@@ -1,6 +1,9 @@
 #include <stdio.h>
-#include <termios.h>
 #include <stdlib.h>
+#include <stddef.h>
+#include <string.h>
+
+#include <termios.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <unistd.h>

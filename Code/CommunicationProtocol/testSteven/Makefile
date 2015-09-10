@@ -3,7 +3,7 @@
 
 CC=gcc
 #CFLAGS=
-#DEPS = hellomake.h
+DEPS = static.h
 
 all: main.c 
-	$(CC) -o test main.c
+	$(CC) -o test main.c setup_connection.c send_command.c

@@ -1,4 +1,4 @@
-#include <static.h>
+#include "static.h"
 
 /**
 *	Setup connection with the board

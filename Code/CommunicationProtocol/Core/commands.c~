@@ -96,5 +96,5 @@ void set_yawrate(char command)
 
 void set_led(char command)
 {
-	X32_leds = command;
+	X32_leds = command
 }

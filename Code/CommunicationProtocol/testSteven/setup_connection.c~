@@ -34,5 +34,5 @@ int setup_connection(){
         tcflush(board, TCIOFLUSH); /* flush I/O buffer */
         tcsetattr (board, TCSANOW, &tty); /* non-canonical */
 	
-	
+	return board;
 }
