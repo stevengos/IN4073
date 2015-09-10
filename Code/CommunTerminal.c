@@ -20,6 +20,7 @@ struct termios 	savetty;
 
 void	term_initio()
 {
+//kjhlkjkh
 	struct termios tty;
 
         tcgetattr(0, &savetty);
