@@ -61,7 +61,7 @@ char getchar_board(int board)
         return c;
 }
 
-int send_command(int board, packet_t p)
+int send_packet(int board, packet_t p)
 {
     int done = 0;
 

@@ -18,9 +18,18 @@
 		</Unit>
 		<Unit filename="commands.h" />
 		<Unit filename="drone.h" />
+		<Unit filename="isr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="isr.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="mode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mode.h" />
+		<Unit filename="static.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

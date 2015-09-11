@@ -8,8 +8,6 @@
 #include "../interface/packet.h"
 #include "drone.h"
 
-#include "x32.h"
-
 #include <stdio.h>
 
 extern struct drone qr;
@@ -108,6 +106,6 @@ void set_yawrate(char command)
 
 void set_led(char command)
 {
-    peripherals[PERIPHERAL_LEDS] = command;
+    X32_leds = command;
 }
 

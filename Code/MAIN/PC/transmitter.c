@@ -6,9 +6,20 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #include "../interface/packet.h"
 #include "board.h"
+
+char getchar_tty()
+{
+    char ch = getchar();
+
+    while( getchar() != '\n' );
+
+    return ch;
+}
 
 int main()
 {
@@ -35,7 +46,7 @@ int main()
 
     printf("Connection successful!\n\n");
 
-    do
+    while(1)
     {
         printf("user> ");
 
@@ -43,8 +54,7 @@ int main()
         p.header = 0x0;
         p.command = 0x0;
 
-        ctty = getchar();
-        getchar();
+        ctty = getchar_tty();
 
         switch(ctty)
         {
@@ -76,12 +86,13 @@ int main()
             break;
 
         if(ctty)
-            send_command(board, p);
+            send_packet(board, p);
+
+        sleep(1); //give time to board to write output
 
         while( (cboard = getchar_board(board)) )
             printf("%c", cboard);
     }
-    while(ctty);
 
     printf("\nEnd of communication.\n");
 

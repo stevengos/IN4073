@@ -1,6 +1,9 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
+#include "x32.h"
+#include "static.h"
+
 #define PANIC_RPM 50
 #define PANIC_TIME 5000
 

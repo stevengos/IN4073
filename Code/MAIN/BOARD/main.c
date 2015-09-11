@@ -6,19 +6,13 @@
 
 #include <stdio.h>
 #include "x32.h"
+#include "static.h"
 
 #include "../interface/packet.h"
 #include "commands.h"
 #include "drone.h"
-
-#define X32_display	peripherals[PERIPHERAL_DISPLAY]
-#define X32_leds	peripherals[PERIPHERAL_LEDS]
-#define X32_buttons	peripherals[PERIPHERAL_BUTTONS]
-#define X32_clock	peripherals[PERIPHERAL_MS_CLOCK]
-
-#define X32_rs232_data	peripherals[PERIPHERAL_PRIMARY_DATA]
-#define X32_rs232_stat	peripherals[PERIPHERAL_PRIMARY_STATUS]
-#define X32_rs232_ready (X32_rs232_stat & 0x02)
+#include "isr.h"
+#include "mode.h"
 
 struct drone qr; // OUR DRONE
 
@@ -26,64 +20,6 @@ void delay(int ms)
 {
 	int time = X32_clock;
 	while(X32_clock - time < ms);
-}
-
-void isr_buttons()
-{
-    printf("board> EXIT PROGRAM\n");
-    qr.exit = 1;
-    qr.flag_mode = 1;
-}
-
-void isr_rs232_rx(void)
-{
-    char header;
-    char command;
-
-    printf("board> inside isr_rs232_rx\n");
-
-    DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
-
-    if( !X32_rs232_ready )
-        return;
-
-    header = X32_rs232_data; //read first byte (HEADER)
-
-    //if( !X32_rs232_ready )
-    //    return;
-
-    while(!X32_rs232_ready);
-
-    command = X32_rs232_data; //read second byte (COMMAND)
-
-    perform_command(header, command);
-
-    ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
-}
-
-void manual_control()
-{
-    while(!qr.flag_mode)
-    {
-        //read data from struct and apply to motors
-    }
-}
-
-void yaw_control()
-{
-    char eps; //error signal
-    char regulator = 49;
-
-    while(!qr.flag_mode)
-    {
-        //atomic
-        eps = qr.yawrate - qr.syawrate;
-
-        /*
-            ae1 = regulator * eps;
-            ...
-        */
-    }
 }
 
 int main()
@@ -131,7 +67,7 @@ int main()
 
         switch(qr.current_mode)
         {
-            case SAFE_MODE:             printf("entered safe mode. ");
+            case SAFE_MODE:
                 while(!qr.flag_mode);
                 break;
             case PANIC_MODE:
@@ -140,7 +76,7 @@ int main()
 
             case MANUAL_MODE:
                 //disable interrupts from sensors
-                manual_control();
+                manual_mode();
                 break;
 
             case CALIBRATION_MODE:
@@ -148,7 +84,7 @@ int main()
                 break;
 
             case YAW_MODE:
-                yaw_control(); break;
+                yaw_mode(); break;
 
             case FULL_MODE:
                 //full_control();
