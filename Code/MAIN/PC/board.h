@@ -19,6 +19,7 @@ int close_board(int board, struct termios* oldtty);
 
 int close_board(int board, struct termios* oldtty);
 char getchar_board(int board);
-int send_command(int board, packet p);
+int send_command(int board, packet_t p);
 
 #endif // BOARD_H
+

@@ -39,9 +39,9 @@ int main()
     {
         printf("user> ");
 
-        packet p;
-        p.header = 0x00;
-        p.command = 0x00;
+        packet_t p;
+        p.header = 0x0;
+        p.command = 0x0;
 
         ctty = getchar();
         getchar();
@@ -89,3 +89,4 @@ int main()
 
     return 0;
 }
+

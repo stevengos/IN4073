@@ -1,6 +1,6 @@
 /**
 @author Gianluca Savaia
-@version 1.0
+@version 1.01
 @last update 2015-09-11
 */
 
@@ -9,28 +9,37 @@
 #ifndef PACKET_H
 #define PACKET_H
 
+/* ########### HEADER ############ */
+#define SET_MODE        0x0
+#define SET_PITCH       0x1
+#define SET_ROLL        0x2
+#define SET_YAW         0x3
+#define SET_LIFT        0x4
+#define SET_PITCHRATE   0x5
+#define SET_ROLLRATE    0x6
+#define SET_YAWRATE     0x7
+#define SET_LIFTRATE    0x8
 
-/* Eligible values for "label" field */
-#define SET_MODE 0x0
-#define SET_PITCH 0x1
-#define SET_ROLL 0x2
-#define SET_YAWRATE 0x3
-#define SET_LIFT 0x4
 //...
-#define SET_LED 0xF
+#define AWAKE           0x10
+#define ACK             0x11
+#define BLINK_LED       0x12
+#define SET_LED         0x13
 
-/* Eligible values for "command" field when the label is "SET_MODE" */
-#define SAFE_MODE 0x0
 
-#define PANIC_MODE 0x1
+/* ############ COMMAND ############# */
+
+/* Eligible values when the header is "SET_MODE" */
+#define SAFE_MODE   0x0
+#define PANIC_MODE  0x1
 #define MANUAL_MODE 0x2
 #define CALIBRATION_MODE 0x3
-#define YAW_MODE 0x4
-#define FULL_MODE 0x5
+#define YAW_MODE    0x4
+#define FULL_MODE   0x5
 
-/* Eligible values for "command" field when the label is "SET_LED". Use OR bitwise to operate on more than one led at once */
-#define LED_OFF 0x0
-#define LED_ON  0xF
+/* Eligible values field when the label is "SET_LED" (use bitwise to operate on more than one led at once */
+#define ALL_OFF 0x00
+#define ALL_ON  0xFF
 #define LED1 0b00000001
 #define LED2 0b00000010
 #define LED3 0b00000100
@@ -44,8 +53,10 @@ struct packet_s
 {
     char header;
     char command;
+    char crc;
 };
 
-typedef struct packet_s packet;
+typedef struct packet_s packet_t;
 
 #endif
+

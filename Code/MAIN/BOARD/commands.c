@@ -110,3 +110,4 @@ void set_led(char command)
 {
     peripherals[PERIPHERAL_LEDS] = command;
 }
+
