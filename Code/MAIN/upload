@@ -1,0 +1,4 @@
+#!/bin/bash
+# Upload to board
+
+x32-upload main.ce -c /dev/ttyUSB0 -e
