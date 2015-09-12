@@ -1,7 +1,6 @@
 /**
 @author Gianluca Savaia
-@version 1.01
-@last update 2015-09-11
+@last update 2015-09-12
 */
 
 /* In the following we list the admissable values for the fields of the struct packet_s */
@@ -11,14 +10,18 @@
 
 /* ########### HEADER ############ */
 #define SET_MODE        0x0
+
 #define SET_PITCH       0x1
 #define SET_ROLL        0x2
 #define SET_YAW         0x3
 #define SET_LIFT        0x4
-#define SET_PITCHRATE   0x5
-#define SET_ROLLRATE    0x6
-#define SET_YAWRATE     0x7
-#define SET_LIFTRATE    0x8
+#define SET_YAWRATE     0x5
+
+#define INC_PITCH       0x6
+#define INC_ROLL        0x7
+#define INC_YAW         0x8
+#define INC_LIFT        0x9
+#define INC_YAWRATE     0xA
 
 //...
 #define AWAKE           0x10

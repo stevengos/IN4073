@@ -1,3 +1,8 @@
+/**
+@author Gianluca Savaia
+@last update 2015-09-12
+*/
+
 #include "isr.h"
 
 #include "drone.h"
@@ -38,6 +43,8 @@ void isr_rs232_rx(void)
     crc = X32_rs232_data; //read third byte (CRC)
 
     perform_command(header, command);
+
+    //ACKNOWLEDGEMENT ???
 
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 }

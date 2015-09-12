@@ -1,6 +1,5 @@
 /**
 @author Gianluca Savaia
-@version 1.0
 @last update 2015-09-11
 */
 

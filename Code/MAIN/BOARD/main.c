@@ -1,26 +1,16 @@
 /**
 @author Gianluca Savaia
-@version 1.0
-@last update 2015-09-11
+@last update 2015-09-12
 */
 
 #include <stdio.h>
 #include "x32.h"
 #include "static.h"
 
-#include "../interface/packet.h"
-#include "commands.h"
 #include "drone.h"
 #include "isr.h"
-#include "mode.h"
 
 struct drone qr; // OUR DRONE
-
-void delay(int ms)
-{
-	int time = X32_clock;
-	while(X32_clock - time < ms);
-}
 
 int main()
 {
@@ -44,53 +34,11 @@ int main()
     X32_display = 0x0000;
 
     //reset drone properties
-    qr.current_mode = SAFE_MODE;
-    qr.flag_mode = 0;
-    qr.exit = 0;
-    qr.rpm1 = 0;
-    qr.rpm2 = 0;
-    qr.rpm3 = 0;
-    qr.rpm4 = 0;
-    qr.pitch = 0;
-    qr.roll = 0;
-    qr.yawrate = 0;
-    qr.lift = 0;
+    clear_drone();
 
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
-    printf("setup complete. ");
-
-    //Main process
-    while( !qr.exit )
-    {
-        qr.flag_mode = 0;
-
-        switch(qr.current_mode)
-        {
-            case SAFE_MODE:
-                while(!qr.flag_mode);
-                break;
-            case PANIC_MODE:
-                delay(PANIC_TIME);
-                break;
-
-            case MANUAL_MODE:
-                //disable interrupts from sensors
-                manual_mode();
-                break;
-
-            case CALIBRATION_MODE:
-                //calibrate_sensors();
-                break;
-
-            case YAW_MODE:
-                yaw_mode(); break;
-
-            case FULL_MODE:
-                //full_control();
-                break;
-        };
-    }
+    run_drone();
 
     X32_display = 0xC1A0;
     X32_leds = 0x0000;
