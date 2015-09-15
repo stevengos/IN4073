@@ -1,6 +1,6 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-12
+@last update 2015-09-15
 */
 
 /* In the following we list the admissable values for the fields of the struct packet_s */
@@ -24,7 +24,7 @@
 #define INC_YAWRATE     0xA
 
 //...
-#define AWAKE           0x10
+#define ALIVE           0x10
 #define ACK             0x11
 #define BLINK_LED       0x12
 #define SET_LED         0x13
@@ -40,17 +40,21 @@
 #define YAW_MODE    0x4
 #define FULL_MODE   0x5
 
-/* Eligible values field when the label is "SET_LED" (use bitwise to operate on more than one led at once */
+/* Eligible values files when the header is "ACK" */
+#define ACK_POSITIVE 0x0
+#define ACK_NEGATIVE 0xF
+
+/* Eligible values field when the header is "SET_LED" (use bitwise to operate on more than one led at once */
 #define ALL_OFF 0x00
 #define ALL_ON  0xFF
-#define LED1 0b00000001
-#define LED2 0b00000010
-#define LED3 0b00000100
-#define LED4 0b00001000
-#define LED5 0b00010000
-#define LED6 0b00100000
-#define LED7 0b01000000
-#define LED8 0b10000000
+#define LED1 0x01 //0b00000001
+#define LED2 0x02 //0b00000010
+#define LED3 0x04 //0b00000100
+#define LED4 0x08 //0b00001000
+#define LED5 0x10 //0b00010000
+#define LED6 0x20 //0b00100000
+#define LED7 0x40 //0b01000000
+#define LED8 0x80 //0b10000000
 
 struct packet_s
 {

@@ -1,6 +1,6 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-12
+@last update 2015-09-15
 */
 
 #include "command.h"
@@ -62,7 +62,7 @@ void perform_command(char header, char command)
                     inc_yawrate();
                     break;
 
-        case AWAKE:
+        case ALIVE:
                     break;
 
         case BLINK_LED:
@@ -72,6 +72,17 @@ void perform_command(char header, char command)
                     set_led(command);
                     break;
     };
+}
+
+void acknowledge(char positive)
+{
+    packet_t packet;
+
+    packet.header = ACK;
+    packet.command = positive ? ACK_POSITIVE : ACK_NEGATIVE;
+    packet.crc = 0x00; //assign by lookup table to save time
+
+
 }
 
 //set_mode changes the operating mode of the drone. It performs some checking in order to avoid unsafe behaviour.
@@ -86,27 +97,33 @@ void set_mode(char command)
         case SAFE_MODE:
             set_lift(0x0);
             qr.current_mode = SAFE_MODE;
+            set_led(LED1);
             break;
 
         case PANIC_MODE:
             set_lift(PANIC_RPM);
             qr.current_mode = PANIC_MODE;
+            set_led(LED2);
             break;
 
         case MANUAL_MODE:
             qr.current_mode = MANUAL_MODE;
+            set_led(LED3);
             break;
 
         case CALIBRATION_MODE:
             qr.current_mode = CALIBRATION_MODE;
+            set_led(LED4);
             break;
 
         case YAW_MODE:
             qr.current_mode = YAW_MODE;
+            set_led(LED5);
             break;
 
         case FULL_MODE:
             qr.current_mode = FULL_MODE;
+            set_led(LED6);
             break;
     };
 
@@ -181,6 +198,6 @@ void inc_yawrate()
 
 void set_led(char command)
 {
-    X32_leds = command;
+    X32_LEDS = command;
 }
 

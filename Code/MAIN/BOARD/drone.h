@@ -1,6 +1,6 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-12
+@last update 2015-09-15
 */
 
 #ifndef DRONE_H

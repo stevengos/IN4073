@@ -1,6 +1,6 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-12
+@last update 2015-09-15
 */
 
 #include "drone.h"
@@ -107,6 +107,6 @@ void clear_drone()
 
 void delay(int ms)
 {
-	int time = X32_clock;
-	while(X32_clock - time < ms);
+	int time = X32_CLOCK;
+	while(X32_CLOCK - time < ms);
 }

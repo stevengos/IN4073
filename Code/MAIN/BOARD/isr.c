@@ -1,6 +1,6 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-12
+@last update 2015-09-15
 */
 
 #include "isr.h"
@@ -27,20 +27,20 @@ void isr_rs232_rx(void)
 
     DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-    if( !X32_rs232_ready )
+    if( !X32_RS232_READ )
         return;
 
-    header = X32_rs232_data; //read first byte (HEADER)
+    header = X32_RS232_DATA; //read first byte (HEADER)
 
-    if( !X32_rs232_ready )
+    if( !X32_RS232_READ )
         return;
 
-    command = X32_rs232_data; //read second byte (COMMAND)
+    command = X32_RS232_DATA; //read second byte (COMMAND)
 
-    if( !X32_rs232_ready )
+    if( !X32_RS232_READ )
         return;
 
-    crc = X32_rs232_data; //read third byte (CRC)
+    crc = X32_RS232_DATA; //read third byte (CRC)
 
     perform_command(header, command);
 

@@ -1,6 +1,6 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-12
+@last update 2015-09-15
 */
 
 #include <stdio.h>
@@ -16,8 +16,8 @@ int main()
 {
     char c;
 
-    while (X32_rs232_ready)
-        c = X32_rs232_data; // empty buffer
+    while (X32_RS232_READ)
+        c = X32_RS232_DATA; // empty buffer
 
     //set ISR vector, buttons
     SET_INTERRUPT_VECTOR(INTERRUPT_BUTTONS, &isr_buttons);
@@ -30,8 +30,8 @@ int main()
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
     //reset output
-    X32_leds = 0x0000;
-    X32_display = 0x0000;
+    X32_LEDS = 0x0000;
+    X32_DISPLAY = 0x0000;
 
     //reset drone properties
     clear_drone();
@@ -40,8 +40,8 @@ int main()
 
     run_drone();
 
-    X32_display = 0xC1A0;
-    X32_leds = 0x0000;
+    X32_DISPLAY = 0xC1A0;
+    X32_LEDS = 0x0000;
 
     return 0;
 }
