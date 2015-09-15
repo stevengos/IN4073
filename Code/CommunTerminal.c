@@ -1,6 +1,6 @@
 /*------------------------------------------------------------
  * Simple terminal in C
- * 
+ *
  * Arjan J.C. van Gemund (+ few mods by Mark Dufour)
  *------------------------------------------------------------
  */
@@ -35,18 +35,18 @@ void	term_exitio()
 	tcsetattr(0, TCSADRAIN, &savetty);
 }
 
-void	term_puts(char *s) 
-{ 
-	fprintf(stderr,"%s",s); 
+void	term_puts(char *s)
+{
+	fprintf(stderr,"%s",s);
 }
 
-void	term_putchar(char c) 
-{ 
-	putc(c,stderr); 
+void	term_putchar(char c)
+{
+	putc(c,stderr);
 }
 
-int	term_getchar_nb() 
-{ 
+int	term_getchar_nb()
+{
         static unsigned char 	line [2];
 
 	// note: destructive read
@@ -57,8 +57,8 @@ int	term_getchar_nb()
         return -1;
 }
 
-int	term_getchar() 
-{ 
+int	term_getchar()
+{
         int    c;
 
         while ((c = term_getchar_nb()) == -1)
@@ -87,9 +87,9 @@ int fd_RS232;
 int rs232_open(void)
 {
   	char 		*name;
-  	int 		result;  
+  	int 		result;
   	struct termios	tty;
-  
+
         fd_RS232 = open(SERIAL_DEVICE, O_RDWR | O_NOCTTY);
         assert(fd_RS232>=0);
 
@@ -142,7 +142,7 @@ int	rs232_getchar_nb()
 		return -1;
 	}
 	else {
-		assert(result == 1);   
+		assert(result == 1);
 		return (int) c;
 	}
 }
@@ -152,19 +152,19 @@ int 	rs232_getchar()
 {
 	int 	c;
 
-	while ((c = rs232_getchar_nb()) == -1) 
-		;
+	while ((c = rs232_getchar_nb()) == -1);
+
 	return c;
 }
 
 
 int 	rs232_putchar(char c)
-{ 
+{
 	int result;
 
 	do {
 		result = (int) write(fd_RS232, &c, 1);
-	} while (result == 0);   
+	} while (result == 0);
 
 	assert(result == 1);
 	return result;

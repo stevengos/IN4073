@@ -68,6 +68,8 @@ void *run_joystick(){
 		 */
 		mon_delay_ms(30);
 		t = mon_time_ms();
+		
+		pthread_mutex_lock(&lock_x);
 
 		/* check up on JS
 		 */
@@ -93,10 +95,11 @@ void *run_joystick(){
 
 		for(i = 0; i < 12; i++){
 			if(button[i] == 1){
-				pthread_mutex_lock(&lock_x);
 				printf("entered button: %i\n", i);			
 			}		
 		}
+
+		pthread_mutex_unlock(&lock_x);
 /*
 		printf("\n");
 		printf("%5d   ",t);

@@ -66,7 +66,7 @@ void *run_joystick(){
 	while (1) {
 		/* simulate work
 		 */
-		mon_delay_ms(30);
+		mon_delay_ms(300);
 		t = mon_time_ms();
 		
 		pthread_mutex_lock(&lock_x);
@@ -93,14 +93,14 @@ void *run_joystick(){
 			exit (1);
 		}
 
-		for(i = 0; i < 12; i++){
+		/*for(i = 0; i < 12; i++){
 			if(button[i] == 1){
 				printf("entered button: %i\n", i);			
 			}		
-		}
+		}*/
 
 		pthread_mutex_unlock(&lock_x);
-/*
+
 		printf("\n");
 		printf("%5d   ",t);
 		for (i = 0; i < 6; i++) {
@@ -111,7 +111,7 @@ void *run_joystick(){
 			printf("%d ",button[i]);
 		}
 		if (button[0])
-			break;*/
+			break;
 	}
 	printf("\n<exit>\n");
 }
