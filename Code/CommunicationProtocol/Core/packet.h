@@ -6,6 +6,7 @@
 #define SET_ROLL 0x2
 #define SET_YAWRATE 0x3
 #define SET_LIFT 0x4
+
 //...
 #define SET_LED 0x80
 
@@ -17,9 +18,17 @@
 #define YAW_MODE 0x4
 #define FULL_MODE 0x5
 
+/* the rates */
+
+#define YAW_RATE 0x6
+#define LIFT_RATE 0X7
+#define ROLL_RATE 0x8
+#define PITCH_RATE 0x9 
+
 /* Eligible values for "command" field when the label is "SET_LED". Use OR bitwise to operate on more than one led at once */
 #define LED_OFF 0x0
 #define LED_ON  0xF
+#define LED_BLINK 0x0E 
 #define LED1 0b00000001
 #define LED2 0b00000010
 #define LED3 0b00000100

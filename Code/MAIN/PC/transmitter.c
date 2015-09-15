@@ -1,14 +1,24 @@
 /**
 @author Gianluca Savaia
-@version 1.0
 @last update 2015-09-11
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
 
 #include "../interface/packet.h"
 #include "board.h"
+
+char getchar_tty()
+{
+    char ch = getchar();
+
+    while( getchar() != '\n' );
+
+    return ch;
+}
 
 int main()
 {
@@ -17,6 +27,11 @@ int main()
 
     int board;
     int sent;
+
+    char ctty = 0;
+    char cboard = 0;
+    char ack_received = 0;
+    char counter = 0;
 
     printf("TERMINAL\n\n");
 
@@ -30,21 +45,17 @@ int main()
         return 1;
     }
 
-    char ctty = 0;
-    char cboard = 0;
-
     printf("Connection successful!\n\n");
 
-    do
+    while(ctty != 'q')
     {
         printf("user> ");
 
-        packet p;
-        p.header = 0x00;
-        p.command = 0x00;
+        packet_t p;
+        p.header = 0x0;
+        p.command = 0x0;
 
-        ctty = getchar();
-        getchar();
+        ctty = getchar_tty();
 
         switch(ctty)
         {
@@ -65,27 +76,63 @@ int main()
                 p.header = SET_LED;
                 p.command = LED4;
                 break;
+            case 'a':
+                p.header = SET_LED;
+                p.command = ALL_ON;
+                break;
             case 'q':
+                p.header = STOP;
+                p.command = 0;
                 break;
             default:
                 ctty = 0;
+                ack_received = 1;
                 printf("pc> Command not recognized.\n");
         };
 
-        if(ctty == 'q')
-            break;
+        while(!ack_received)
+        {
+            if(ctty)
+                send_packet(board, p);
 
-        if(ctty)
-            send_command(board, p);
+            sleep(1); //give time to board to write output
 
-        while( (cboard = getchar_board(board)) )
-            printf("%c", cboard);
+            while( (cboard = getchar_board(board)) )
+            {
+                if( cboard == ACK ) //ack coming
+                {
+                    cboard = getchar_board(board); //response: positive or negative
+
+                    getchar_board(board); //ignore crc
+
+                    if( cboard == ACK_POSITIVE )
+                        printf("pc> Positive acknowledge received.\n"), ack_received = 1;
+                    else
+                        if( cboard == ACK_NEGATIVE )
+                            printf("pc> Negative acknowledge received.\n");
+                    else
+                        printf("pc> Unexpected message from board.\n");
+                }
+                else
+                    printf("%c", cboard);
+            }
+
+            if(counter++>3)
+            {
+                printf("pc> Timeout: ACK not received.\n");
+                break;
+            }
+        }
+
+        ack_received = 0;
+
+        printf("\n");
     }
-    while(ctty);
 
-    printf("\nEnd of communication.\n");
+    printf("End of communication.\n");
 
     close_board(board, &oldBoardSettings);
 
     return 0;
 }
+

@@ -1,4 +1,4 @@
 
 all: 
-	lcc-x32 BOARD/main.c BOARD/commands.c -o main.ce
-	gcc PC/transmitter.c PC/board.c -o terminal
+	lcc-x32 BOARD/main.c BOARD/drone.c BOARD/isr.c BOARD/command.c -o main.ce
+	gcc PC/transmitter.c PC/board.c -pthread -o terminal

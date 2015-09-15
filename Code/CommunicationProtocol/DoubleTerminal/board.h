@@ -9,7 +9,7 @@
 #include <termios.h>
 #include <fcntl.h>
 
-#include "../interface/packet.h"
+#include "packet.h"
 
 #define BOARD_PATH "/dev/ttyUSB0"
 
