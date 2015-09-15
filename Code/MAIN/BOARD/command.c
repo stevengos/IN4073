@@ -14,7 +14,7 @@ extern struct drone qr;
 
 void perform_command(char header, char command)
 {
-    printf("board> inside perform_command: %x %x\n", header, command);
+    printf("board> Performing command: %x %x \n", header, command);
 
     switch( header )
     {
@@ -71,18 +71,54 @@ void perform_command(char header, char command)
         case SET_LED:
                     set_led(command);
                     break;
+        case STOP:
+                    printf("board> Stop signal received.\n");
+                    stop();
+                    break;
+        default:
+                    acknowledge(ACK_NEGATIVE);
     };
 }
 
-void acknowledge(char positive)
+void acknowledge(char response)
 {
-    packet_t packet;
+    char counter = 0;
 
-    packet.header = ACK;
-    packet.command = positive ? ACK_POSITIVE : ACK_NEGATIVE;
-    packet.crc = 0x00; //assign by lookup table to save time
+    if( response != ACK_POSITIVE && response != ACK_NEGATIVE )
+    {
+        printf("board> Internal error: call to acknowledge() with input not defined by protocol.\n");
+        response = ACK_NEGATIVE; //NOT IN FINAL VERSION***********************************
+    }
 
+    while( !X32_RS232_WRITE )
+    {
+        if( counter++ > TIMEOUT_BUFFER_TX )
+            return; //NOT IN FINAL VERSION***********************************
+        else
+            usleep(SLEEP_BUFFER_TX);
+    }
 
+    X32_RS232_DATA = ACK;               //header
+
+    while( !X32_RS232_WRITE )
+    {
+        if( counter++ > TIMEOUT_BUFFER_TX )
+            return; //NOT IN FINAL VERSION***********************************
+        else
+            usleep(SLEEP_BUFFER_TX);
+    }
+
+    X32_RS232_DATA = response;          //command
+
+    while( !X32_RS232_WRITE )
+    {
+        if( counter++ > TIMEOUT_BUFFER_TX )
+            return; //NOT IN FINAL VERSION***********************************
+        else
+            usleep(SLEEP_BUFFER_TX);
+    }
+
+    X32_RS232_DATA = 0x00;              //checksum
 }
 
 //set_mode changes the operating mode of the drone. It performs some checking in order to avoid unsafe behaviour.
@@ -128,6 +164,23 @@ void set_mode(char command)
     };
 
     qr.flag_mode = 1; //signal a change in mode
+}
+
+void stop()
+{
+    if( qr.current_mode != SAFE_MODE ) //machine can be stopped only in SAFE_MODE
+    {
+        acknowledge(ACK_NEGATIVE);
+        return;
+    }
+
+    qr.exit = 1;
+    qr.flag_mode = 1;
+    X32_LEDS = ALL_OFF;
+
+    acknowledge(ACK_POSITIVE);
+
+    printf("board> Machine Stopped\n");
 }
 
 void set_pitch(char command)
@@ -199,5 +252,6 @@ void inc_yawrate()
 void set_led(char command)
 {
     X32_LEDS = command;
+    acknowledge(ACK_POSITIVE);
 }
 

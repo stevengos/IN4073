@@ -1,9 +1,15 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-void perform_command(char,char);
+#define TIMEOUT_BUFFER_TX   10 //counter
+#define SLEEP_BUFFER_TX     10 //usec
 
+void perform_command(char,char);
+void acknowledge(char);
+
+//machine settings
 void set_mode(char);
+void stop();
 
 // interface used by joystick
 void set_pitch(char);

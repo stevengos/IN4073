@@ -53,7 +53,6 @@ struct drone
 
 void run_drone();
 void clear_drone();
-void delay(int);
 
 void safe_mode(void);
 void panic_mode(void);

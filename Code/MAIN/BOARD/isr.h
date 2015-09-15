@@ -11,6 +11,9 @@
 #include "static.h"
 #include "command.h"
 
+#define TIMEOUT_BUFFER_RX   5
+#define SLEEP_BUFFER_RX     10
+
 void isr_buttons(void);
 void isr_rs232_rx(void);
 

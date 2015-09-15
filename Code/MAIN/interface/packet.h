@@ -23,11 +23,12 @@
 #define INC_LIFT        0x9
 #define INC_YAWRATE     0xA
 
-//...
 #define ALIVE           0x10
 #define ACK             0x11
 #define BLINK_LED       0x12
 #define SET_LED         0x13
+
+#define STOP            0x20
 
 
 /* ############ COMMAND ############# */

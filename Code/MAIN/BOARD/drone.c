@@ -71,7 +71,7 @@ void manual_mode()
 
         ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-        delay(1); //refresh time
+        sleep(1); //refresh time
     }
 }
 
@@ -103,10 +103,4 @@ void clear_drone()
     qr.current_mode = SAFE_MODE;
     qr.flag_mode = 0;
     qr.exit = 0;
-}
-
-void delay(int ms)
-{
-	int time = X32_CLOCK;
-	while(X32_CLOCK - time < ms);
 }

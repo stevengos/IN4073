@@ -9,7 +9,8 @@
 #define X32_DISPLAY	    peripherals[PERIPHERAL_DISPLAY]
 #define X32_LEDS	    peripherals[PERIPHERAL_LEDS]
 #define X32_BUTTONS	    peripherals[PERIPHERAL_BUTTONS]
-#define X32_CLOCK	    peripherals[PERIPHERAL_MS_CLOCK]
+#define X32_CLOCK_MS    peripherals[PERIPHERAL_MS_CLOCK]
+#define X32_CLOCK_US    peripherals[PERIPHERAL_US_CLOCK]
 
 #define X32_QR_A1 		peripherals[PERIPHERAL_XUFO_A0]
 #define X32_QR_A2 		peripherals[PERIPHERAL_XUFO_A1]

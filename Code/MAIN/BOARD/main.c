@@ -21,7 +21,7 @@ int main()
 
     //set ISR vector, buttons
     SET_INTERRUPT_VECTOR(INTERRUPT_BUTTONS, &isr_buttons);
-    SET_INTERRUPT_PRIORITY(INTERRUPT_BUTTONS, 10);
+    SET_INTERRUPT_PRIORITY(INTERRUPT_BUTTONS, 100);
     ENABLE_INTERRUPT(INTERRUPT_BUTTONS);
 
     //prepare rs232 rx interrupt
@@ -41,7 +41,6 @@ int main()
     run_drone();
 
     X32_DISPLAY = 0xC1A0;
-    X32_LEDS = 0x0000;
 
     return 0;
 }
