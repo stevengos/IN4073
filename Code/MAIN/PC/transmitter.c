@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "../interface/packet.h"
+#include "../interface/hamming.h"
 #include "board.h"
 
 char getchar_tty()
@@ -89,6 +90,8 @@ int main()
                 ack_received = 1;
                 printf("pc> Command not recognized.\n");
         };
+
+        compute_hamming(&p);
 
         while(!ack_received)
         {

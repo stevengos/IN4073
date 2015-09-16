@@ -6,6 +6,7 @@
 #include "command.h"
 
 #include "../interface/packet.h"
+#include "../interface/hamming.h"
 
 #include "drone.h"
 #include <stdio.h>
@@ -83,17 +84,18 @@ void perform_command(char header, char command)
 void acknowledge(char response)
 {
     char counter = 0;
+    packet_t packet;
 
     if( response != ACK_POSITIVE && response != ACK_NEGATIVE )
     {
         printf("board> Internal error: call to acknowledge() with input not defined by protocol.\n");
-        response = ACK_NEGATIVE; //NOT IN FINAL VERSION***********************************
+        response = ACK_NEGATIVE;
     }
 
     while( !X32_RS232_WRITE )
     {
         if( counter++ > TIMEOUT_BUFFER_TX )
-            return; //NOT IN FINAL VERSION***********************************
+            return;
         else
             usleep(SLEEP_BUFFER_TX);
     }
@@ -103,7 +105,7 @@ void acknowledge(char response)
     while( !X32_RS232_WRITE )
     {
         if( counter++ > TIMEOUT_BUFFER_TX )
-            return; //NOT IN FINAL VERSION***********************************
+            return;
         else
             usleep(SLEEP_BUFFER_TX);
     }
@@ -113,12 +115,17 @@ void acknowledge(char response)
     while( !X32_RS232_WRITE )
     {
         if( counter++ > TIMEOUT_BUFFER_TX )
-            return; //NOT IN FINAL VERSION***********************************
+            return;
         else
             usleep(SLEEP_BUFFER_TX);
     }
 
-    X32_RS232_DATA = 0x00;              //checksum
+    packet.header = ACK;
+    packet.command = response;
+
+    compute_hamming(&packet);
+
+    X32_RS232_DATA = packet.crc;              //checksum
 }
 
 //set_mode changes the operating mode of the drone. It performs some checking in order to avoid unsafe behaviour.
@@ -126,18 +133,19 @@ void set_mode(char command)
 {
     // It is not allowed to switch between modes unless either you are currently in SAFE_MODE or the command is SAFE/PANIC_MODE
     if( qr.current_mode != SAFE_MODE && ( command != SAFE_MODE || command != PANIC_MODE ) )
-        return; // ignore command
+    {
+        acknowledge(ACK_NEGATIVE);
+        return;
+    }
 
     switch(command)
     {
         case SAFE_MODE:
-            set_lift(0x0);
             qr.current_mode = SAFE_MODE;
             set_led(LED1);
             break;
 
         case PANIC_MODE:
-            set_lift(PANIC_RPM);
             qr.current_mode = PANIC_MODE;
             set_led(LED2);
             break;
@@ -201,6 +209,7 @@ void set_lift(char command)
 
     qr.lift = command;
 }
+
 void set_yawrate(char command)
 {
     if( qr.current_mode == SAFE_MODE )
