@@ -179,7 +179,7 @@ do {
             if(c)
                 send_packet(board, p);
 
-            sleep(1); //give time to board to write output
+            //sleep(1); //give time to board to write output
 
             while( (cboard = getchar_board(board)) )
             {
