@@ -6,24 +6,25 @@
 #include "isr.h"
 
 #include "drone.h"
+
+#include "../interface/packet.h"
+#include "../interface/hamming.h"
+
 #include <stdio.h>
 
 extern struct drone qr;
 
 void isr_buttons(void)
 {
-    printf("board> Button Pressed: stopping machine.\n");
-    qr.exit = 1;
-    qr.flag_mode = 1;
+    add_log();
 }
 
 void isr_rs232_rx(void)
 {
-    char header;
-    char command;
-    char crc;
-
+    packet_t incoming;
     char counter = 0;
+
+    qr.link_down = 0;
 
     DISABLE_INTERRUPT( INTERRUPT_PRIMARY_RX );
 
@@ -34,21 +35,22 @@ void isr_rs232_rx(void)
         return;
     }
 
-    header = X32_RS232_DATA; //read first byte (HEADER)
+    incoming.header = X32_RS232_DATA; //read first byte (HEADER)
 
     while( !X32_RS232_READ )
     {
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
-            printf("board> Waiting for payload...\n");
+            printf("board> Packet incomplete.\n");
             ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            acknowledge(ACK_NEGATIVE);
             return;
         }
         else
             usleep(SLEEP_BUFFER_RX);
     }
 
-    command = X32_RS232_DATA; //read second byte (COMMAND)
+    incoming.command = X32_RS232_DATA; //read second byte (COMMAND)
 
     while( !X32_RS232_READ );
     {
@@ -56,19 +58,41 @@ void isr_rs232_rx(void)
         {
             printf("board> Waiting for checksum...\n");
             ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            acknowledge(ACK_NEGATIVE);
             return;
         }
         else
             usleep(SLEEP_BUFFER_RX);
     }
 
-    crc = X32_RS232_DATA; //read third byte (CRC)
+    incoming.crc = X32_RS232_DATA; //read third byte (CRC)
 
     printf("board> Packet received.\n");
 
-    perform_command(header, command);
-
-    //ACKNOWLEDGEMENT ???
+    if( check_hamming(incoming) )
+    {
+        printf("board> Checksum verified.\n");
+        perform_command(incoming.header, incoming.command);
+    }
+    else
+    {
+        printf("board> Packet is corrupt.\n");
+        acknowledge(ACK_NEGATIVE);
+    }
 
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+}
+
+
+void isr_timer(void)
+{
+    if( qr.link_down )
+    {
+        printf("board> PC Link is down! SAFE_MODE set.\n");
+        qr.current_mode = SAFE_MODE;
+        qr.exit = 1;
+        qr.flag_mode = 1;
+    }
+
+    qr.link_down = 1;
 }

@@ -10,6 +10,8 @@ void acknowledge(char);
 //machine settings
 void set_mode(char);
 void stop();
+void set_log(char);
+void upload_log();
 
 // interface used by joystick
 void set_pitch(char);

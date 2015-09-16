@@ -30,10 +30,6 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="mode.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="mode.h" />
 		<Unit filename="static.h" />
 		<Extensions>
 			<code_completion />

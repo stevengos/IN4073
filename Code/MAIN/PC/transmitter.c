@@ -10,6 +10,7 @@
 #include <termios.h>
 
 #include "../interface/packet.h"
+#include "../interface/hamming.h"
 #include "board.h"
 
 char getchar_tty()
@@ -268,11 +269,21 @@ printf("quit\n");
                 p.header = STOP;
                 p.command = 0;
                 break;
+            case 'l':
+                p.header = LOG;
+                p.command = LOG_START;
+                break;
+            case 'u':
+                p.header = LOG;
+                p.command = LOG_GET;
+                break;
             default:
                 ctty = 0;
                 ack_received = 1;
                 printf("pc> Command not recognized.\n");
         };
+
+        compute_hamming(&p);
 
         while(!ack_received)
         {
@@ -309,6 +320,7 @@ printf("quit\n");
         }
 
         ack_received = 0;
+        counter = 0;
 
         printf("\n");
     }
