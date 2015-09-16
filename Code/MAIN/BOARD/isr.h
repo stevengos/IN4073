@@ -1,6 +1,5 @@
 /**
 @author Gianluca Savaia
-@version 1.0
 @last update 2015-09-11
 */
 
@@ -19,7 +18,6 @@
 void isr_buttons(void);
 void isr_rs232_rx(void);
 void isr_timer(void);
-
 
 
 #endif // ISR_H

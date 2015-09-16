@@ -85,6 +85,14 @@ int main()
                 p.header = STOP;
                 p.command = 0;
                 break;
+            case 'l':
+                p.header = LOG;
+                p.command = LOG_START;
+                break;
+            case 'u':
+                p.header = LOG;
+                p.command = LOG_GET;
+                break;
             default:
                 ctty = 0;
                 ack_received = 1;
@@ -128,6 +136,7 @@ int main()
         }
 
         ack_received = 0;
+        counter = 0;
 
         printf("\n");
     }

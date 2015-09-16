@@ -49,12 +49,17 @@ struct drone
     char current_mode;
     char flag_mode;
     char exit;
-
     char link_down;
+    char log;
+
+    //logs buffer
+    int log_buffer[LOG_BUFFER_SIZE];
+    int log_size;
 };
 
 void run_drone();
 void clear_drone();
+void add_log();
 
 void safe_mode(void);
 void panic_mode(void);

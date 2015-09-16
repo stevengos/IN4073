@@ -72,6 +72,11 @@ void perform_command(char header, char command)
         case SET_LED:
                     set_led(command);
                     break;
+
+        case LOG:
+                    set_log(command);
+                    break;
+
         case STOP:
                     printf("board> Stop signal received.\n");
                     stop();
@@ -189,6 +194,66 @@ void stop()
     acknowledge(ACK_POSITIVE);
 
     printf("board> Machine Stopped\n");
+}
+
+void set_log(char command)
+{
+    switch(command)
+    {
+        case LOG_START:
+                qr.log = 1;
+                acknowledge(ACK_POSITIVE);
+                break;
+        case LOG_STOP:
+                qr.log = 0;
+                acknowledge(ACK_POSITIVE);
+                break;
+        case LOG_GET:
+                upload_log();
+                break;
+        default:
+                acknowledge(ACK_NEGATIVE);
+                return;
+    }
+
+    printf("board> Log %s.\n", qr.log ? "on" : "off");
+}
+
+void upload_log()
+{
+    char counter_timeout = 0;
+    char i = 0;
+
+    printf("board> uploading log.\n");
+
+    if( qr.current_mode != SAFE_MODE )
+    {
+        printf("board> Command discarded: you can upload logs only in SAFE_MODE.\n");
+        acknowledge(ACK_NEGATIVE);
+        return;
+    }
+
+    while( i < qr.log_size )
+    {
+        counter_timeout = 0;
+
+        while( !X32_RS232_WRITE )
+        {
+            if( counter_timeout++ > TIMEOUT_BUFFER_TX )
+            {
+                acknowledge(ACK_NEGATIVE);
+                return;
+            }
+            else
+                usleep(SLEEP_BUFFER_TX);
+        }
+
+        X32_RS232_DATA = qr.log_buffer[i];
+
+        i++;
+    }
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void set_pitch(char command)

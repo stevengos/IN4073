@@ -104,4 +104,26 @@ void clear_drone()
     qr.flag_mode = 0;
     qr.exit = 0;
     qr.link_down = 0;
+    qr.log = 0;
+    qr.log_size = 0;
 }
+
+void add_log()
+{
+    if( !qr.log )
+        return;
+
+    if( qr.log_size >= LOG_BUFFER_SIZE )
+    {
+        qr.log = 0;
+        return;
+    }
+
+    printf("board> Adding Log.\n");
+
+    /* write log into buffer */
+    qr.log_buffer[qr.log_size] = 'H';
+
+    qr.log_size++;
+}
+

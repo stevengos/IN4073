@@ -16,9 +16,7 @@ extern struct drone qr;
 
 void isr_buttons(void)
 {
-    printf("board> Button Pressed: stopping machine.\n");
-    qr.exit = 1;
-    qr.flag_mode = 1;
+    add_log();
 }
 
 void isr_rs232_rx(void)
@@ -75,7 +73,6 @@ void isr_rs232_rx(void)
     {
         printf("board> Checksum verified.\n");
         perform_command(incoming.header, incoming.command);
-        acknowledge(ACK_POSITIVE);
     }
     else
     {

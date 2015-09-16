@@ -25,10 +25,13 @@
 
 #define ALIVE           0x10
 #define ACK             0x11
+
 #define BLINK_LED       0x12
 #define SET_LED         0x13
 
-#define STOP            0x20
+#define LOG             0x20
+
+#define STOP            0x30
 
 
 /* ############ COMMAND ############# */
@@ -44,6 +47,11 @@
 /* Eligible values files when the header is "ACK" */
 #define ACK_POSITIVE 0x0
 #define ACK_NEGATIVE 0xF
+
+/* Eligible values files when the header is "LOG" */
+#define LOG_START   0x1
+#define LOG_STOP    0x2
+#define LOG_GET     0x3
 
 /* Eligible values field when the header is "SET_LED" (use bitwise to operate on more than one led at once */
 #define ALL_OFF 0x00
