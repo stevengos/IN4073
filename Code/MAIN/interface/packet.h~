@@ -41,7 +41,7 @@
 #define YAW_MODE    0x4
 #define FULL_MODE   0x5
 
-/* Eligible values when the header is "D_****" */
+/* Eligible values when the header is "INC_****" */
 #define INCREASE 0x1
 #define DECREASE 0x2
 

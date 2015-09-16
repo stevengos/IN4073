@@ -89,28 +89,28 @@ do {
 		arrow_key = 1;
 	}
 
-	//left key
+	//left key - roll up
 	if(c == 68 && arrow_key == 1){
-		printf("Left pressed! \n");
-		arrow_key = 0;
+		p.header	= D_ROLL;
+        	p.command	= INCREASE;
+	}
+
+	//right key - roll down
+	if(c == 67 && arrow_key == 1){
+		p.header	= D_ROLL;
+        	p.command	= DECREASE;
 	}
 
 	//up key
 	if(c == 65 && arrow_key == 1){
-		printf("Up pressed! \n");
-		arrow_key = 0;
-	}
-
-	//right key
-	if(c == 67 && arrow_key == 1){
-		printf("Right pressed! \n");
-		arrow_key = 0;
+		p.header	= D_PITCH;
+        	p.command	= INCREASE;
 	}
 
 	//down key
 	if(c == 66 && arrow_key == 1){
-		printf("Down pressed! \n");
-		arrow_key = 0;
+		p.header	= D_PITCH;
+        	p.command	= DECREASE;
 	}
 
 	//0 - SAFE_MODE
@@ -151,27 +151,31 @@ do {
 
 	//a - lift up
 	if(c == 97){
-		p.header	= INC_LIFT;
+		p.header	= D_LIFT;
+        	p.command	= INCREASE;
 	}
 
 	//z - lift down
 	if(c == 122){
-		//p.header	= INC_LIFT;
+		p.header	= D_LIFT;
+        	p.command	= DECREASE;
 	}
 
 	//w - yaw up
 	if(c = 119){
-		p.header	= INC_YAW;	
+		p.header	= D_YAWRATE;
+        	p.command	= INCREASE;
 	}
 
 	//q - yaw down
 	if(c = 133){
-		//p.header	= INC_YAW;
+		p.header	= D_YAWRATE;
+        	p.command	= DECREASE;
 	}
 
 	while(!ack_received)
         {
-            if(ctty)
+            if(c)
                 send_packet(board, p);
 
             sleep(1); //give time to board to write output
