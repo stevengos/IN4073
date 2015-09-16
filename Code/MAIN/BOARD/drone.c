@@ -103,4 +103,5 @@ void clear_drone()
     qr.current_mode = SAFE_MODE;
     qr.flag_mode = 0;
     qr.exit = 0;
+    qr.link_down = 0;
 }

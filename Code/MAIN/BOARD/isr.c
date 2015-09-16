@@ -26,6 +26,8 @@ void isr_rs232_rx(void)
     packet_t incoming;
     char counter = 0;
 
+    qr.link_down = 0;
+
     DISABLE_INTERRUPT( INTERRUPT_PRIMARY_RX );
 
     if( !X32_RS232_READ )
@@ -82,4 +84,18 @@ void isr_rs232_rx(void)
     }
 
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+}
+
+
+void isr_timer(void)
+{
+    if( qr.link_down )
+    {
+        printf("board> PC Link is down! SAFE_MODE set.\n");
+        qr.current_mode = SAFE_MODE;
+        qr.exit = 1;
+        qr.flag_mode = 1;
+    }
+
+    qr.link_down = 1;
 }

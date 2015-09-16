@@ -49,6 +49,8 @@ struct drone
     char current_mode;
     char flag_mode;
     char exit;
+
+    char link_down;
 };
 
 void run_drone();
