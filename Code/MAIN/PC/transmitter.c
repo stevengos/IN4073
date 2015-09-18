@@ -11,6 +11,7 @@
 #include "../interface/hamming.h"
 #include "board.h"
 #include "keyboard.h"
+#include "joystick.h"
 
 pthread_mutex_t lock_board;
 
@@ -54,7 +55,20 @@ int main()
     pthread_t polling;
     int status;
 
-    open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+//---- open joystick
+	int 		fd, js_exit = 0;
+
+	if ((fd = open(JS_DEV, O_RDONLY)) < 0) {
+		perror("jstest");
+		exit(1);
+	}
+
+	/* non-blocking mode
+	 */
+	fcntl(fd, F_SETFL, O_NONBLOCK);
+//----
+
+    //open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 
     printf("TERMINAL\n\n");
 
@@ -80,17 +94,22 @@ int main()
         ctty = ESC;
     }
 
-    while(ctty != ESC)
+    while(js_exit != 1) //ctty != ESC)
     {
-        printf("user> ");
+        //printf("user> ");
 
         packet_t p;
 
-        ctty = getchar_keyboard();
+//---- read JS command
+	js_exit = set_js_command(fd, &p);
+	//continue;
+//----
 
-        printf("pc> Command received: %d.\n", ctty);
+        //ctty = getchar_keyboard();
 
-        p = encapsulate( ctty );
+        //printf("pc> Command received: %d.\n", ctty);
+
+        //p = encapsulate( ctty );
 
         do
         {
@@ -145,8 +164,8 @@ int main()
 
     printf("End of communication.\n");
 
-    close_keyboard(&oldKeyboardSettings);
-    close_board(board, &oldBoardSettings);
+    //close_keyboard(&oldKeyboardSettings);
+    ////close_board(board, &oldBoardSettings);
 
     return 0;
 }
