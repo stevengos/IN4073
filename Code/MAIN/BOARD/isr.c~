@@ -73,7 +73,7 @@ void isr_rs232_rx(void)
     else
         acknowledge(ACK_NEGATIVE);
 
-    //X32_DISPLAY = debug++;
+    X32_DISPLAY = debug++;
 
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 }
@@ -88,7 +88,7 @@ void isr_timer(void)
         stop_motors();
         qr.exit = 1;
         qr.flag_mode = 1;
-        //X32_DISPLAY = 0x0FF;
+        X32_DISPLAY = 0x0FF;
     }
 
     qr.link_down = 1;

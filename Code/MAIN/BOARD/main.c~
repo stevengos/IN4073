@@ -40,7 +40,7 @@ int main()
 
     run_drone();
 
-    //X32_DISPLAY = 0xC1A0;
+    X32_DISPLAY = 0xC1A0;
     X32_LEDS = 0x0;
 
     return 0;

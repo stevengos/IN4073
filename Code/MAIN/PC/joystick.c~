@@ -147,7 +147,7 @@ int set_js_command(int fd, packet_t* p){
 		}
 		printf("lift: %d ", throttle_on_scale);
 
-		p->header  = SET_LIFT;
+		p->header = SET_LIFT;
 		p->command = throttle_on_scale;
 
 		command_set = 1;

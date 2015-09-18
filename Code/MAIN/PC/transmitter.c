@@ -68,7 +68,7 @@ int main()
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 //----
 
-    //open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+    open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 
     printf("TERMINAL\n\n");
 
@@ -105,11 +105,13 @@ int main()
 	//continue;
 //----
 
-        //ctty = getchar_keyboard();
+	if(p.header == EMPTY){
+		ctty = getchar_keyboard();
 
-        //printf("pc> Command received: %d.\n", ctty);
+		printf("pc> Command received: %d.\n", ctty);
 
-        //p = encapsulate( ctty );
+		p = encapsulate( ctty );
+	}
 
         do
         {
