@@ -22,6 +22,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="hamming.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="hamming.h" />
 		<Unit filename="packet.h" />
 		<Extensions>
 			<code_completion />

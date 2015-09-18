@@ -13,10 +13,11 @@
 #include <stdio.h>
 
 extern struct drone qr;
+short debug = 0;
 
 void isr_buttons(void)
 {
-    add_log();
+    stop();
 }
 
 void isr_rs232_rx(void)
@@ -67,18 +68,12 @@ void isr_rs232_rx(void)
 
     incoming.crc = X32_RS232_DATA; //read third byte (CRC)
 
-    printf("board> Packet received.\n");
-
     if( check_hamming(incoming) )
-    {
-        printf("board> Checksum verified.\n");
         perform_command(incoming.header, incoming.command);
-    }
     else
-    {
-        printf("board> Packet is corrupt.\n");
         acknowledge(ACK_NEGATIVE);
-    }
+
+    X32_DISPLAY = debug++;
 
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 }
@@ -90,8 +85,10 @@ void isr_timer(void)
     {
         printf("board> PC Link is down! SAFE_MODE set.\n");
         qr.current_mode = SAFE_MODE;
+        stop_motors();
         qr.exit = 1;
         qr.flag_mode = 1;
+        X32_DISPLAY = 0x0FF;
     }
 
     qr.link_down = 1;

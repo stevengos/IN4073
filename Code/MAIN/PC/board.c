@@ -1,6 +1,5 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-11
 */
 
 #include "board.h"

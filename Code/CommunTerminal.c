@@ -78,7 +78,7 @@ int	term_getchar()
 #include <assert.h>
 #include <time.h>
 
-#define SERIAL_DEVICE 	"/dev/ttyS0"
+#define SERIAL_DEVICE 	"/dev/ttyUSB0"
 
 
 int fd_RS232;

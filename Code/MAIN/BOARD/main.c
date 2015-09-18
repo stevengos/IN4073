@@ -1,6 +1,5 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-15
 */
 
 #include <stdio.h>
@@ -30,12 +29,6 @@ int main()
     SET_INTERRUPT_PRIORITY(INTERRUPT_PRIMARY_RX, 20);
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-    //prepare rs232 rx interrupt
-    X32_TIMER_CYCLE = TIMEOUT_TIMER*CLOCKS_PER_MS;
-    SET_INTERRUPT_VECTOR(INTERRUPT_TIMER1, &isr_timer);
-    SET_INTERRUPT_PRIORITY(INTERRUPT_TIMER1, 10);
-    ENABLE_INTERRUPT(INTERRUPT_TIMER1);
-
     //reset output
     X32_LEDS = 0x0000;
     X32_DISPLAY = 0x0000;
@@ -48,6 +41,7 @@ int main()
     run_drone();
 
     X32_DISPLAY = 0xC1A0;
+    X32_LEDS = 0x0;
 
     return 0;
 }

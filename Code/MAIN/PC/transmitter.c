@@ -1,25 +1,39 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-11
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <termios.h>
 
 #include "../interface/packet.h"
 #include "../interface/hamming.h"
 #include "board.h"
+#include "keyboard.h"
 
-char getchar_tty()
+pthread_mutex_t lock_board;
+
+void *is_alive(void* board)
 {
-    char ch = getchar();
+    int idboard = *( (int*)(board) );
 
-    //while( getchar() != '\n' );
+    while(1)
+    {
+        packet_t p;
+        p.header = ALIVE;
+        p.command = EMPTY;
 
-    return ch;
+        compute_hamming(&p);
+
+        pthread_mutex_lock( &lock_board );
+
+        send_packet(idboard, p);
+
+        pthread_mutex_unlock( &lock_board );
+
+        sleep(1);//usleep(1000000); //500ms
+    }
 }
 
 int main()
@@ -27,14 +41,20 @@ int main()
     struct termios boardSettings;
     struct termios oldBoardSettings;
 
+    struct termios oldKeyboardSettings;
+    struct termios keyboardSettings;
+
     int board;
-    int sent;
 
     char ctty = 0;
     char cboard = 0;
     char ack_received = 0;
     char counter = 0;
 
+    pthread_t polling;
+    int status;
+
+    open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 
     printf("TERMINAL\n\n");
 
@@ -50,261 +70,58 @@ int main()
 
     printf("Connection successful!\n\n");
 
-	/** DEBUG **/
-struct termios old_tio, new_tio;
-unsigned char c;
-unsigned int arrow_key = 0;
+    pthread_mutex_init(&lock_board, NULL);
 
-//using termios code from http://shtrom.ssji.net/skb/getc.html
-/* get the terminal settings for stdin */
-tcgetattr(STDIN_FILENO,&old_tio);
+    status = pthread_create(&polling, NULL, is_alive, (void*)&board);
 
-/* we want to keep the old setting to restore them a the end */
-new_tio=old_tio;
-
-/* disable canonical mode (buffered i/o) and local echo */
-new_tio.c_lflag &=(~ICANON & ~ECHO);
-
-/* set the new settings immediately */
-tcsetattr(STDIN_FILENO,TCSANOW,&new_tio);
-
-do {
-	packet_t p;
-        p.header = 0x0;
-        p.command = 0x0;
-	
-	printf("user> ");
-
-	c=getchar();
-
-	printf("%d \n",c);
-
-	//detect esc key
-	if(c == 27 && arrow_key){
-		break;	
-	}
-
-	//detection of arrow key press
-	//for example the sequence kan be 27, 91, 66 or 27, 91, 68
-	if(c == 27){
-		arrow_key = 1;
-	}
-
-	//left key - roll up
-	if(c == 68 && arrow_key == 1){
-		p.header	= D_ROLL;
-        	p.command	= INCREASE;
-	}
-
-	//right key - roll down
-	if(c == 67 && arrow_key == 1){
-		p.header	= D_ROLL;
-        	p.command	= DECREASE;
-	}
-
-	//up key
-	if(c == 65 && arrow_key == 1){
-		p.header	= D_PITCH;
-        	p.command	= INCREASE;
-	}
-
-	//down key
-	if(c == 66 && arrow_key == 1){
-		p.header	= D_PITCH;
-        	p.command	= DECREASE;
-	}
-
-	//0 - SAFE_MODE
-	if(c == 48){
-		p.header	= SET_MODE;
-        	p.command	= SAFE_MODE;
-	}
-
-	//1 - PANIC_MODE
-	if(c == 49){
-		p.header	= SET_MODE;
-        	p.command	= PANIC_MODE;
-	}
-
-	//2 - MANUAL_MODE
-	if(c == 50){
-		p.header	= SET_MODE;
-        	p.command	= MANUAL_MODE;
-	}
-
-	//3 - CALIBRATION_MODE
-	if(c == 51){
-		p.header	= SET_MODE;
-        	p.command	= CALIBRATION_MODE;
-	}
-
-	//4 - YAW_MODE
-	if(c == 52){
-		p.header	= SET_MODE;
-        	p.command	= YAW_MODE;
-	}
-
-	//5 - FULL_MODE
-	if(c == 53){
-		p.header	= SET_MODE;
-        	p.command	= FULL_MODE;
-	}
-
-	//a - lift up
-	if(c == 97){
-		p.header	= D_LIFT;
-        	p.command	= INCREASE;
-	}
-
-	//z - lift down
-	if(c == 122){
-		p.header	= D_LIFT;
-        	p.command	= DECREASE;
-	}
-
-	//w - yaw up
-	if(c = 119){
-		p.header	= D_YAWRATE;
-        	p.command	= INCREASE;
-	}
-
-	//q - yaw down
-	if(c = 133){
-		p.header	= D_YAWRATE;
-        	p.command	= DECREASE;
-	}
-
-	while(!ack_received)
-        {
-            if(c)
-                send_packet(board, p);
-
-            //sleep(1); //give time to board to write output
-
-            while( (cboard = getchar_board(board)) )
-            {
-                if( cboard == ACK ) //ack coming
-                {
-                    cboard = getchar_board(board); //response: positive or negative
-
-                    getchar_board(board); //ignore crc
-
-                    if( cboard == ACK_POSITIVE )
-                        printf("pc> Positive acknowledge received.\n"), ack_received = 1;
-                    else
-                        if( cboard == ACK_NEGATIVE )
-                            printf("pc> Negative acknowledge received.\n");
-                    else
-                        printf("pc> Unexpected message from board.\n");
-                }
-                else
-                    printf("%c", cboard);
-            }
-
-            if(counter++>3)
-            {
-                printf("pc> Timeout: ACK not received.\n");
-                break;
-            }
-        }
-
-        ack_received = 0;
-} while(c!='x');
-
-/* restore the former settings */
-tcsetattr(STDIN_FILENO,TCSANOW,&old_tio);
-
-printf("quit\n");
-
-	/** 	  **/
-/*
-    printf("TERMINAL\n\n");
-
-    printf("Trying to connect to the board...");
-
-    board = open_board(&oldBoardSettings, &boardSettings);
-
-    if( board < 0 )
+    if( status )
     {
-        printf("Error: connection to board failed.");
-        return 1;
+        printf("pc> Error while creating polling thread. Session Aborted.\n");
+        ctty = ESC;
     }
 
-    printf("Connection successful!\n\n");
-
-    while(ctty != 'q')
+    while(ctty != ESC)
     {
         printf("user> ");
 
         packet_t p;
-        p.header = 0x0;
-        p.command = 0x0;
 
-        ctty = getchar_tty();
+        ctty = getchar_keyboard();
 
-        switch(ctty)
+        printf("pc> Command received: %d.\n", ctty);
+
+        p = encapsulate( ctty );
+
+        do
         {
-            case '1':
-                printf("pc> turn on led1.\n");
-                p.header = SET_LED;
-                p.command = LED1;
-                break;
-            case '2':
-                p.header = SET_LED;
-                p.command = LED2;
-                break;
-            case '3':
-                p.header = SET_LED;
-                p.command = LED3;
-                break;
-            case '4':
-                p.header = SET_LED;
-                p.command = LED4;
-                break;
-            case 'a':
-                p.header = SET_LED;
-                p.command = ALL_ON;
-                break;
-            case 'q':
-                p.header = STOP;
-                p.command = 0;
-                break;
-            case 'l':
-                p.header = LOG;
-                p.command = LOG_START;
-                break;
-            case 'u':
-                p.header = LOG;
-                p.command = LOG_GET;
-                break;
-            default:
-                ctty = 0;
-                ack_received = 1;
-                printf("pc> Command not recognized.\n");
-        };
+            printf("pc> Sending packet...\n");
 
-        compute_hamming(&p);
+            pthread_mutex_lock( &lock_board );
 
-        while(!ack_received)
-        {
-            if(ctty)
-                send_packet(board, p);
+            send_packet(board, p);
 
-            sleep(1); //give time to board to write output
+            pthread_mutex_unlock( &lock_board );
+
+            sleep(1); //give time to board to write output 1s
+
+            pthread_mutex_lock( &lock_board );
 
             while( (cboard = getchar_board(board)) )
             {
                 if( cboard == ACK ) //ack coming
                 {
-                    cboard = getchar_board(board); //response: positive or negative
+                    cboard = getchar_board(board); //response: positive or negative or invalid
 
                     getchar_board(board); //ignore crc
 
                     if( cboard == ACK_POSITIVE )
-                        printf("pc> Positive acknowledge received.\n"), ack_received = 1;
+                        printf("pc> Positive acknowledge received.\n"), ack_received = ACK_POSITIVE;
                     else
                         if( cboard == ACK_NEGATIVE )
-                            printf("pc> Negative acknowledge received.\n");
+                            printf("pc> Negative acknowledge received.\n\n"), ack_received = ACK_NEGATIVE;
+                    else
+                        if( cboard == ACK_INVALID )
+                            printf("pc> Board signaled invalid message.\n"), ack_received = ACK_INVALID;
                     else
                         printf("pc> Unexpected message from board.\n");
                 }
@@ -312,23 +129,25 @@ printf("quit\n");
                     printf("%c", cboard);
             }
 
+            pthread_mutex_unlock( &lock_board );
+
             if(counter++>3)
             {
                 printf("pc> Timeout: ACK not received.\n");
                 break;
             }
         }
+        while( ack_received == ACK_NEGATIVE );
 
-        ack_received = 0;
         counter = 0;
-
         printf("\n");
     }
 
     printf("End of communication.\n");
 
+    close_keyboard(&oldKeyboardSettings);
     close_board(board, &oldBoardSettings);
-*/
+
     return 0;
 }
 

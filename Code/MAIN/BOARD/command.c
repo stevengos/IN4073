@@ -1,6 +1,5 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-15
 */
 
 #include "command.h"
@@ -9,14 +8,14 @@
 #include "../interface/hamming.h"
 
 #include "drone.h"
+#include "isr.h"
+
 #include <stdio.h>
 
 extern struct drone qr;
 
 void perform_command(char header, char command)
 {
-    printf("board> Performing command: %x %x \n", header, command);
-
     switch( header )
     {
         case SET_MODE:
@@ -31,10 +30,6 @@ void perform_command(char header, char command)
                     set_roll(command);
                     break;
 
-        case SET_YAW:
-                    set_yaw(command);
-                    break;
-
         case SET_LIFT:
                     set_lift(command);
                     break;
@@ -43,28 +38,24 @@ void perform_command(char header, char command)
                     set_yawrate(command);
                     break;
 
-        case INC_PITCH:
-                    inc_pitch();
+        case D_PITCH:
+                    d_pitch(command);
                     break;
 
-        case INC_ROLL:
-                    inc_roll();
+        case D_ROLL:
+                    d_roll(command);
                     break;
 
-        case INC_YAW:
-                    inc_yaw();
+        case D_LIFT:
+                    d_lift(command);
                     break;
 
-        case INC_LIFT:
-                    inc_lift();
-                    break;
-
-        case INC_YAWRATE:
-                    inc_yawrate();
+        case D_YAWRATE:
+                    d_yawrate(command);
                     break;
 
         case ALIVE:
-                    break;
+                    return;
 
         case BLINK_LED:
                     break;
@@ -82,8 +73,10 @@ void perform_command(char header, char command)
                     stop();
                     break;
         default:
-                    acknowledge(ACK_NEGATIVE);
+                    acknowledge(ACK_INVALID);
     };
+
+    print_drone();
 }
 
 void acknowledge(char response)
@@ -91,7 +84,7 @@ void acknowledge(char response)
     char counter = 0;
     packet_t packet;
 
-    if( response != ACK_POSITIVE && response != ACK_NEGATIVE )
+    if( response != ACK_POSITIVE && response != ACK_NEGATIVE && response != ACK_INVALID)
     {
         printf("board> Internal error: call to acknowledge() with input not defined by protocol.\n");
         response = ACK_NEGATIVE;
@@ -136,10 +129,17 @@ void acknowledge(char response)
 //set_mode changes the operating mode of the drone. It performs some checking in order to avoid unsafe behaviour.
 void set_mode(char command)
 {
+    //prepare timer interrupt
+    X32_TIMER_CYCLE = TIMEOUT_TIMER*CLOCKS_PER_MS;
+    SET_INTERRUPT_VECTOR(INTERRUPT_TIMER1, &isr_timer);
+    SET_INTERRUPT_PRIORITY(INTERRUPT_TIMER1, 1);
+    ENABLE_INTERRUPT(INTERRUPT_TIMER1);
+
     // It is not allowed to switch between modes unless either you are currently in SAFE_MODE or the command is SAFE/PANIC_MODE
-    if( qr.current_mode != SAFE_MODE && ( command != SAFE_MODE || command != PANIC_MODE ) )
+    if( qr.current_mode != SAFE_MODE && ( command != SAFE_MODE && command != PANIC_MODE ) )
     {
-        acknowledge(ACK_NEGATIVE);
+        acknowledge(ACK_INVALID);
+        printf("board> Please go in SAFE_MODE if you want to change mode.\n");
         return;
     }
 
@@ -147,53 +147,50 @@ void set_mode(char command)
     {
         case SAFE_MODE:
             qr.current_mode = SAFE_MODE;
-            set_led(LED1);
             break;
 
         case PANIC_MODE:
             qr.current_mode = PANIC_MODE;
-            set_led(LED2);
             break;
 
         case MANUAL_MODE:
             qr.current_mode = MANUAL_MODE;
-            set_led(LED3);
             break;
 
         case CALIBRATION_MODE:
             qr.current_mode = CALIBRATION_MODE;
-            set_led(LED4);
             break;
 
         case YAW_MODE:
             qr.current_mode = YAW_MODE;
-            set_led(LED5);
             break;
 
         case FULL_MODE:
             qr.current_mode = FULL_MODE;
-            set_led(LED6);
             break;
     };
 
     qr.flag_mode = 1; //signal a change in mode
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void stop()
 {
     if( qr.current_mode != SAFE_MODE ) //machine can be stopped only in SAFE_MODE
     {
-        acknowledge(ACK_NEGATIVE);
+        acknowledge(ACK_INVALID);
+        printf("board> Please, if you want to stop then go in SAFE_MODE first.\n");
         return;
     }
 
     qr.exit = 1;
     qr.flag_mode = 1;
-    X32_LEDS = ALL_OFF;
-
-    acknowledge(ACK_POSITIVE);
+    X32_DISPLAY = 0x0000;
 
     printf("board> Machine Stopped\n");
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void set_log(char command)
@@ -212,7 +209,7 @@ void set_log(char command)
                 upload_log();
                 break;
         default:
-                acknowledge(ACK_NEGATIVE);
+                acknowledge(ACK_INVALID);
                 return;
     }
 
@@ -229,7 +226,7 @@ void upload_log()
     if( qr.current_mode != SAFE_MODE )
     {
         printf("board> Command discarded: you can upload logs only in SAFE_MODE.\n");
-        acknowledge(ACK_NEGATIVE);
+        acknowledge(ACK_INVALID);
         return;
     }
 
@@ -256,14 +253,11 @@ void upload_log()
     acknowledge(ACK_POSITIVE);
 }
 
+/* JOYSTICK SECTION */
 void set_pitch(char command)
 {
 }
 void set_roll(char command)
-{
-}
-
-void set_yaw(char command)
 {
 }
 
@@ -283,49 +277,78 @@ void set_yawrate(char command)
     qr.yawrate = command;
 }
 
-void inc_pitch()
+/* KEYBOARD SESSION */
+
+void d_pitch(char command)
 {
     if( qr.current_mode == SAFE_MODE )
-        return;
-
-    qr.ae1 = qr.ae1 + STEP_PITCH > MAX_RPM ? MAX_RPM : qr.ae1 + STEP_PITCH;
+        acknowledge(ACK_INVALID);
+    else
+        if( command == INCREASE )
+            if( qr.pitch + STEP_PITCH > MAX_PITCH )
+                acknowledge(ACK_INVALID);
+            else
+                qr.pitch += STEP_PITCH, acknowledge(ACK_POSITIVE);
+        else
+            if( qr.pitch - STEP_PITCH < MIN_PITCH )
+                acknowledge(ACK_INVALID);
+            else
+                qr.pitch -= STEP_PITCH, acknowledge(ACK_POSITIVE);
 }
 
-void inc_roll()
+void d_roll(char command)
 {
     if( qr.current_mode == SAFE_MODE )
-        return;
-
-    qr.ae4 = qr.ae4 + STEP_ROLL > MAX_RPM ? MAX_RPM : qr.ae4 + STEP_ROLL;
+        acknowledge(ACK_INVALID);
+    else
+        if( command == INCREASE )
+            if( qr.roll + STEP_ROLL > MAX_ROLL )
+                acknowledge(ACK_INVALID);
+            else
+                qr.roll += STEP_ROLL, acknowledge(ACK_POSITIVE);
+        else
+            if( qr.roll - STEP_ROLL < MIN_ROLL )
+                acknowledge(ACK_INVALID);
+            else
+                qr.roll -= STEP_ROLL, acknowledge(ACK_POSITIVE);
 }
 
-void inc_yaw()
-{
-}
-
-void inc_lift()
-{
-    if( qr.current_mode == SAFE_MODE )
-        return;
-
-    qr.ae1 = qr.ae1 + STEP_LIFT > MAX_RPM ? MAX_RPM : qr.ae1 + STEP_LIFT;
-    qr.ae2 = qr.ae1 + STEP_LIFT > MAX_RPM ? MAX_RPM : qr.ae2 + STEP_LIFT;
-    qr.ae3 = qr.ae1 + STEP_LIFT > MAX_RPM ? MAX_RPM : qr.ae3 + STEP_LIFT;
-    qr.ae4 = qr.ae1 + STEP_LIFT > MAX_RPM ? MAX_RPM : qr.ae4 + STEP_LIFT;
-}
-
-void inc_yawrate()
+void d_yawrate(char command)
 {
     if( qr.current_mode == SAFE_MODE )
-        return;
-
-    qr.ae1 = qr.ae1 + STEP_YAWRATE > MAX_RPM ? MAX_RPM : qr.ae1 + STEP_YAWRATE;
+        acknowledge(ACK_INVALID);
+    else
+        if( command == INCREASE )
+            if( qr.yawrate + STEP_YAWRATE > MAX_YAWRATE )
+                acknowledge(ACK_INVALID);
+            else
+                qr.yawrate += STEP_YAWRATE, acknowledge(ACK_POSITIVE);
+        else
+            if( qr.yawrate - STEP_YAWRATE < MIN_YAWRATE )
+                acknowledge(ACK_INVALID);
+            else
+                qr.yawrate -= STEP_YAWRATE, acknowledge(ACK_POSITIVE);
 }
 
+void d_lift(char command)
+{
+    if( qr.current_mode == SAFE_MODE )
+        acknowledge(ACK_INVALID);
+    else
+        if( command == INCREASE )
+            if( qr.lift + STEP_LIFT > MAX_LIFT )
+                acknowledge(ACK_INVALID);
+            else
+                qr.lift += STEP_LIFT, acknowledge(ACK_POSITIVE);
+        else
+            if( qr.lift - STEP_LIFT < MIN_LIFT )
+                qr.lift = MIN_LIFT, acknowledge(ACK_INVALID);
+            else
+                qr.lift -= STEP_LIFT, acknowledge(ACK_POSITIVE);
+}
 
 void set_led(char command)
 {
     X32_LEDS = command;
     acknowledge(ACK_POSITIVE);
 }
-

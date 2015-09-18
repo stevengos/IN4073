@@ -1,6 +1,6 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-15
+@last update 2015-09-17
 */
 
 /* In the following we list the admissable values for the fields of the struct packet_s */
@@ -33,7 +33,7 @@
 
 #define STOP            0x30
 
-
+#define EMPTY           0x40
 /* ############ COMMAND ############# */
 
 /* Eligible values when the header is "SET_MODE" */
@@ -50,7 +50,8 @@
 
 /* Eligible values files when the header is "ACK" */
 #define ACK_POSITIVE 0x0
-#define ACK_NEGATIVE 0xF
+#define ACK_NEGATIVE 0x1F
+#define ACK_INVALID  0x2F
 
 /* Eligible values files when the header is "LOG" */
 #define LOG_START   0x1
