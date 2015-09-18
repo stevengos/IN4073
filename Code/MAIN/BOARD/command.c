@@ -253,30 +253,55 @@ void upload_log()
 }
 
 /* JOYSTICK SECTION */
+//{
 void set_pitch(char command)
 {
+    if( qr.current_mode == SAFE_MODE )
+    {
+        acknowledge(ACK_INVALID);
+        return;
+    }
+
+    qr.pitch = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
 }
+
 void set_roll(char command)
 {
+    if( qr.current_mode == SAFE_MODE )
+    {
+        acknowledge(ACK_INVALID);
+        return;
+    }
+
+    qr.roll = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
 }
 
 void set_lift(char command)
 {
     if( qr.current_mode == SAFE_MODE )
+    {
+        acknowledge(ACK_INVALID);
         return;
+    }
 
-    qr.lift = command;
+    qr.lift = command > MAX_LIFT ? MAX_LIFT : command < MIN_LIFT ? MIN_LIFT : command;
 }
 
 void set_yawrate(char command)
 {
     if( qr.current_mode == SAFE_MODE )
+    {
+        acknowledge(ACK_INVALID);
         return;
+    }
 
-    qr.yawrate = command;
+    qr.yawrate = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
 }
+//}
 
 /* KEYBOARD SESSION */
+//{
+
 
 void d_pitch(char command)
 {
@@ -284,15 +309,15 @@ void d_pitch(char command)
         acknowledge(ACK_INVALID);
     else
         if( command == INCREASE )
-            if( qr.pitch + STEP_PITCH > MAX_PITCH )
+            if( qr.pitch + qr.step_pitch > MAX_PITCH )
                 acknowledge(ACK_INVALID);
             else
-                qr.pitch += STEP_PITCH, acknowledge(ACK_POSITIVE);
+                qr.pitch += qr.step_pitch, acknowledge(ACK_POSITIVE);
         else
-            if( qr.pitch - STEP_PITCH < MIN_PITCH )
+            if( qr.pitch - qr.step_pitch < MIN_PITCH )
                 acknowledge(ACK_INVALID);
             else
-                qr.pitch -= STEP_PITCH, acknowledge(ACK_POSITIVE);
+                qr.pitch -= qr.step_pitch, acknowledge(ACK_POSITIVE);
 }
 
 void d_roll(char command)
@@ -301,15 +326,15 @@ void d_roll(char command)
         acknowledge(ACK_INVALID);
     else
         if( command == INCREASE )
-            if( qr.roll + STEP_ROLL > MAX_ROLL )
+            if( qr.roll + qr.step_roll > MAX_ROLL )
                 acknowledge(ACK_INVALID);
             else
-                qr.roll += STEP_ROLL, acknowledge(ACK_POSITIVE);
+                qr.roll += qr.step_roll, acknowledge(ACK_POSITIVE);
         else
-            if( qr.roll - STEP_ROLL < MIN_ROLL )
+            if( qr.roll - qr.step_roll < MIN_ROLL )
                 acknowledge(ACK_INVALID);
             else
-                qr.roll -= STEP_ROLL, acknowledge(ACK_POSITIVE);
+                qr.roll -= qr.step_roll, acknowledge(ACK_POSITIVE);
 }
 
 void d_yawrate(char command)
@@ -318,15 +343,15 @@ void d_yawrate(char command)
         acknowledge(ACK_INVALID);
     else
         if( command == INCREASE )
-            if( qr.yawrate + STEP_YAWRATE > MAX_YAWRATE )
+            if( qr.yawrate + qr.step_yawrate > MAX_YAWRATE )
                 acknowledge(ACK_INVALID);
             else
-                qr.yawrate += STEP_YAWRATE, acknowledge(ACK_POSITIVE);
+                qr.yawrate += qr.step_yawrate, acknowledge(ACK_POSITIVE);
         else
-            if( qr.yawrate - STEP_YAWRATE < MIN_YAWRATE )
+            if( qr.yawrate - qr.step_yawrate < MIN_YAWRATE )
                 acknowledge(ACK_INVALID);
             else
-                qr.yawrate -= STEP_YAWRATE, acknowledge(ACK_POSITIVE);
+                qr.yawrate -= qr.step_yawrate, acknowledge(ACK_POSITIVE);
 }
 
 void d_lift(char command)
@@ -335,15 +360,15 @@ void d_lift(char command)
         acknowledge(ACK_INVALID);
     else
         if( command == INCREASE )
-            if( qr.lift + STEP_LIFT > MAX_LIFT )
+            if( qr.lift + qr.step_lift > MAX_LIFT )
                 acknowledge(ACK_INVALID);
             else
-                qr.lift += STEP_LIFT, acknowledge(ACK_POSITIVE);
+                qr.lift += qr.step_lift, acknowledge(ACK_POSITIVE);
         else
-            if( qr.lift - STEP_LIFT < MIN_LIFT )
+            if( qr.lift - qr.step_lift < MIN_LIFT )
                 qr.lift = MIN_LIFT, acknowledge(ACK_INVALID);
             else
-                qr.lift -= STEP_LIFT, acknowledge(ACK_POSITIVE);
+                qr.lift -= qr.step_lift, acknowledge(ACK_POSITIVE);
 }
 
 void set_led(char command)
@@ -351,3 +376,5 @@ void set_led(char command)
     X32_LEDS = command;
     acknowledge(ACK_POSITIVE);
 }
+
+//}

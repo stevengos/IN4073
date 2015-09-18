@@ -51,12 +51,33 @@ void safe_mode()
     short debug = 0;
     X32_LEDS = LED8;
 
+    stop_motors();
+
     while(!qr.flag_mode);// X32_DISPLAY = debug++;
 
     X32_LEDS = ALL_OFF;
 }
 
-void panic_mode() { X32_LEDS = ALL_ON; while(!qr.flag_mode); X32_LEDS = ALL_OFF; }
+void panic_mode()
+{
+    X32_LEDS = LED7;
+
+    qr.ae1 = PANIC_RPM;
+    qr.ae2 = PANIC_RPM;
+    qr.ae3 = PANIC_RPM;
+    qr.ae3 = PANIC_RPM;
+
+    qr.lift    = -qr.scaling_factor*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+
+    //ZEROS???
+    qr.pitch   =  qr.scaling_factor*( qr.ae1*qr.ae1 - qr.ae3*qr.ae3 );
+    qr.roll    =  qr.scaling_factor*( qr.ae4*qr.ae1 - qr.ae2*qr.ae3 );
+    qr.yawrate =  qr.scaling_factor*( -qr.ae1*qr.ae1 + qr.ae2*qr.ae2 - qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+
+    sleep(5000);
+
+    qr.current_mode = SAFE_MODE;
+}
 
 void manual_mode()
 {
@@ -64,19 +85,18 @@ void manual_mode()
     int ae2 = 0;
     int ae3 = 0;
     int ae4 = 0;
-    int scaling_factor = 100;
     short debug = 0;
 
-    X32_LEDS = LED7;
+    X32_LEDS = LED6;
 
     while(!qr.flag_mode)
     {
         //X32_DISPLAY = debug++;
 
-        ae1 = scaling_factor*( qr.lift  + 2*qr.pitch                    - qr.yawrate ) / 4;
-        ae2 = scaling_factor*( qr.lift                  - 2*qr.roll     + qr.yawrate ) / 4;
-        ae3 = scaling_factor*( qr.lift  - 2*qr.pitch                    - qr.yawrate ) / 4;
-        ae4 = scaling_factor*( qr.lift                  + 2*qr.roll     + qr.yawrate ) / 4;
+        ae1 = qr.scaling_factor*( qr.lift  + 2*qr.pitch                    - qr.yawrate ) / 4;
+        ae2 = qr.scaling_factor*( qr.lift                  - 2*qr.roll     + qr.yawrate ) / 4;
+        ae3 = qr.scaling_factor*( qr.lift  - 2*qr.pitch                    - qr.yawrate ) / 4;
+        ae4 = qr.scaling_factor*( qr.lift                  + 2*qr.roll     + qr.yawrate ) / 4;
 
         ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
         ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
@@ -90,10 +110,14 @@ void manual_mode()
 
         DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
+        #ifdef PERIPHERAL_XUFO_A0
+
         X32_QR_A1 = qr.ae1;
         X32_QR_A2 = qr.ae2;
         X32_QR_A3 = qr.ae3;
         X32_QR_A4 = qr.ae4;
+
+        #endif
 
         ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
     }
@@ -123,6 +147,12 @@ void clear_drone()
     qr.yawrate = 0;
     qr.lift = 0;
 
+    qr.scaling_factor = 16000;
+    qr.step_pitch = 10;
+    qr.step_roll = 10;
+    qr.step_yawrate = 50;
+    qr.step_lift = 10;
+
     qr.sax = 0;
     qr.say = 0;
     qr.saz = 0;
@@ -140,21 +170,21 @@ void clear_drone()
 
 void stop_motors()
 {
-    X32_LEDS = LED2;
-
     while(qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4)
     {
         qr.ae1 = qr.ae1 - STEP_RPM < 0 ? 0 : qr.ae1 - STEP_RPM;
         qr.ae2 = qr.ae2 - STEP_RPM < 0 ? 0 : qr.ae2 - STEP_RPM;
         qr.ae3 = qr.ae3 - STEP_RPM < 0 ? 0 : qr.ae3 - STEP_RPM;
         qr.ae4 = qr.ae4 - STEP_RPM < 0 ? 0 : qr.ae4 - STEP_RPM;
-//
+
+        #ifdef PERIPHERAL_XUFO_A0
+
         X32_QR_A1 = qr.ae1;
         X32_QR_A2 = qr.ae2;
         X32_QR_A3 = qr.ae3;
         X32_QR_A4 = qr.ae4;
 
-        usleep(REFRESH_TIME);
+        #endif // PERIPHERAL_XUFO_A0
     }
 
     qr.lift = 0;
