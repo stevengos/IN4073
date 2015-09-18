@@ -22,6 +22,8 @@
 #define MIN_YAWRATE -255
 #define MIN_LIFT    0
 
+#define SCALE_PARAMETER 1000
+
 #define PANIC_RPM 50
 #define PANIC_TIME 5000
 
@@ -40,7 +42,11 @@ struct drone
     short lift;
 
     //parameters
-    short scaling_factor;
+    short scale_pitch;
+    short scale_roll;
+    short scale_yaw;
+    short scale_lift;
+
     short step_pitch;
     short step_roll;
     short step_yawrate;

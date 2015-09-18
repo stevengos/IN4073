@@ -22,6 +22,7 @@ void perform_command(char header, char command)
                     set_mode(command);
                     break;
 
+        /* set setpoints */ //{
         case SET_PITCH:
                     set_pitch(command);
                     break;
@@ -37,7 +38,9 @@ void perform_command(char header, char command)
         case SET_YAWRATE:
                     set_yawrate(command);
                     break;
+        //}
 
+        /* tune setpoints */ //{
         case D_PITCH:
                     d_pitch(command);
                     break;
@@ -53,6 +56,22 @@ void perform_command(char header, char command)
         case D_YAWRATE:
                     d_yawrate(command);
                     break;
+        //}
+
+        /* tune scales */ //{
+        case SET_SCALE_PITCH:
+                    set_scale_pitch(command);
+                    break;
+        case SET_SCALE_ROLL:
+                    set_scale_roll(command);
+                    break;
+        case SET_SCALE_YAW:
+                    set_scale_yaw(command);
+                    break;
+        case SET_SCALE_LIFT:
+                    set_scale_lift(command);
+                    break;
+        //}
 
         case ALIVE:
                     return;
@@ -126,6 +145,23 @@ void acknowledge(char response)
     X32_RS232_DATA = packet.crc;              //checksum
 }
 
+void stop()
+{
+    if( qr.current_mode != SAFE_MODE ) //machine can be stopped only in SAFE_MODE
+    {
+        acknowledge(ACK_INVALID);
+        printf("board> Please, if you want to stop then go in SAFE_MODE first.\n");
+        return;
+    }
+
+    qr.exit = 1;
+    qr.flag_mode = 1;
+
+    printf("board> Machine Stopped\n");
+
+    acknowledge(ACK_POSITIVE);
+}
+
 //set_mode changes the operating mode of the drone. It performs some checking in order to avoid unsafe behaviour.
 void set_mode(char command)
 {
@@ -175,22 +211,41 @@ void set_mode(char command)
     acknowledge(ACK_POSITIVE);
 }
 
-void stop()
+
+/* Setting parameters */
+//{
+void set_scale_pitch(char command)
 {
-    if( qr.current_mode != SAFE_MODE ) //machine can be stopped only in SAFE_MODE
-    {
-        acknowledge(ACK_INVALID);
-        printf("board> Please, if you want to stop then go in SAFE_MODE first.\n");
-        return;
-    }
-
-    qr.exit = 1;
-    qr.flag_mode = 1;
-
-    printf("board> Machine Stopped\n");
-
-    acknowledge(ACK_POSITIVE);
+    if(command == INCREASE)
+        qr.scale_pitch += SCALE_PARAMETER;
+    else
+        qr.scale_pitch -= SCALE_PARAMETER;
 }
+
+void set_scale_roll(char command)
+{
+    if(command == INCREASE)
+        qr.scale_roll += SCALE_PARAMETER;
+    else
+        qr.scale_roll -= SCALE_PARAMETER;
+}
+
+void set_scale_yaw(char command)
+{
+    if(command == INCREASE)
+        qr.scale_yaw += SCALE_PARAMETER;
+    else
+        qr.scale_yaw -= SCALE_PARAMETER;
+}
+
+void set_scale_lift(char command)
+{
+    if(command == INCREASE)
+        qr.scale_lift += SCALE_PARAMETER;
+    else
+        qr.scale_lift -= SCALE_PARAMETER;
+}
+//}
 
 void set_log(char command)
 {

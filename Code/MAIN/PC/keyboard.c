@@ -139,24 +139,28 @@ packet_t encapsulate(char command)
 
         /* CONTROLLER SETTINGS */
         case U:
-            outgoing.header     = EMPTY;
-            outgoing.command    = DECREASE;
+            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.command    = INCREASE;
             break;
         case J:
-            outgoing.header     = EMPTY;
-            outgoing.command    = EMPTY;
+            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.command    = DECREASE;
+            break;
+        case I:
+            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.command    = INCREASE;
             break;
         case K:
-            outgoing.header     = EMPTY;
-            outgoing.command    = EMPTY;
+            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.command    = DECREASE;
             break;
         case O:
-            outgoing.header     = EMPTY;
-            outgoing.command    = EMPTY;
+            outgoing.header     = SET_SCALE_YAW;
+            outgoing.command    = INCREASE;
             break;
         case L:
-            outgoing.header     = EMPTY;
-            outgoing.command    = EMPTY;
+            outgoing.header     = SET_SCALE_YAW;
+            outgoing.command    = DECREASE;
             break;
 
         /* NOT RECOGNIZED */

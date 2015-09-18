@@ -67,12 +67,12 @@ void panic_mode()
     qr.ae3 = PANIC_RPM;
     qr.ae3 = PANIC_RPM;
 
-    qr.lift    = -qr.scaling_factor*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+    qr.lift    = qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
 
     //ZEROS???
-    qr.pitch   =  qr.scaling_factor*( qr.ae1*qr.ae1 - qr.ae3*qr.ae3 );
-    qr.roll    =  qr.scaling_factor*( qr.ae4*qr.ae1 - qr.ae2*qr.ae3 );
-    qr.yawrate =  qr.scaling_factor*( -qr.ae1*qr.ae1 + qr.ae2*qr.ae2 - qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+    qr.pitch   =  qr.scale_pitch    *   ( qr.ae1*qr.ae1 - qr.ae3*qr.ae3 );
+    qr.roll    =  qr.scale_roll     *   ( qr.ae4*qr.ae1 - qr.ae2*qr.ae3 );
+    qr.yawrate =  qr.scale_yaw      *   ( -qr.ae1*qr.ae1 + qr.ae2*qr.ae2 - qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
 
     sleep(5000);
 
@@ -93,10 +93,10 @@ void manual_mode()
     {
         //X32_DISPLAY = debug++;
 
-        ae1 = qr.scaling_factor*( qr.lift  + 2*qr.pitch                    - qr.yawrate ) / 4;
-        ae2 = qr.scaling_factor*( qr.lift                  - 2*qr.roll     + qr.yawrate ) / 4;
-        ae3 = qr.scaling_factor*( qr.lift  - 2*qr.pitch                    - qr.yawrate ) / 4;
-        ae4 = qr.scaling_factor*( qr.lift                  + 2*qr.roll     + qr.yawrate ) / 4;
+        ae1 = ( qr.scale_lift*qr.lift  + 2*qr.scale_pitch*qr.pitch                              - qr.scale_yaw*qr.yawrate ) / 4;
+        ae2 = ( qr.scale_lift*qr.lift                               - 2*qr.scale_roll*qr.roll   + qr.scale_yaw*qr.yawrate ) / 4;
+        ae3 = ( qr.scale_lift*qr.lift  - 2*qr.scale_pitch*qr.pitch                              - qr.scale_yaw*qr.yawrate ) / 4;
+        ae4 = ( qr.scale_lift*qr.lift                               + 2*qr.scale_roll*qr.roll   + qr.scale_yaw*qr.yawrate ) / 4;
 
         ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
         ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
@@ -147,11 +147,15 @@ void clear_drone()
     qr.yawrate = 0;
     qr.lift = 0;
 
-    qr.scaling_factor = 16000;
-    qr.step_pitch = 10;
-    qr.step_roll = 10;
-    qr.step_yawrate = 50;
-    qr.step_lift = 10;
+    qr.scale_pitch = 8240;
+    qr.scale_roll = 8240;
+    qr.scale_yaw = 16400;
+    qr.scale_lift = 16400;
+
+    qr.step_pitch = 5;
+    qr.step_roll = 5;
+    qr.step_yawrate = 10;
+    qr.step_lift = 5;
 
     qr.sax = 0;
     qr.say = 0;
@@ -201,6 +205,7 @@ void print_drone() //PRINT DRONE STATUS
     printf("flag=%d ", qr.flag_mode);
     printf("link=%d ", qr.link_down);
     printf("exit=%d\n", qr.exit);
+    printf("scales: pitch=%d roll=%d yawrate=%d lift=%d\n", qr.scale_pitch, qr.scale_roll, qr.scale_yaw, qr.scale_lift);
     printf("ae1=%d ae2=%d ae3=%d ae4=%d\n", qr.ae1, qr.ae2, qr.ae3, qr.ae4);
     printf("pitch=%d roll=%d yawrate=%d lift=%d\n", qr.pitch, qr.roll, qr.yawrate, qr.lift);
 }

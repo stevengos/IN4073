@@ -13,15 +13,18 @@
 
 #define SET_PITCH       0x1
 #define SET_ROLL        0x2
-#define SET_YAW         0x3
-#define SET_LIFT        0x4
-#define SET_YAWRATE     0x5
+#define SET_LIFT        0x3
+#define SET_YAWRATE     0x4
 
-#define D_PITCH       0x6
-#define D_ROLL        0x7
-#define D_YAW         0x8
-#define D_LIFT        0x9
-#define D_YAWRATE     0xA
+#define D_PITCH         0x5
+#define D_ROLL          0x6
+#define D_LIFT          0x7
+#define D_YAWRATE       0x8
+
+#define SET_SCALE_PITCH 0x9
+#define SET_SCALE_ROLL  0xA
+#define SET_SCALE_YAW   0xB
+#define SET_SCALE_LIFT  0xC
 
 #define ALIVE           0x10
 #define ACK             0x11
@@ -37,14 +40,14 @@
 /* ############ COMMAND ############# */
 
 /* Eligible values when the header is "SET_MODE" */
-#define SAFE_MODE   0x0
-#define PANIC_MODE  0x1
-#define MANUAL_MODE 0x2
-#define CALIBRATION_MODE 0x3
-#define YAW_MODE    0x4
-#define FULL_MODE   0x5
+#define SAFE_MODE           0x0
+#define PANIC_MODE          0x1
+#define MANUAL_MODE         0x2
+#define CALIBRATION_MODE    0x3
+#define YAW_MODE            0x4
+#define FULL_MODE           0x5
 
-/* Eligible values when the header is "D_****" */
+/* Eligible values when the header is "D_****" or "SET_SCALE_****" */
 #define INCREASE 0x1
 #define DECREASE 0x2
 
