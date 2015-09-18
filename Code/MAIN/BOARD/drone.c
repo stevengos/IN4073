@@ -48,9 +48,10 @@ void run_drone()
 
 void safe_mode()
 {
+    short debug = 0;
     X32_LEDS = LED8;
 
-    while(!qr.flag_mode);
+    while(!qr.flag_mode);// X32_DISPLAY = debug++;
 
     X32_LEDS = ALL_OFF;
 }
@@ -77,10 +78,10 @@ void manual_mode()
         ae3 = scaling_factor*( qr.lift  - 2*qr.pitch                    - qr.yawrate ) / 4;
         ae4 = scaling_factor*( qr.lift                  + 2*qr.roll     + qr.yawrate ) / 4;
 
-        ae1 = ae1 <= 0 ? 0 : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
-        ae2 = ae2 <= 0 ? 0 : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
-        ae3 = ae3 <= 0 ? 0 : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
-        ae4 = ae4 <= 0 ? 0 : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
+        ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
+        ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
+        ae3 = ae3 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
+        ae4 = ae4 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
 
         qr.ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
         qr.ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
@@ -89,15 +90,15 @@ void manual_mode()
 
         DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-//        X32_QR_a1 = qr.ae1;
-//        X32_QR_a2 = qr.ae2;
-//        X32_QR_a3 = qr.ae3;
-//        X32_QR_a4 = qr.ae4;
+        X32_QR_A1 = qr.ae1;
+        X32_QR_A2 = qr.ae2;
+        X32_QR_A3 = qr.ae3;
+        X32_QR_A4 = qr.ae4;
 
         ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
-
-        usleep(REFRESH_TIME); //refresh time
     }
+
+    //X32_DISPLAY = debug++;
 
     stop_motors();
 
@@ -139,7 +140,7 @@ void clear_drone()
 
 void stop_motors()
 {
-    X32_LEDS = ALL_ON;
+    X32_LEDS = LED2;
 
     while(qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4)
     {
@@ -147,11 +148,11 @@ void stop_motors()
         qr.ae2 = qr.ae2 - STEP_RPM < 0 ? 0 : qr.ae2 - STEP_RPM;
         qr.ae3 = qr.ae3 - STEP_RPM < 0 ? 0 : qr.ae3 - STEP_RPM;
         qr.ae4 = qr.ae4 - STEP_RPM < 0 ? 0 : qr.ae4 - STEP_RPM;
-
-//        X32_QR_A1 = qr.ae1;
-//        X32_QR_A2 = qr.ae2;
-//        X32_QR_A3 = qr.ae3;
-//        X32_QR_A4 = qr.ae4;
+//
+        X32_QR_A1 = qr.ae1;
+        X32_QR_A2 = qr.ae2;
+        X32_QR_A3 = qr.ae3;
+        X32_QR_A4 = qr.ae4;
 
         usleep(REFRESH_TIME);
     }

@@ -32,7 +32,7 @@ void *is_alive(void* board)
 
         pthread_mutex_unlock( &lock_board );
 
-        sleep(1);//usleep(1000000); //500ms
+        usleep(50000); //50ms
     }
 }
 
@@ -131,17 +131,41 @@ int main()
 
             pthread_mutex_unlock( &lock_board );
 
-            if(counter++>3)
-            {
-                printf("pc> Timeout: ACK not received.\n");
-                break;
-            }
+//            if(counter++>0)
+//            {
+//                printf("pc> Timeout: ACK not received.\n");
+//                break;
+//            }
+            break;
         }
         while( ack_received == ACK_NEGATIVE );
 
         counter = 0;
         printf("\n");
     }
+
+    while( (cboard = getchar_board(board)) )
+        {
+            if( cboard == ACK ) //ack coming
+            {
+                cboard = getchar_board(board); //response: positive or negative or invalid
+
+                getchar_board(board); //ignore crc
+
+                if( cboard == ACK_POSITIVE )
+                    printf("pc> Positive acknowledge received.\n"), ack_received = ACK_POSITIVE;
+                else
+                    if( cboard == ACK_NEGATIVE )
+                        printf("pc> Negative acknowledge received.\n\n"), ack_received = ACK_NEGATIVE;
+                else
+                    if( cboard == ACK_INVALID )
+                        printf("pc> Board signaled invalid message.\n"), ack_received = ACK_INVALID;
+                else
+                    printf("pc> Unexpected message from board.\n");
+            }
+            else
+                printf("%c", cboard);
+        }
 
     printf("End of communication.\n");
 

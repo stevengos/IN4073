@@ -17,7 +17,7 @@
 #define STEP_YAWRATE    10
 
 #define MAX_RPM     0x3ff
-#define MIN_RPM     0x000
+#define MIN_RPM     0x00F
 #define STEP_RPM    0x010
 
 #define MAX_PITCH   200000

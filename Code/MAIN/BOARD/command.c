@@ -186,7 +186,6 @@ void stop()
 
     qr.exit = 1;
     qr.flag_mode = 1;
-    X32_DISPLAY = 0x0000;
 
     printf("board> Machine Stopped\n");
 
