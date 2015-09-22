@@ -62,21 +62,32 @@ void panic_mode()
 {
     X32_LEDS = LED7;
 
-    qr.ae1 = PANIC_RPM;
-    qr.ae2 = PANIC_RPM;
-    qr.ae3 = PANIC_RPM;
-    qr.ae3 = PANIC_RPM;
+    if( qr.ae1 && qr.ae2 && qr.ae3 && qr.ae4 )
 
-    qr.lift    = qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+        qr.ae1 = PANIC_RPM,
+        qr.ae2 = PANIC_RPM,
+        qr.ae3 = PANIC_RPM,
+        qr.ae3 = PANIC_RPM;
 
-    //ZEROS???
-    qr.pitch   =  qr.scale_pitch    *   ( qr.ae1*qr.ae1 - qr.ae3*qr.ae3 );
-    qr.roll    =  qr.scale_roll     *   ( qr.ae4*qr.ae1 - qr.ae2*qr.ae3 );
-    qr.yawrate =  qr.scale_yaw      *   ( -qr.ae1*qr.ae1 + qr.ae2*qr.ae2 - qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+    #ifdef PERIPHERAL_XUFO_A0
 
-    sleep(5000);
+    X32_QR_A1 = qr.ae1;
+    X32_QR_A2 = qr.ae2;
+    X32_QR_A3 = qr.ae3;
+    X32_QR_A4 = qr.ae4;
+
+    #endif // PERIPHERAL_XUFO_A0
+
+    qr.lift = qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+    qr.pitch   =  0;
+    qr.roll    =  0;
+    qr.yawrate =  0;
+
+    catnap(PANIC_TIME);
 
     qr.current_mode = SAFE_MODE;
+    qr.flag_mode = 1;
+    X32_LEDS = ALL_OFF;
 }
 
 void manual_mode()
@@ -189,6 +200,8 @@ void stop_motors()
         X32_QR_A4 = qr.ae4;
 
         #endif // PERIPHERAL_XUFO_A0
+
+        ucatnap(500);
     }
 
     qr.lift = 0;
@@ -208,6 +221,20 @@ void print_drone() //PRINT DRONE STATUS
     printf("scales: pitch=%d roll=%d yawrate=%d lift=%d\n", qr.scale_pitch, qr.scale_roll, qr.scale_yaw, qr.scale_lift);
     printf("ae1=%d ae2=%d ae3=%d ae4=%d\n", qr.ae1, qr.ae2, qr.ae3, qr.ae4);
     printf("pitch=%d roll=%d yawrate=%d lift=%d\n", qr.pitch, qr.roll, qr.yawrate, qr.lift);
+}
+
+void catnap(int ms)
+{
+    int now = X32_CLOCK_MS;
+
+    while( X32_CLOCK_MS < now + ms);
+}
+
+void ucatnap(int us)
+{
+    int now = X32_CLOCK_US;
+
+    while( X32_CLOCK_US < now + us);
 }
 
 void add_log()

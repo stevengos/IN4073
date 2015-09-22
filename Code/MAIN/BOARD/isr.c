@@ -44,7 +44,7 @@ void isr_rs232_rx(void)
             return;
         }
         else
-            usleep(SLEEP_BUFFER_RX);
+            ucatnap(SLEEP_BUFFER_RX);
     }
 
     incoming.command = X32_RS232_DATA; //read second byte (COMMAND)
@@ -57,7 +57,7 @@ void isr_rs232_rx(void)
             return;
         }
         else
-            usleep(SLEEP_BUFFER_RX);
+            ucatnap(SLEEP_BUFFER_RX);
     }
 
     incoming.crc = X32_RS232_DATA; //read third byte (CRC)

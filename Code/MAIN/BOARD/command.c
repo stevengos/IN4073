@@ -114,7 +114,7 @@ void acknowledge(char response)
         if( counter++ > TIMEOUT_BUFFER_TX )
             return;
         else
-            usleep(SLEEP_BUFFER_TX);
+            ucatnap(SLEEP_BUFFER_TX);
     }
 
     X32_RS232_DATA = ACK;               //header
@@ -124,7 +124,7 @@ void acknowledge(char response)
         if( counter++ > TIMEOUT_BUFFER_TX )
             return;
         else
-            usleep(SLEEP_BUFFER_TX);
+            ucatnap(SLEEP_BUFFER_TX);
     }
 
     X32_RS232_DATA = response;          //command
@@ -134,7 +134,7 @@ void acknowledge(char response)
         if( counter++ > TIMEOUT_BUFFER_TX )
             return;
         else
-            usleep(SLEEP_BUFFER_TX);
+            ucatnap(SLEEP_BUFFER_TX);
     }
 
     packet.header = ACK;
@@ -217,33 +217,33 @@ void set_mode(char command)
 void set_scale_pitch(char command)
 {
     if(command == INCREASE)
-        qr.scale_pitch += SCALE_PARAMETER;
+        qr.scale_pitch += STEP_SCALE_PARAMETER;
     else
-        qr.scale_pitch -= SCALE_PARAMETER;
+        qr.scale_pitch -= STEP_SCALE_PARAMETER;
 }
 
 void set_scale_roll(char command)
 {
     if(command == INCREASE)
-        qr.scale_roll += SCALE_PARAMETER;
+        qr.scale_roll += STEP_SCALE_PARAMETER;
     else
-        qr.scale_roll -= SCALE_PARAMETER;
+        qr.scale_roll -= STEP_SCALE_PARAMETER;
 }
 
 void set_scale_yaw(char command)
 {
     if(command == INCREASE)
-        qr.scale_yaw += SCALE_PARAMETER;
+        qr.scale_yaw += STEP_SCALE_PARAMETER;
     else
-        qr.scale_yaw -= SCALE_PARAMETER;
+        qr.scale_yaw -= STEP_SCALE_PARAMETER;
 }
 
 void set_scale_lift(char command)
 {
     if(command == INCREASE)
-        qr.scale_lift += SCALE_PARAMETER;
+        qr.scale_lift += STEP_SCALE_PARAMETER;
     else
-        qr.scale_lift -= SCALE_PARAMETER;
+        qr.scale_lift -= STEP_SCALE_PARAMETER;
 }
 //}
 
@@ -296,7 +296,7 @@ void upload_log()
                 return;
             }
             else
-                usleep(SLEEP_BUFFER_TX);
+                ucatnap(SLEEP_BUFFER_TX);
         }
 
         X32_RS232_DATA = qr.log_buffer[i];

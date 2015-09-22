@@ -22,7 +22,7 @@
 #define MIN_YAWRATE -255
 #define MIN_LIFT    0
 
-#define SCALE_PARAMETER 1000
+#define STEP_SCALE_PARAMETER 1000
 
 #define PANIC_RPM 50
 #define PANIC_TIME 5000
@@ -85,5 +85,7 @@ void yaw_mode(void);
 void full_mode(void);
 
 void stop_motors(void);
+void catnap(int);
+void ucatnap(int);
 
 #endif // DRONE_H
