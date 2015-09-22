@@ -16,9 +16,9 @@ q88 q_subtract(q88 a, q88 b);
 int main(int argc, char *argv[])
 {
 
-  if(argc < 4)
+  if(argc < 3)
  {
-   printf("error usage %s float1    float2     type of operation;a,s,m,d \n", argv[0]);
+   printf("error usage %s float1    float2  ", argv[0]);
    exit(1);
  }
   q88 res;
@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
  float y = atof(argv[2]);
  q88 first = normal2q(x);
  q88 second = normal2q(y);
+ 
+ //here you can define the operation type
  res = q_multiplication(first,second);
  /*if (strcmp(argv[3],'a') == 0){
         res = q_add(first,second);
