@@ -63,6 +63,11 @@ return 1;
 
 q88 normal2q (float x) {   
  int result;
+ 
+ /***********X32Version**************
+ long d = (long) x << Q;
+ result = (int) d
+ */
  float y = pow(2,Q); 
  float d = y*x;
  /*r**Rounding to the closest int near the float value */
@@ -81,6 +86,10 @@ q88 normal2q (float x) {
  and turn it into floating point real value************/
 
  float q2normal(q88 a) {
+ /************X32Version************
+ long x = (long) a >> Q;
+ return x;
+ */
  float y = pow(2,Q);
  float x = a;
  return (x/y);
