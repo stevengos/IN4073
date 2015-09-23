@@ -4,6 +4,7 @@
 
 #include "drone.h"
 #include "../interface/packet.h"
+#include "../interface/log.h"
 
 #include <stdio.h>
 
@@ -62,6 +63,8 @@ void panic_mode()
 {
     X32_LEDS = LED7;
 
+    DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
     if( qr.ae1 && qr.ae2 && qr.ae3 && qr.ae4 )
 
         qr.ae1 = PANIC_RPM,
@@ -78,16 +81,18 @@ void panic_mode()
 
     #endif // PERIPHERAL_XUFO_A0
 
-    qr.lift = qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
-    qr.pitch   =  0;
-    qr.roll    =  0;
-    qr.yawrate =  0;
+    qr.lift_force       = qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+    qr.pitch_momentum   =  0;
+    qr.roll_momentum    =  0;
+    qr.yaw_momentum     =  0;
 
     catnap(PANIC_TIME);
 
     qr.current_mode = SAFE_MODE;
     qr.flag_mode = 1;
     X32_LEDS = ALL_OFF;
+
+    ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 }
 
 void manual_mode()
@@ -102,12 +107,12 @@ void manual_mode()
 
     while(!qr.flag_mode)
     {
-        //X32_DISPLAY = debug++;
+        X32_DISPLAY = debug++;
 
-        ae1 = ( qr.scale_lift*qr.lift  + 2*qr.scale_pitch*qr.pitch                              - qr.scale_yaw*qr.yawrate ) / 4;
-        ae2 = ( qr.scale_lift*qr.lift                               - 2*qr.scale_roll*qr.roll   + qr.scale_yaw*qr.yawrate ) / 4;
-        ae3 = ( qr.scale_lift*qr.lift  - 2*qr.scale_pitch*qr.pitch                              - qr.scale_yaw*qr.yawrate ) / 4;
-        ae4 = ( qr.scale_lift*qr.lift                               + 2*qr.scale_roll*qr.roll   + qr.scale_yaw*qr.yawrate ) / 4;
+        ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+        ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+        ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+        ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
 
         ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
         ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
@@ -140,9 +145,41 @@ void manual_mode()
     X32_LEDS = ALL_OFF;
 }
 
-void calibration_mode(){ X32_LEDS = LED6; while(!qr.flag_mode); X32_LEDS = ALL_OFF; }
+void calibration_mode()
+{
+    X32_LEDS = LED6;
 
-void yaw_mode(){ X32_LEDS = LED5; while(!qr.flag_mode); X32_LEDS = ALL_OFF; }
+    catnap(1);
+
+    DISABLE_INTERRUPT(INTERRUPT_XUFO);
+
+    qr.off_ax = X32_QR_S1;
+    qr.off_ay = X32_QR_S2;
+    qr.off_az = X32_QR_S3;
+    qr.off_p = X32_QR_S4;
+    qr.off_q = X32_QR_S5;
+    qr.off_r = X32_QR_S6;
+
+    ENABLE_INTERRUPT(INTERRUPT_XUFO);
+
+    X32_LEDS = ALL_OFF;
+}
+
+void yaw_mode()
+{
+    short e;
+
+    X32_LEDS = LED5;
+
+    while(!qr.flag_mode)
+    {
+        //e = qr.sr - qr.yawrate;
+
+
+    }
+
+    X32_LEDS = ALL_OFF;
+}
 
 void full_mode(){ X32_LEDS = LED4; while(!qr.flag_mode); X32_LEDS = ALL_OFF; }
 
@@ -153,10 +190,15 @@ void clear_drone()
     qr.ae3 = 0;
     qr.ae4 = 0;
 
-    qr.pitch = 0;
-    qr.roll = 0;
-    qr.yawrate = 0;
-    qr.lift = 0;
+    qr.pitch_momentum = 0;
+    qr.roll_momentum = 0;
+    qr.yaw_momentum = 0;
+    qr.lift_force = 0;
+
+    qr.pitch_ref = 0;
+    qr.roll_ref = 0;
+    qr.yawrate_ref = 0;
+    qr.lift_ref = 0;
 
     qr.scale_pitch = 8240;
     qr.scale_roll = 8240;
@@ -174,6 +216,13 @@ void clear_drone()
     qr.sp = 0;
     qr.sq = 0;
     qr.sr = 0;
+
+    qr.off_ax = 0;
+    qr.off_ay = 0;
+    qr.off_az = 0;
+    qr.off_p = 0;
+    qr.off_q = 0;
+    qr.off_r = 0;
 
     qr.current_mode = SAFE_MODE;
     qr.flag_mode = 0;
@@ -204,10 +253,15 @@ void stop_motors()
         ucatnap(500);
     }
 
-    qr.lift = 0;
-    qr.pitch = 0;
-    qr.roll = 0;
-    qr.yawrate = 0;
+    qr.lift_force = 0;
+    qr.pitch_momentum = 0;
+    qr.roll_momentum = 0;
+    qr.yaw_momentum = 0;
+
+    qr.lift_ref = 0;
+    qr.pitch_ref = 0;
+    qr.roll_ref = 0;
+    qr.yawrate_ref = 0;
 }
 
 void print_drone() //PRINT DRONE STATUS
@@ -220,7 +274,7 @@ void print_drone() //PRINT DRONE STATUS
     printf("exit=%d\n", qr.exit);
     printf("scales: pitch=%d roll=%d yawrate=%d lift=%d\n", qr.scale_pitch, qr.scale_roll, qr.scale_yaw, qr.scale_lift);
     printf("ae1=%d ae2=%d ae3=%d ae4=%d\n", qr.ae1, qr.ae2, qr.ae3, qr.ae4);
-    printf("pitch=%d roll=%d yawrate=%d lift=%d\n", qr.pitch, qr.roll, qr.yawrate, qr.lift);
+    printf("pitch=%d roll=%d yawrate=%d lift=%d\n", qr.pitch_momentum, qr.roll_momentum, qr.yaw_momentum, qr.lift_force);
 }
 
 void catnap(int ms)
@@ -239,6 +293,8 @@ void ucatnap(int us)
 
 void add_log()
 {
+    struct log_s new_log;
+
     if( !qr.log )
         return;
 
@@ -250,9 +306,27 @@ void add_log()
 
     printf("board> Adding Log.\n");
 
-    /* write log into buffer */
-    qr.log_buffer[qr.log_size] = 'H';
+    DISABLE_INTERRUPT(INTERRUPT_GLOBAL); //SAVE LOG ATOMICALLY
+
+    new_log.id = qr.log_size;
+
+    #ifdef X32_XUFO_TIMESTAMP
+    new_log.timestamp = X32_XUFO_TIMESTAMP;
+    #else
+    new_log.timestamp = X32_CLOCK_MS;
+    #endif
+
+    new_log.ae1 = qr.ae1;
+    new_log.ae2 = qr.ae2;
+    new_log.ae3 = qr.ae3;
+    new_log.ae4 = qr.ae4;
+
+    ENABLE_INTERRUPT(INTERRUPT_GLOBAL); //END LOG
+
+    qr.log_buffer[qr.log_size] = new_log; // write log into buffer
 
     qr.log_size++;
+
+    printf("board> Log added %d %d %d %d %d %d.\n", new_log.id, new_log.timestamp, new_log.ae1, new_log.ae2, new_log.ae3, new_log.ae4);
 }
 

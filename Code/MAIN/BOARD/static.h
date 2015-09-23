@@ -18,11 +18,17 @@
 #define X32_QR_A3 		peripherals[PERIPHERAL_XUFO_A2]
 #define X32_QR_A4 		peripherals[PERIPHERAL_XUFO_A3]
 
+#define X32_QR_S1 		peripherals[PERIPHERAL_XUFO_S0]
+#define X32_QR_S2 		peripherals[PERIPHERAL_XUFO_S1]
+#define X32_QR_S3 		peripherals[PERIPHERAL_XUFO_S2]
+#define X32_QR_S4 		peripherals[PERIPHERAL_XUFO_S3]
+#define X32_QR_S5 		peripherals[PERIPHERAL_XUFO_S4]
+#define X32_QR_S6 		peripherals[PERIPHERAL_XUFO_S5]
+#define X32_QR_TIME 	peripherals[PERIPHERAL_XUFO_TIMESTAMP]
+
 #define X32_RS232_DATA	    peripherals[PERIPHERAL_PRIMARY_DATA]
 #define X32_RS232_STATUS	peripherals[PERIPHERAL_PRIMARY_STATUS]
 #define X32_RS232_WRITE     (X32_RS232_STATUS & 0x01)
 #define X32_RS232_READ      (X32_RS232_STATUS & 0x02)
-
-#define LOG_BUFFER_SIZE     179200 //700kB = 700*1024 B, NUMBER OF INTEGERS = 700*1024/4
 
 #endif // STATIC_H

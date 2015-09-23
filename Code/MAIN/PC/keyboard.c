@@ -102,6 +102,18 @@ packet_t encapsulate(char command)
             outgoing.header     = SET_MODE;
             outgoing.command    = FULL_MODE;
             break;
+        case SEVEN:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_START;
+            break;
+        case EIGHT:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_STOP;
+            break;
+        case NINE:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_GET;
+            break;
 
         /* MANUAL CONTROL */
         case A:

@@ -9,10 +9,12 @@
 
 #include "../interface/packet.h"
 #include "../interface/hamming.h"
+#include "../interface/log.h"
 #include "board.h"
 #include "keyboard.h"
 
 pthread_mutex_t lock_board;
+
 
 void *is_alive(void* board)
 {
@@ -34,6 +36,53 @@ void *is_alive(void* board)
 
         usleep(50000); //50ms
     }
+}
+
+void loggamelo(int board, packet_t p)
+{
+    printf("pc> Sending packet...\n");
+
+    pthread_mutex_lock( &lock_board );
+
+    send_packet(board, p);
+
+    pthread_mutex_unlock( &lock_board );
+
+    sleep(1); //give time to board to write output 1s
+
+    int incoming_int;
+    short incoming_short;
+
+    int status = 1;
+
+    while( status = getint_board(board, &incoming_int) )
+    {
+        /*************************************************/
+        printf("\t#%d ", incoming_int);
+
+        /*************************************************/
+        status = getint_board(board, &incoming_int);
+
+        if( !status )
+            break;
+
+        printf("%d ", incoming_int);
+
+        /*************************************************/
+        while(1)
+        {
+            status = getshort_board(board, &incoming_short);
+
+            if(incoming_short == LOG_END)
+                break;
+
+            printf("%d ", incoming_short);
+        }
+
+        printf("\n");
+    }
+
+    printf("\npc>Log retrival is over.\n\n");
 }
 
 int main()
@@ -92,6 +141,12 @@ int main()
 
         p = encapsulate( ctty );
 
+        if( p.command == LOG_GET )
+        {
+            loggamelo(board, p);
+            continue;
+        }
+
         do
         {
             printf("pc> Sending packet...\n");
@@ -131,12 +186,6 @@ int main()
 
             pthread_mutex_unlock( &lock_board );
 
-//            if(counter++>0)
-//            {
-//                printf("pc> Timeout: ACK not received.\n");
-//                break;
-//            }
-            break;
         }
         while( ack_received == ACK_NEGATIVE );
 

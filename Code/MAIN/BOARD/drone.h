@@ -7,6 +7,7 @@
 
 #include "x32.h"
 #include "static.h"
+#include "../interface/log.h"
 
 #define MAX_RPM     0x3ff
 #define MIN_RPM     0x00F
@@ -27,6 +28,8 @@
 #define PANIC_RPM 50
 #define PANIC_TIME 5000
 
+#define LOG_BUFFER_SIZE     716800 //700kB = 700*1024 B, NUMBER OF INTEGERS = 700*1024/4
+
 struct drone
 {
     //setpoints for motor
@@ -35,13 +38,19 @@ struct drone
     short ae3;
     short ae4;
 
-    //setpoints for configuration
-    short pitch;
-    short roll;
-    short yawrate;
-    short lift;
+    //openloop control input
+    short pitch_momentum;
+    short roll_momentum;
+    short yaw_momentum;
+    short lift_force;
 
-    //parameters
+    //references for control mode
+    short pitch_ref;
+    short roll_ref;
+    short yawrate_ref;
+    short lift_ref;
+
+    //parameters Manual Mode
     short scale_pitch;
     short scale_roll;
     short scale_yaw;
@@ -52,13 +61,24 @@ struct drone
     short step_yawrate;
     short step_lift;
 
+    //Parameter Yaw Mode
+    short controller_yaw;
+
     //sensed data
-    char sax;
-    char say;
-    char saz;
-    char sp;
-    char sq;
-    char sr;
+    short sax;
+    short say;
+    short saz;
+    short sp;
+    short sq;
+    short sr;
+
+    //sensor offsets
+    short off_ax;
+    short off_ay;
+    short off_az;
+    short off_p;
+    short off_q;
+    short off_r;
 
     //flags
     char current_mode;
@@ -68,7 +88,7 @@ struct drone
     char log;
 
     //logs buffer
-    int log_buffer[LOG_BUFFER_SIZE];
+    struct log_s log_buffer[LOG_BUFFER_SIZE/LOG_SIZE];
     int log_size;
 };
 

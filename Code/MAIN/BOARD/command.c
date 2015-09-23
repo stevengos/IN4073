@@ -95,7 +95,10 @@ void perform_command(char header, char command)
                     acknowledge(ACK_INVALID);
     };
 
-    print_drone();
+    //print_drone();
+
+    if(qr.log)
+        add_log();
 }
 
 void acknowledge(char response)
@@ -211,7 +214,6 @@ void set_mode(char command)
     acknowledge(ACK_POSITIVE);
 }
 
-
 /* Setting parameters */
 //{
 void set_scale_pitch(char command)
@@ -266,26 +268,66 @@ void set_log(char command)
                 acknowledge(ACK_INVALID);
                 return;
     }
+}
 
-    printf("board> Log %s.\n", qr.log ? "on" : "off");
+void send_short(short value)
+{
+    unsigned char c1, c2;
+
+    c1 = value;
+    c2 = (value >> 8);
+
+    while(!X32_RS232_WRITE);
+    X32_RS232_DATA = c1;
+
+    while(!X32_RS232_WRITE);
+    X32_RS232_DATA = c2;
+}
+
+void send_int(int value)
+{
+    unsigned char c1, c2, c3, c4;
+
+    c1 = value;
+    c2 = (value >> 8);
+    c3 = (value >> 16);
+    c4 = (value >> 24);
+
+    while(!X32_RS232_WRITE);
+    X32_RS232_DATA = c1;
+
+    while(!X32_RS232_WRITE);
+    X32_RS232_DATA = c2;
+
+    while(!X32_RS232_WRITE);
+    X32_RS232_DATA = c3;
+
+    while(!X32_RS232_WRITE);
+    X32_RS232_DATA = c4;
 }
 
 void upload_log()
 {
-    char counter_timeout = 0;
-    char i = 0;
+    int counter_timeout = 0;
+    int i = 0;
 
-    printf("board> uploading log.\n");
+    unsigned char cl, cr;
 
     if( qr.current_mode != SAFE_MODE )
     {
-        printf("board> Command discarded: you can upload logs only in SAFE_MODE.\n");
         acknowledge(ACK_INVALID);
         return;
     }
 
     while( i < qr.log_size )
     {
+        struct log_s outgoing = qr.log_buffer[i];
+        short* ptr_head = &outgoing.ae1; //************* FIRST STRUCT ELEMENT
+        short* ptr_tail = &outgoing.ae4; //************* LAST STRUCT ELEMENT
+
+        X32_DISPLAY = outgoing.id;
+
+        /* Sending log id */
         counter_timeout = 0;
 
         while( !X32_RS232_WRITE )
@@ -299,7 +341,46 @@ void upload_log()
                 ucatnap(SLEEP_BUFFER_TX);
         }
 
-        X32_RS232_DATA = qr.log_buffer[i];
+        send_int(outgoing.id);
+
+        /* Sending timestamp */
+        counter_timeout = 0;
+
+        while( !X32_RS232_WRITE )
+        {
+            if( counter_timeout++ > TIMEOUT_BUFFER_TX )
+            {
+                acknowledge(ACK_NEGATIVE);
+                return;
+            }
+            else
+                ucatnap(SLEEP_BUFFER_TX);
+        }
+
+        send_int( outgoing.timestamp );
+
+        /* Sending log data */
+        while( ptr_head != ptr_tail )
+        {
+            counter_timeout = 0;
+
+            while( !X32_RS232_WRITE )
+            {
+                if( counter_timeout++ > TIMEOUT_BUFFER_TX )
+                {
+                    acknowledge(ACK_NEGATIVE);
+                    return;
+                }
+                else
+                    ucatnap(SLEEP_BUFFER_TX);
+            }
+
+            send_short( *ptr_head );
+
+            ptr_head++;
+        }
+
+        send_short(LOG_END);
 
         i++;
     }
@@ -317,7 +398,11 @@ void set_pitch(char command)
         return;
     }
 
-    qr.pitch = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
+    if( qr.current_mode == MANUAL_MODE )
+        qr.pitch_momentum = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
+
+    if( qr.current_mode == FULL_MODE )
+        qr.pitch_ref = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
 }
 
 void set_roll(char command)
@@ -328,7 +413,11 @@ void set_roll(char command)
         return;
     }
 
-    qr.roll = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
+    if( qr.current_mode == MANUAL_MODE )
+        qr.roll_momentum = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
+
+    if( qr.current_mode == FULL_MODE )
+        qr.roll_ref = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
 }
 
 void set_lift(char command)
@@ -356,7 +445,6 @@ void set_yawrate(char command)
 
 /* KEYBOARD SESSION */
 //{
-
 
 void d_pitch(char command)
 {
