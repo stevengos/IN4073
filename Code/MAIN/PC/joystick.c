@@ -61,7 +61,8 @@ void    mon_delay_ms(unsigned int ms)
 }
 
 void set_throttle_command(char header, int throttle, int divisor){
-	int throttle_on_scale = 0;
+	int throttle_on_scale = 0, multiplier;
+	char send_value;
 	//throttle_division = axis[3]/JS_STEP_DIVISION;
 	throttle_on_scale = round_div(throttle,divisor);
 
@@ -69,9 +70,21 @@ void set_throttle_command(char header, int throttle, int divisor){
 		throttle_on_scale = 1000;
 	}
 	if(throttle_on_scale < -1000){
-		throttle_on_scale = -1000;	
+		throttle_on_scale = -1000;
 	}
-	printf(" %c = %d | ", header, throttle_on_scale);
+
+	//scale int to char
+	if(divisor == JS_SET_DIVISION_SMALL){
+		multiplier = 127;
+	}
+	else{
+		multiplier = 255;
+	}
+
+	send_value = (float)throttle_on_scale/1000*multiplier;
+	
+	//send the packet
+	printf(" %c = %d | ", header, send_value);
 
 	push_packet_t(header, throttle_on_scale);
 }
