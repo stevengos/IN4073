@@ -105,6 +105,13 @@ packet_t encapsulate(char command)
 
         /* MANUAL CONTROL */
         case A:
+	    outgoing.header     = D_LIFT;
+            outgoing.command    = INCREASE;
+            break;
+        case Z:
+            outgoing.header     = D_LIFT;
+            outgoing.command    = DECREASE;
+            break;
         
         case Q:
             outgoing.header     = D_YAWRATE;
@@ -163,10 +170,4 @@ packet_t encapsulate(char command)
     compute_hamming(&outgoing);
 
     return outgoing;
-}    outgoing.header     = D_LIFT;
-            outgoing.command    = INCREASE;
-            break;
-        case Z:
-            outgoing.header     = D_LIFT;
-            outgoing.command    = DECREASE;
-            break;
+}
