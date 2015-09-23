@@ -34,7 +34,7 @@ inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* n
     tcsetattr(0, TCSANOW, newTerminalSettings);
 
 //system ("/bin/stty raw");
-    //setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
+    setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
 inline void close_keyboard(struct termios* oldTerminalSettings)
@@ -44,7 +44,8 @@ inline void close_keyboard(struct termios* oldTerminalSettings)
 
 char getchar_keyboard()
 {
-	char ch = 1;
+	char ch = 0;
+	int c;
 
     //char ch = getchar();
     if(kbhit()){

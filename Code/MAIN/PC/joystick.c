@@ -32,7 +32,7 @@ int js_operation_mode = 0;
 
 /* Round division with int
  */
-unsigned int round_div(unsigned int dividend, unsigned int divisor)
+int round_div(int dividend, int divisor)
 {
     return (dividend + (divisor / 2)) / divisor;
 }
@@ -60,7 +60,23 @@ void    mon_delay_ms(unsigned int ms)
         assert(nanosleep(&req,&rem) == 0);
 }
 
-int set_js_command(int fd, packet_t* p){
+void set_throttle_command(char header, int throttle, int divisor){
+	int throttle_on_scale = 0;
+	//throttle_division = axis[3]/JS_STEP_DIVISION;
+	throttle_on_scale = round_div(throttle,divisor);
+
+	if(throttle_on_scale > 1000){
+		throttle_on_scale = 1000;
+	}
+	if(throttle_on_scale < -1000){
+		throttle_on_scale = -1000;	
+	}
+	printf(" %c = %d | ", header, throttle_on_scale);
+
+	push_packet_t(header, throttle_on_scale);
+}
+
+int set_js_command(int fd){
 	struct js_event js;
 	unsigned int	t, i, throttle_total = 0, throttle_on_scale = 0, command_set = 0;
 
@@ -91,7 +107,7 @@ int set_js_command(int fd, packet_t* p){
 		exit (1);
 	}
 
-	printf("\n");
+	/*printf("\n");
 	printf("%5d   ",t);
 	for (i = 0; i < 6; i++) {
 		printf("%6d ",axis[i]);
@@ -100,11 +116,16 @@ int set_js_command(int fd, packet_t* p){
 	for (i = 0; i < 12; i++) {
 		printf("%d ",button[i]);
 	}
-	if (button[0])
-		return 1;
+	
 
 
 	printf(" |  ");
+	*/
+	
+	//exit program	
+	if (button[0]){
+		return 1;
+	}
 
 	//when all axis are 0, then it is safe to increase the init_2_op counter
 	if(js_init_mode && axis[0] == 0 && axis[1] == 0 && axis[2] == 0){
@@ -130,65 +151,38 @@ int set_js_command(int fd, packet_t* p){
 	//---
 
 	//roll
-	/*if(axis[0] < -JS_MIN_VALUE){
-		printf("left  ");
-	}
-	else if(axis[0] > JS_MIN_VALUE){
-		printf("right ");
-	}
-	else{
-		printf("      ");
-	}
+	if(axis[0] < -JS_MIN_VALUE || axis[0] > JS_MIN_VALUE){
+		set_throttle_command(SET_ROLL, axis[0], JS_STEP_DIVISION_SMALL);
 
-	//pitch
-	if(axis[1] < -JS_MIN_VALUE){
-		printf("up   ");
-	}
-	else if(axis[1] > JS_MIN_VALUE){
-		printf("down ");
-	}
-	else{
-		printf("     ");
-	}
-
-	//yaw
-	if(axis[2] < -JS_MIN_VALUE){
-		printf("y_left  ");
-	}
-	else if(axis[2] > JS_MIN_VALUE){
-		printf("y_right ");
-	}
-	else{
-		printf("      ");
-	}*/
-
-	//throttle
-	throttle_total = 65534 - (axis[3] + 32767);
-	
-	//printf("lift: %d ", throttle_total);
-
-	if(throttle_total > JS_MIN_VALUE){
-		//throttle_division = axis[3]/JS_STEP_DIVISION;
-		throttle_on_scale = round_div(throttle_total,JS_STEP_DIVISION);
-
-		if(throttle_on_scale > 1000){
-			throttle_on_scale = 1000;
-		}
-		printf("lift: %d ", throttle_on_scale);
-
-		p->header  = SET_LIFT;
-		p->command = throttle_on_scale;
-
-		//set flag that command is not empty
 		command_set = 1;
 	}
 
-	if(command_set == 0){
-		p->header  = EMPTY;
-		p->command = EMPTY;
+	//pitch
+	if(axis[1] < -JS_MIN_VALUE || axis[1] > JS_MIN_VALUE){
+		set_throttle_command(SET_PITCH, axis[1], JS_STEP_DIVISION_SMALL);
+
+		command_set = 1;
 	}
 
-	compute_hamming(p);
+	//yaw
+	if(axis[2] < -JS_MIN_VALUE || axis[2] > JS_MIN_VALUE){
+		set_throttle_command(SET_YAWRATE, axis[1], JS_STEP_DIVISION_SMALL);
+
+		command_set = 1;
+	}
+
+	//throttle
+	throttle_total = 65534 - (axis[3] + 32767);
+
+	if(throttle_total > JS_MIN_VALUE){
+		set_throttle_command(SET_LIFT, throttle_total, JS_STEP_DIVISION_BIG);
+
+		command_set = 1;		
+	}
+
+	if(command_set == 0){
+		push_packet_t(EMPTY, EMPTY);
+	}	
 
 	return 0;
 }

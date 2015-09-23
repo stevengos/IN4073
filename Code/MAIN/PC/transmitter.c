@@ -14,6 +14,24 @@
 #include "joystick.h"
 
 pthread_mutex_t lock_board;
+packet_t p_arr[10];
+int packet_counter = 0;
+
+void push_packet_t(char header, char command){
+	packet_t p;
+
+	p.header = header;
+	p.command = command;
+	compute_hamming(&p);
+
+	p_arr[packet_counter++] = p;
+}
+
+void empty_packet_t(){
+	int i = 0;
+
+	packet_counter = 0;
+}
 
 void *is_alive(void* board)
 {
@@ -53,7 +71,7 @@ int main()
     char counter = 0;
 
     pthread_t polling;
-    int status;
+    int status, i = 0;
 
 //---- open joystick
 	int 		fd, js_exit = 0;
@@ -71,7 +89,7 @@ int main()
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 
     printf("TERMINAL\n\n");
-/*DEBUG
+
     printf("Trying to connect to the board...");
 
     board = open_board(&oldBoardSettings, &boardSettings);
@@ -93,28 +111,30 @@ int main()
         printf("pc> Error while creating polling thread. Session Aborted.\n");
         ctty = ESC;
     }
-*/
+
     while(js_exit != 1 && ctty != ESC)
     {
         //printf("user> ");
 
-        packet_t p;
+       
 
 //---- read JS command
-	js_exit = set_js_command(fd, &p);
+	js_exit = set_js_command(fd);
 	//continue; //DEBUG
 //----
 
 	//if(p.header == EMPTY){
 		//printf("into keyboard \n");
 		ctty = getchar_keyboard();
-
+		
 		printf("pc> Command received: %d.\n", ctty);
 
-		//DEBUG p = encapsulate( ctty );
+		p_arr[packet_counter] = encapsulate( ctty );
+		packet_counter++;
 	//}
 
-        /* DEBUG do
+	for(i = 0; i < packet_counter; i++){
+        do
         {
             printf("pc> Sending packet...\n");
 
@@ -159,16 +179,17 @@ int main()
                 break;
             }
         }
-        while( ack_received == ACK_NEGATIVE );*/
-
+        while( ack_received == ACK_NEGATIVE );
+}
+	empty_packet_t();
         counter = 0;
         printf("\n");
     }
 
     printf("End of communication.\n");
 
-    //close_keyboard(&oldKeyboardSettings);
-    ////close_board(board, &oldBoardSettings);
+    close_keyboard(&oldKeyboardSettings);
+    close_board(board, &oldBoardSettings);
 
     return 0;
 }

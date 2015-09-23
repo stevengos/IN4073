@@ -132,7 +132,8 @@ struct JS_DATA_SAVE_TYPE {
 #define JS_DEV	"/dev/input/js0"
 
 #define JS_MIN_VALUE 8500
-#define JS_STEP_DIVISION 64
+#define JS_STEP_DIVISION_SMALL 32
+#define JS_STEP_DIVISION_BIG 64
 #define JS_OPERATION_MODE_THRESHOLD 10
 
 #endif /* _LINUX_JOYSTICK_H */
