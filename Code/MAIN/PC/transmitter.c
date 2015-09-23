@@ -134,6 +134,7 @@ int main()
 	//}
 
 	for(i = 0; i < packet_counter; i++){
+	packet_t p = p_arr[i];
         do
         {
             printf("pc> Sending packet...\n");
@@ -144,7 +145,8 @@ int main()
 
             pthread_mutex_unlock( &lock_board );
 
-            sleep(1); //give time to board to write output 1s
+            //sleep(1); //give time to board to write output 1s
+	    mon_delay_ms(4);
 
             pthread_mutex_lock( &lock_board );
 

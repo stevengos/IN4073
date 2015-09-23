@@ -51,7 +51,7 @@ void *is_alive(void* board)
 
         pthread_mutex_unlock( &lock_board );
 
-        sleep(1);//usleep(1000000); //500ms
+        usleep(50000); //50ms
     }
 }
 
@@ -89,7 +89,7 @@ int main()
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 
     printf("TERMINAL\n\n");
-/*DEBUG
+
     printf("Trying to connect to the board...");
 
     board = open_board(&oldBoardSettings, &boardSettings);
@@ -111,7 +111,7 @@ int main()
         printf("pc> Error while creating polling thread. Session Aborted.\n");
         ctty = ESC;
     }
-*/
+
     while(js_exit != 1 && ctty != ESC)
     {
         //printf("user> ");
@@ -134,6 +134,7 @@ int main()
 	//}
 
 	for(i = 0; i < packet_counter; i++){
+	packet_t p = p_arr[i];
         do
         {
             printf("pc> Sending packet...\n");
@@ -144,7 +145,8 @@ int main()
 
             pthread_mutex_unlock( &lock_board );
 
-            sleep(1); //give time to board to write output 1s
+            //sleep(1); //give time to board to write output 1s
+		mon_delay_ms(4);
 
             pthread_mutex_lock( &lock_board );
 
@@ -173,11 +175,12 @@ int main()
 
             pthread_mutex_unlock( &lock_board );
 
-            if(counter++>3)
-            {
-                printf("pc> Timeout: ACK not received.\n");
-                break;
-            }
+//            if(counter++>0)
+//            {
+//                printf("pc> Timeout: ACK not received.\n");
+//                break;
+//            }
+            break;
         }
         while( ack_received == ACK_NEGATIVE );
 }
@@ -186,10 +189,33 @@ int main()
         printf("\n");
     }
 
+    while( (cboard = getchar_board(board)) )
+        {
+            if( cboard == ACK ) //ack coming
+            {
+                cboard = getchar_board(board); //response: positive or negative or invalid
+
+                getchar_board(board); //ignore crc
+
+                if( cboard == ACK_POSITIVE )
+                    printf("pc> Positive acknowledge received.\n"), ack_received = ACK_POSITIVE;
+                else
+                    if( cboard == ACK_NEGATIVE )
+                        printf("pc> Negative acknowledge received.\n\n"), ack_received = ACK_NEGATIVE;
+                else
+                    if( cboard == ACK_INVALID )
+                        printf("pc> Board signaled invalid message.\n"), ack_received = ACK_INVALID;
+                else
+                    printf("pc> Unexpected message from board.\n");
+            }
+            else
+                printf("%c", cboard);
+        }
+
     printf("End of communication.\n");
 
     close_keyboard(&oldKeyboardSettings);
-    ////close_board(board, &oldBoardSettings);
+    close_board(board, &oldBoardSettings);
 
     return 0;
 }
