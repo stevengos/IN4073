@@ -17,6 +17,12 @@ void stop();
 void set_log(char);
 void upload_log();
 
+//parameters setting
+void set_scale_pitch(char);
+void set_scale_roll(char);
+void set_scale_yaw(char);
+void set_scale_lift(char);
+
 // interface used by joystick
 void set_pitch(char);
 void set_roll(char);

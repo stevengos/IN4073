@@ -30,8 +30,9 @@ int main()
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
     //reset output
-    X32_LEDS = 0x0000;
-    //X32_DISPLAY = 0x0000;
+//    X32_LEDS = 0x0000;
+//    X32_DISPLAY = 0x0000;
+
 
     //reset drone properties
     clear_drone();
@@ -41,7 +42,8 @@ int main()
     run_drone();
 
     //X32_DISPLAY = 0xC1A0;
-    X32_LEDS = 0x0;
+
+    //X32_LEDS = ALL_ON;
 
     return 0;
 }

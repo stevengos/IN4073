@@ -8,27 +8,21 @@
 #include "x32.h"
 #include "static.h"
 
-#define REFRESH_TIME 10
-
-#define STEP_PITCH      10
-#define STEP_ROLL       10
-#define STEP_YAW        10
-#define STEP_LIFT       10
-#define STEP_YAWRATE    10
-
 #define MAX_RPM     0x3ff
-#define MIN_RPM     0x000
+#define MIN_RPM     0x00F
 #define STEP_RPM    0x010
 
-#define MAX_PITCH   200000
-#define MAX_ROLL    200000
-#define MAX_YAWRATE 200000
-#define MAX_LIFT    200000
+#define MAX_PITCH   255
+#define MAX_ROLL    255
+#define MAX_YAWRATE 255
+#define MAX_LIFT    255
 
-#define MIN_PITCH   -200000
-#define MIN_ROLL    -200000
-#define MIN_YAWRATE -200000
+#define MIN_PITCH   -255
+#define MIN_ROLL    -255
+#define MIN_YAWRATE -255
 #define MIN_LIFT    0
+
+#define STEP_SCALE_PARAMETER 1000
 
 #define PANIC_RPM 50
 #define PANIC_TIME 5000
@@ -46,6 +40,17 @@ struct drone
     short roll;
     short yawrate;
     short lift;
+
+    //parameters
+    short scale_pitch;
+    short scale_roll;
+    short scale_yaw;
+    short scale_lift;
+
+    short step_pitch;
+    short step_roll;
+    short step_yawrate;
+    short step_lift;
 
     //sensed data
     char sax;
@@ -80,5 +85,7 @@ void yaw_mode(void);
 void full_mode(void);
 
 void stop_motors(void);
+void catnap(int);
+void ucatnap(int);
 
 #endif // DRONE_H

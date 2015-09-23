@@ -27,12 +27,10 @@ void isr_rs232_rx(void)
 
     qr.link_down = 0;
 
-    DISABLE_INTERRUPT( INTERRUPT_PRIMARY_RX );
+    //X32_DISPLAY = debug++;
 
     if( !X32_RS232_READ )
     {
-        printf("board> Interrupt from RS232 arrived, but buffer was empty.\n");
-        ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
         return;
     }
 
@@ -42,13 +40,11 @@ void isr_rs232_rx(void)
     {
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
-            printf("board> Packet incomplete.\n");
-            ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
             acknowledge(ACK_NEGATIVE);
             return;
         }
         else
-            usleep(SLEEP_BUFFER_RX);
+            ucatnap(SLEEP_BUFFER_RX);
     }
 
     incoming.command = X32_RS232_DATA; //read second byte (COMMAND)
@@ -57,13 +53,11 @@ void isr_rs232_rx(void)
     {
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
-            printf("board> Waiting for checksum...\n");
-            ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
             acknowledge(ACK_NEGATIVE);
             return;
         }
         else
-            usleep(SLEEP_BUFFER_RX);
+            ucatnap(SLEEP_BUFFER_RX);
     }
 
     incoming.crc = X32_RS232_DATA; //read third byte (CRC)
@@ -72,10 +66,6 @@ void isr_rs232_rx(void)
         perform_command(incoming.header, incoming.command);
     else
         acknowledge(ACK_NEGATIVE);
-
-    //X32_DISPLAY = debug++;
-
-    ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 }
 
 
@@ -88,7 +78,7 @@ void isr_timer(void)
         stop_motors();
         qr.exit = 1;
         qr.flag_mode = 1;
-        //X32_DISPLAY = 0x0FF;
+        X32_LEDS = LED1;
     }
 
     qr.link_down = 1;
