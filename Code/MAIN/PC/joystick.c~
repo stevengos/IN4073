@@ -86,7 +86,7 @@ void set_throttle_command(char header, int throttle, int divisor){
 	//send the packet
 	printf(" %c = %d | ", header, send_value);
 
-	push_packet_t(header, throttle_on_scale);
+	push_packet_t(header, send_value);
 }
 
 int set_js_command(int fd){
@@ -168,6 +168,10 @@ int set_js_command(int fd){
 		set_throttle_command(SET_ROLL, axis[0], JS_STEP_DIVISION_SMALL);
 
 		command_set = 1;
+	}else{
+		set_throttle_command(SET_ROLL, axis[0], 0);
+
+		command_set = 1;
 	}
 
 	//pitch
@@ -175,11 +179,19 @@ int set_js_command(int fd){
 		set_throttle_command(SET_PITCH, axis[1], JS_STEP_DIVISION_SMALL);
 
 		command_set = 1;
+	}else{
+		set_throttle_command(SET_PITCH, axis[1], 0);
+
+		command_set = 1;
 	}
 
 	//yaw
 	if(axis[2] < -JS_MIN_VALUE || axis[2] > JS_MIN_VALUE){
 		set_throttle_command(SET_YAWRATE, axis[1], JS_STEP_DIVISION_SMALL);
+
+		command_set = 1;
+	}else{
+		set_throttle_command(SET_YAWRATE, axis[1], 0);
 
 		command_set = 1;
 	}
@@ -191,6 +203,10 @@ int set_js_command(int fd){
 		set_throttle_command(SET_LIFT, throttle_total, JS_STEP_DIVISION_BIG);
 
 		command_set = 1;		
+	}else{
+		set_throttle_command(SET_ROLL, axis[0], 0);
+
+		command_set = 1;
 	}
 
 	if(command_set == 0){

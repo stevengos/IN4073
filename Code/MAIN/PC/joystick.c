@@ -168,18 +168,30 @@ int set_js_command(int fd){
 		set_throttle_command(SET_ROLL, axis[0], JS_STEP_DIVISION_SMALL);
 
 		command_set = 1;
+	}else{
+		set_throttle_command(SET_ROLL, 0, JS_STEP_DIVISION_SMALL);
+
+		command_set = 1;
 	}
 
 	//pitch
 	if(axis[1] < -JS_MIN_VALUE || axis[1] > JS_MIN_VALUE){
-		set_throttle_command(SET_PITCH, axis[1], JS_STEP_DIVISION_SMALL);
+		set_throttle_command(SET_PITCH, 0, JS_STEP_DIVISION_SMALL);
+
+		command_set = 1;
+	}else{
+		set_throttle_command(SET_PITCH, 0, JS_STEP_DIVISION_SMALL);
 
 		command_set = 1;
 	}
 
 	//yaw
 	if(axis[2] < -JS_MIN_VALUE || axis[2] > JS_MIN_VALUE){
-		set_throttle_command(SET_YAWRATE, axis[1], JS_STEP_DIVISION_SMALL);
+		set_throttle_command(SET_YAWRATE, 0, JS_STEP_DIVISION_SMALL);
+
+		command_set = 1;
+	}else{
+		set_throttle_command(SET_YAWRATE, 0, JS_STEP_DIVISION_SMALL);
 
 		command_set = 1;
 	}
@@ -191,6 +203,10 @@ int set_js_command(int fd){
 		set_throttle_command(SET_LIFT, throttle_total, JS_STEP_DIVISION_BIG);
 
 		command_set = 1;		
+	}else{
+		set_throttle_command(SET_LIFT, 0, JS_STEP_DIVISION_BIG);
+
+		command_set = 1;
 	}
 
 	if(command_set == 0){
