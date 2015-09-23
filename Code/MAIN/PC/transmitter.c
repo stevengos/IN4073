@@ -71,7 +71,7 @@ int main()
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 
     printf("TERMINAL\n\n");
-
+/*DEBUG
     printf("Trying to connect to the board...");
 
     board = open_board(&oldBoardSettings, &boardSettings);
@@ -93,8 +93,8 @@ int main()
         printf("pc> Error while creating polling thread. Session Aborted.\n");
         ctty = ESC;
     }
-
-    while(js_exit != 1) //ctty != ESC)
+*/
+    while(js_exit != 1 && ctty != ESC)
     {
         //printf("user> ");
 
@@ -102,18 +102,19 @@ int main()
 
 //---- read JS command
 	js_exit = set_js_command(fd, &p);
-	//continue;
+	//continue; //DEBUG
 //----
 
-	if(p.header == EMPTY){
+	//if(p.header == EMPTY){
+		//printf("into keyboard \n");
 		ctty = getchar_keyboard();
 
 		printf("pc> Command received: %d.\n", ctty);
 
-		p = encapsulate( ctty );
-	}
+		//DEBUG p = encapsulate( ctty );
+	//}
 
-        do
+        /* DEBUG do
         {
             printf("pc> Sending packet...\n");
 
@@ -158,7 +159,7 @@ int main()
                 break;
             }
         }
-        while( ack_received == ACK_NEGATIVE );
+        while( ack_received == ACK_NEGATIVE );*/
 
         counter = 0;
         printf("\n");

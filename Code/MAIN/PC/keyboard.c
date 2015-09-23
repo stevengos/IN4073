@@ -2,8 +2,26 @@
 @author Gianluca Savaia
 */
 
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/select.h>
+#include <termios.h>
+
 #include "keyboard.h"
 #include "../interface/hamming.h"
+
+/* from http://stackoverflow.com/questions/448944/c-non-blocking-keyboard-input
+ * check if keyboard was hit
+ */
+int kbhit()
+{
+    struct timeval tv = { 0L, 0L };
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(0, &fds);
+    return select(1, &fds, NULL, NULL, &tv);
+}
 
 inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTerminalSettings)
 {
@@ -14,6 +32,9 @@ inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* n
     newTerminalSettings->c_lflag &= (~ICANON & ~ECHO); //dont wait for enter, dont print to terminal
 
     tcsetattr(0, TCSANOW, newTerminalSettings);
+
+//system ("/bin/stty raw");
+    //setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
 inline void close_keyboard(struct termios* oldTerminalSettings)
@@ -23,7 +44,12 @@ inline void close_keyboard(struct termios* oldTerminalSettings)
 
 char getchar_keyboard()
 {
-    char ch = getchar();
+	char ch = 1;
+
+    //char ch = getchar();
+    if(kbhit()){
+	ch = getchar();
+    }
 
     printf("%d ", ch);
 

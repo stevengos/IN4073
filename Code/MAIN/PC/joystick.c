@@ -24,6 +24,12 @@
 int	axis[6];
 int	button[12];
 
+/* current joystick modes
+ */
+int js_init_mode = 1;
+int js_init_2_op_counter = 0;
+int js_operation_mode = 0;
+
 /* Round division with int
  */
 unsigned int round_div(unsigned int dividend, unsigned int divisor)
@@ -60,7 +66,7 @@ int set_js_command(int fd, packet_t* p){
 
 	/* simulate work
 	*/
-	mon_delay_ms(20);
+	mon_delay_ms(50);
 	t = mon_time_ms();
 
 	/* check up on JS
@@ -99,6 +105,29 @@ int set_js_command(int fd, packet_t* p){
 
 
 	printf(" |  ");
+
+	//when all axis are 0, then it is safe to increase the init_2_op counter
+	if(js_init_mode && axis[0] == 0 && axis[1] == 0 && axis[2] == 0){
+		js_init_2_op_counter++;
+	}
+
+	/* when a level of init_2_op of 5 is reached the joystick is considered out of 
+	 * biased init_mode
+	 */
+	if(js_init_2_op_counter > JS_OPERATION_MODE_THRESHOLD){
+		js_init_mode = 0;
+		js_operation_mode = 1;
+	}
+
+	//--- DEBUG
+	if(js_init_mode){
+		printf("init_mode");
+	}
+
+	if(js_operation_mode){
+		printf("op mode");
+	}
+	//---
 
 	//roll
 	/*if(axis[0] < -JS_MIN_VALUE){
@@ -150,6 +179,7 @@ int set_js_command(int fd, packet_t* p){
 		p->header  = SET_LIFT;
 		p->command = throttle_on_scale;
 
+		//set flag that command is not empty
 		command_set = 1;
 	}
 
