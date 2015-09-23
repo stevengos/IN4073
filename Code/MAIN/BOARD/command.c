@@ -331,7 +331,7 @@ void set_roll(char command)
     qr.roll = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
 }
 
-void set_lift(char command)
+void set_lift(unsigned char command)
 {
     if( qr.current_mode == SAFE_MODE )
     {

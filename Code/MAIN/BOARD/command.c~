@@ -222,11 +222,6 @@ void set_scale_pitch(char command)
         qr.scale_pitch -= STEP_SCALE_PARAMETER;
 }
 
-<<<<<<< HEAD
-    qr.exit = 1;
-    qr.flag_mode = 1;
-    //X32_DISPLAY = 0x0000;
-=======
 void set_scale_roll(char command)
 {
     if(command == INCREASE)
@@ -234,7 +229,6 @@ void set_scale_roll(char command)
     else
         qr.scale_roll -= STEP_SCALE_PARAMETER;
 }
->>>>>>> 2015-09-18-gsavaia-lab
 
 void set_scale_yaw(char command)
 {

@@ -74,7 +74,7 @@ void set_throttle_command(char header, int throttle, int divisor){
 	}
 
 	//scale int to char
-	if(divisor == JS_SET_DIVISION_SMALL){
+	if(divisor == JS_STEP_DIVISION_SMALL){
 		multiplier = 127;
 	}
 	else{
@@ -86,7 +86,7 @@ void set_throttle_command(char header, int throttle, int divisor){
 	//send the packet
 	printf(" %c = %d | ", header, send_value);
 
-	push_packet_t(header, throttle_on_scale);
+	push_packet_t(header, send_value);
 }
 
 int set_js_command(int fd){
