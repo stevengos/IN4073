@@ -26,7 +26,7 @@ void set_scale_lift(char);
 // interface used by joystick
 void set_pitch(char);
 void set_roll(char);
-void set_lift(char);
+void set_lift(unsigned char);
 void set_yawrate(char);
 
 // interface used by keyboard

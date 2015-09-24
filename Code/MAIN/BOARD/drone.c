@@ -168,14 +168,43 @@ void calibration_mode()
 void yaw_mode()
 {
     short e;
+    int ae1, ae2, ae3, ae4;
 
     X32_LEDS = LED5;
 
     while(!qr.flag_mode)
     {
-        //e = qr.sr - qr.yawrate;
+        e = qr.yawrate_ref - qr.sr;
 
+        qr.yaw_momentum = qr.controller_yaw * e;
 
+        ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+        ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+        ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+        ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+
+        ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
+        ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
+        ae3 = ae3 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
+        ae4 = ae4 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
+
+        qr.ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
+        qr.ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
+        qr.ae3 = ae3 > MAX_RPM ? MAX_RPM : (short)ae3;
+        qr.ae4 = ae4 > MAX_RPM ? MAX_RPM : (short)ae4;
+
+        DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+
+        #ifdef PERIPHERAL_XUFO_A0
+
+        X32_QR_A1 = qr.ae1;
+        X32_QR_A2 = qr.ae2;
+        X32_QR_A3 = qr.ae3;
+        X32_QR_A4 = qr.ae4;
+
+        #endif
+
+        ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
     }
 
     X32_LEDS = ALL_OFF;
