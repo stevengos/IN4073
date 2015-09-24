@@ -20,6 +20,16 @@ void isr_buttons(void)
     stop();
 }
 
+void isr_sensors(void)
+{
+    qr.sax = X32_QR_S1;
+    qr.say = X32_QR_S2;
+    qr.saz = X32_QR_S3;
+    qr.sp = X32_QR_S4;
+    qr.sq = X32_QR_S5;
+    qr.sr = X32_QR_S6;
+}
+
 void isr_rs232_rx(void)
 {
     packet_t incoming;

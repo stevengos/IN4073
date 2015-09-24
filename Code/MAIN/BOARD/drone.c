@@ -356,6 +356,6 @@ void add_log()
 
     qr.log_size++;
 
-    printf("board> Log added %d %d %d %d %d %d.\n", new_log.id, new_log.timestamp, new_log.ae1, new_log.ae2, new_log.ae3, new_log.ae4);
+    //printf("board> Log added %d %d %d %d %d %d.\n", new_log.id, new_log.timestamp, new_log.ae1, new_log.ae2, new_log.ae3, new_log.ae4);
 }
 

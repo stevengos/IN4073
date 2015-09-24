@@ -168,10 +168,6 @@ void stop()
 //set_mode changes the operating mode of the drone. It performs some checking in order to avoid unsafe behaviour.
 void set_mode(char command)
 {
-    //prepare timer interrupt
-    X32_TIMER_CYCLE = TIMEOUT_TIMER*CLOCKS_PER_MS;
-    SET_INTERRUPT_VECTOR(INTERRUPT_TIMER1, &isr_timer);
-    SET_INTERRUPT_PRIORITY(INTERRUPT_TIMER1, 1);
     ENABLE_INTERRUPT(INTERRUPT_TIMER1);
 
     // It is not allowed to switch between modes unless either you are currently in SAFE_MODE or the command is SAFE/PANIC_MODE
@@ -443,7 +439,7 @@ void set_yawrate(char command)
         return;
     }
 
-    if( qr.current_mode == FULL_MODE )
+    if( qr.current_mode == MANUAL_MODE )
         qr.yaw_momentum = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
 
     if( qr.current_mode == FULL_MODE )

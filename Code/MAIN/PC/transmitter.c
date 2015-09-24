@@ -38,7 +38,7 @@ void *is_alive(void* board)
     }
 }
 
-void loggamelo(int board, packet_t p)
+void logging(int board, packet_t p)
 {
     printf("pc> Sending packet...\n");
 
@@ -143,7 +143,7 @@ int main()
 
         if( p.command == LOG_GET )
         {
-            loggamelo(board, p);
+            logging(board, p);
             continue;
         }
 
