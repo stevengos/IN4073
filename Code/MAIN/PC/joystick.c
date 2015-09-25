@@ -176,7 +176,7 @@ int set_js_command(int fd){
 
 	//pitch
 	if(axis[1] < -JS_MIN_VALUE || axis[1] > JS_MIN_VALUE){
-		set_throttle_command(SET_PITCH, 0, JS_STEP_DIVISION_SMALL);
+		set_throttle_command(SET_PITCH, axis[1], JS_STEP_DIVISION_SMALL);
 
 		command_set = 1;
 	}else{
@@ -187,7 +187,7 @@ int set_js_command(int fd){
 
 	//yaw
 	if(axis[2] < -JS_MIN_VALUE || axis[2] > JS_MIN_VALUE){
-		set_throttle_command(SET_YAWRATE, 0, JS_STEP_DIVISION_SMALL);
+		set_throttle_command(SET_YAWRATE, axis[2], JS_STEP_DIVISION_SMALL);
 
 		command_set = 1;
 	}else{
