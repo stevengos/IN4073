@@ -181,6 +181,17 @@ int main()
 
 		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
 
+        if(packet_buffer[packet_counter].header == LOG)
+        {
+            close_keyboard(&oldKeyboardSettings);
+
+            logging(board, packet_buffer[packet_counter]);
+
+            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+
+            continue;
+        }
+
 		if( packet_buffer[packet_counter].header != EMPTY )  //if it is a valid one, then push it, else ignore
             packet_counter++;
 
@@ -226,6 +237,7 @@ int main()
 
     close_keyboard(&oldKeyboardSettings);
     close_board(board, &oldBoardSettings);
+    //does the joystick need closing?
 
     return 0;
 }
