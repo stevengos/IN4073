@@ -1,6 +1,17 @@
 #ifndef _LINUX_JOYSTICK_H
 #define _LINUX_JOYSTICK_H
 
+
+/******************************/
+/* Custom mapping             */
+/******************************/
+#define JS_DEV	"/dev/input/js0"
+
+#define JS_MIN_VALUE 100
+#define JS_STEP_DIVISION_SMALL 32
+#define JS_STEP_DIVISION_BIG 64
+#define JS_OPERATION_MODE_THRESHOLD 10
+
 /*
  * $Id: joystick.h,v 1.4 2001/04/24 07:06:43 vojtech Exp $
  *
@@ -125,16 +136,6 @@ struct JS_DATA_SAVE_TYPE {
 	struct JS_DATA_TYPE JS_CORR;
 };
 
-
-/******************************/
-/* Custom mapping             */
-/******************************/
-#define JS_DEV	"/dev/input/js0"
-
-#define JS_MIN_VALUE 100
-#define JS_STEP_DIVISION_SMALL 32
-#define JS_STEP_DIVISION_BIG 64
-#define JS_OPERATION_MODE_THRESHOLD 10
 
 #endif /* _LINUX_JOYSTICK_H */
 

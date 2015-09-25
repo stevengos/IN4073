@@ -25,6 +25,8 @@
 #define SET_SCALE_YAW   0xB
 #define SET_SCALE_LIFT  0xC
 
+#define SET_CONTROLLER_YAW  0xD
+
 #define ALIVE           0x10
 #define ACK             0x11
 

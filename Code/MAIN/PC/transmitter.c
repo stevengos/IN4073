@@ -14,23 +14,26 @@
 #include "keyboard.h"
 #include "joystick.h"
 
+#define REFRESH_TIME    50
+
 pthread_mutex_t lock_board;
-packet_t p_arr[10];
+
+packet_t packet_buffer[10];
 int packet_counter = 0;
 
-void push_packet_t(char header, char command){
+void push_packet_t(char header, char command)
+{
 	packet_t p;
 
 	p.header = header;
 	p.command = command;
 	compute_hamming(&p);
 
-	p_arr[packet_counter++] = p;
+	packet_buffer[packet_counter++] = p;
 }
 
-void empty_packet_t(){
-	int i = 0;
-
+void empty_packet_t()
+{
 	packet_counter = 0;
 }
 
@@ -114,6 +117,7 @@ int main()
     struct termios keyboardSettings;
 
     int board;
+    int joystick;
 
     char ctty = 0;
     char cboard = 0;
@@ -123,24 +127,27 @@ int main()
     pthread_t polling;
     int status, i = 0;
 
-//---- open joystick
-	int 		fd, js_exit = 0;
+	int js_exit = 0;
 
-	if ((fd = open(JS_DEV, O_RDONLY)) < 0) {
+    /************* Open Joystick ********************************/
+    joystick = open(JS_DEV, O_RDONLY);
+
+	if ( joystick < 0)
+	{
 		perror("jstest");
 		exit(1);
 	}
 
-	/* non-blocking mode
-	 */
-	fcntl(fd, F_SETFL, O_NONBLOCK);
-//----
+	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
+    /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 
     printf("TERMINAL\n\n");
 
     printf("Trying to connect to the board...");
+
+    /************* Open Board ***********************************/
 
     board = open_board(&oldBoardSettings, &boardSettings);
 
@@ -152,6 +159,8 @@ int main()
 
     printf("Connection successful!\n\n");
 
+    /************* Create Polling (keep_alive) ********************/ //do we still need it?
+
     pthread_mutex_init(&lock_board, NULL);
 
     status = pthread_create(&polling, NULL, is_alive, (void*)&board);
@@ -162,113 +171,56 @@ int main()
         ctty = ESC;
     }
 
+    /************* Main Loop ********************************/
+
     while(js_exit != 1 && ctty != ESC)
     {
+        js_exit = set_js_command(joystick); //read the joystick configuration
 
+		ctty = getchar_keyboard();          //read the keyboard
 
+		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
 
+		if( packet_buffer[packet_counter].header != EMPTY )  //if it is a valid one, then push it, else ignore
+            packet_counter++;
 
-//---- read JS command
-	js_exit = set_js_command(fd);
-	//continue; //DEBUG
-//----
-
-	//if(p.header == EMPTY){
-		//printf("into keyboard \n");
-		printf("user> ");
-		ctty = getchar_keyboard();
-		printf("\n");
-
-		//printf("pc> Command received: %d.\n", ctty);
-
-		p_arr[packet_counter] = encapsulate( ctty );
-		packet_counter++;
-
-        if( p_arr[packet_counter].command == LOG_GET )
+        for(i = 0; i < packet_counter; i++) //send a burst of packets
         {
-            logging(board, p_arr[packet_counter]);
-            continue;
-        }
-	//}
+            packet_t p = packet_buffer[i];
 
-	for(i = 0; i < packet_counter; i++){
-	packet_t p = p_arr[i];
-        do
-        {
-            //printf("pc> Sending packet...\n");
-
-            pthread_mutex_lock( &lock_board );
-
-            send_packet(board, p);
-
-            pthread_mutex_unlock( &lock_board );
-
-            //sleep(1); //give time to board to write output 1s
-	    mon_delay_ms(50);
-
-            pthread_mutex_lock( &lock_board );
-
-            while( (cboard = getchar_board(board)) )
+            do //send the same packet until I receive a positive ack
             {
-                if( cboard == ACK ) //ack coming
-                {
-                    cboard = getchar_board(board); //response: positive or negative or invalid
+                int counter_waitack = 0;
 
-                    getchar_board(board); //ignore crc
+                //get exclusive access to the board and send the packet
+                pthread_mutex_lock( &lock_board );
+                send_packet(board, p);
+                pthread_mutex_unlock( &lock_board );
 
-//                    if( cboard == ACK_POSITIVE )
-//                        printf("pc> Positive acknowledge received.\n"), ack_received = ACK_POSITIVE;
-//                    else
-//                        if( cboard == ACK_NEGATIVE )
-//                            printf("pc> Negative acknowledge received.\n\n"), ack_received = ACK_NEGATIVE;
-//                    else
-//                        if( cboard == ACK_INVALID )
-//                            printf("pc> Board signaled invalid message.\n"), ack_received = ACK_INVALID;
-//                    else
-//                        printf("pc> Unexpected message from board.\n");
-                }
-                //else
-                    //printf("%c", cboard);
+                mon_delay_ms(REFRESH_TIME);
+
+                //pthread_mutex_lock( &lock_board );
+
+                for(counter_waitack=0; counter_waitack < 5; counter_waitack++)
+                    if( (cboard = getchar_board(board)) == ACK ) //wait for acknowledgment
+                    {
+                        ack_received = getchar_board(board);    //response
+                        getchar_board(board);                   //ignore crc
+                        break;
+                    }
+                    else
+                        usleep(500);
+
+                //pthread_mutex_unlock( &lock_board );
             }
+            while( ack_received == ACK_NEGATIVE );
 
-            pthread_mutex_unlock( &lock_board );
-
-//            if(counter++>0)
-//            {
-//                printf("pc> Timeout: ACK not received.\n");
-//                break;
-//            }
-            break;
         }
-        while( ack_received == ACK_NEGATIVE );
-}
-	empty_packet_t();
+
+        empty_packet_t();
         counter = 0;
         system("clear");
     }
-
-//    while( (cboard = getchar_board(board)) )
-//        {
-//            if( cboard == ACK ) //ack coming
-//            {
-//                cboard = getchar_board(board); //response: positive or negative or invalid
-//
-//                getchar_board(board); //ignore crc
-//
-//                if( cboard == ACK_POSITIVE )
-//                    printf("pc> Positive acknowledge received.\n"), ack_received = ACK_POSITIVE;
-//                else
-//                    if( cboard == ACK_NEGATIVE )
-//                        printf("pc> Negative acknowledge received.\n\n"), ack_received = ACK_NEGATIVE;
-//                else
-//                    if( cboard == ACK_INVALID )
-//                        printf("pc> Board signaled invalid message.\n"), ack_received = ACK_INVALID;
-//                else
-//                    printf("pc> Unexpected message from board.\n");
-//            }
-//            else
-//                printf("%c", cboard);
-//        }
 
     printf("End of communication.\n");
 

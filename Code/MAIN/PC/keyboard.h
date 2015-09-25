@@ -30,6 +30,8 @@
 #define Z           122
 #define Q           113
 #define W           119
+
+//scale parameters
 #define Y           121
 #define H           104
 #define U           117
@@ -38,6 +40,10 @@
 #define K           107
 #define O           111
 #define L           108
+
+//tune controller
+#define N           110
+#define M           109
 
 #define ARROW_U     65
 #define ARROW_D     66

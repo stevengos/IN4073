@@ -207,6 +207,16 @@ packet_t encapsulate(char command)
             outgoing.command    = DECREASE;
             break;
 
+        case N:
+            outgoing.header     = SET_CONTROLLER_YAW;
+            outgoing.command    = INCREASE;
+            break;
+
+        case M:
+            outgoing.header     = SET_CONTROLLER_YAW;
+            outgoing.command    = DECREASE;
+            break;
+
         /* NOT RECOGNIZED */
         default:
             outgoing.header     = EMPTY;
