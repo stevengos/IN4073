@@ -18,6 +18,9 @@ pthread_mutex_t lock_board;
 packet_t p_arr[10];
 int packet_counter = 0;
 
+struct termios oldKeyboardSettings;
+struct termios keyboardSettings;
+
 void push_packet_t(char header, char command){
 	packet_t p;
 
@@ -58,6 +61,9 @@ void *is_alive(void* board)
 
 void logging(int board, packet_t p)
 {
+    //set input retreiving back to buffering with the old 
+    close_keyboard(&oldKeyboardSettings);
+
     printf("pc> Sending packet...\n");
 
     pthread_mutex_lock( &lock_board );
@@ -103,15 +109,15 @@ void logging(int board, packet_t p)
     printf("\npc>Log retrival is over.\n\n");
 
     getchar();
+
+    //set keyboard back to non buffering
+    open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 }
 
 int main()
 {
     struct termios boardSettings;
     struct termios oldBoardSettings;
-
-    struct termios oldKeyboardSettings;
-    struct termios keyboardSettings;
 
     int board;
 
@@ -184,9 +190,9 @@ int main()
 		p_arr[packet_counter] = encapsulate( ctty );
 		packet_counter++;
 
-        if( p_arr[packet_counter].command == LOG_GET )
+        if( p_arr[packet_counter - 1].command == LOG_GET )
         {
-            logging(board, p_arr[packet_counter]);
+            logging(board, p_arr[packet_counter - 1]);
             continue;
         }
 	//}
