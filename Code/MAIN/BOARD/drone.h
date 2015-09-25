@@ -10,7 +10,7 @@
 #include "../interface/log.h"
 
 #define MAX_RPM     0x3ff
-#define MIN_RPM     0x000
+#define MIN_RPM     0x00a
 #define STEP_RPM    0x010
 
 #define MAX_PITCH   255
@@ -25,8 +25,8 @@
 
 #define STEP_SCALE_PARAMETER 1000
 
-#define PANIC_RPM 50
-#define PANIC_TIME 5000
+#define PANIC_RPM   200
+#define PANIC_TIME  5000
 
 #define LOG_BUFFER_SIZE     716800 //700kB = 700*1024 B, NUMBER OF INTEGERS = 700*1024/4
 

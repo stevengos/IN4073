@@ -50,7 +50,7 @@ void run_drone()
 void safe_mode()
 {
     short debug = 0;
-    X32_LEDS = LED8;
+    X32_LEDS = LED1;
 
     stop_motors();
 
@@ -61,11 +61,11 @@ void safe_mode()
 
 void panic_mode()
 {
-    X32_LEDS = LED7;
+    X32_LEDS = LED2;
 
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
-    if( qr.ae1 && qr.ae2 && qr.ae3 && qr.ae4 )
+    if( qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4 )
 
         qr.ae1 = PANIC_RPM,
         qr.ae2 = PANIC_RPM,
@@ -103,41 +103,45 @@ void manual_mode()
     int ae4 = 0;
     short debug = 0;
 
-    X32_LEDS = LED6;
+    X32_LEDS = LED3;
 
     while(!qr.flag_mode)
     {
-        #ifdef PERIPHERAL_DISPLAY
-        X32_DISPLAY = debug++;
-        #endif
+        if( qr.lift_force )
+        {
+            ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
 
-        ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-        ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
-        ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-        ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
+            ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
+            ae3 = ae3 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
+            ae4 = ae4 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
 
-        ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
-        ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
-        ae3 = ae3 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
-        ae4 = ae4 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
+            ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
+            ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
+            ae3 = ae3 > MAX_RPM ? MAX_RPM : (short)ae3;
+            ae4 = ae4 > MAX_RPM ? MAX_RPM : (short)ae4;
 
-        qr.ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
-        qr.ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
-        qr.ae3 = ae3 > MAX_RPM ? MAX_RPM : (short)ae3;
-        qr.ae4 = ae4 > MAX_RPM ? MAX_RPM : (short)ae4;
+            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : (short)ae1;
+            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : (short)ae2;
+            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : (short)ae3;
+            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : (short)ae4;
 
-        DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-        #ifdef PERIPHERAL_XUFO_A0
+            #ifdef PERIPHERAL_XUFO_A0
 
-        X32_QR_A1 = qr.ae1;
-        X32_QR_A2 = qr.ae2;
-        X32_QR_A3 = qr.ae3;
-        X32_QR_A4 = qr.ae4;
+            X32_QR_A1 = qr.ae1;
+            X32_QR_A2 = qr.ae2;
+            X32_QR_A3 = qr.ae3;
+            X32_QR_A4 = qr.ae4;
 
-        #endif
+            #endif
 
-        ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+        }
     }
 
     //X32_DISPLAY = debug++;
@@ -149,21 +153,62 @@ void manual_mode()
 
 void calibration_mode()
 {
-    X32_LEDS = LED6;
+    int samples = 100;
+    int i = 0;
+    int average = 0;
 
-    catnap(1);
+    X32_LEDS = LED4;
 
     DISABLE_INTERRUPT(INTERRUPT_XUFO);
 
-    qr.off_ax = X32_QR_S1;
-    qr.off_ay = X32_QR_S2;
-    qr.off_az = X32_QR_S3;
-    qr.off_p = X32_QR_S4;
-    qr.off_q = X32_QR_S5;
-    qr.off_r = X32_QR_S6;
+    catnap(1000);
+
+/****************************************************/
+    for(i=0, average=0; i<samples; i++, catnap(1))
+        average += X32_QR_S1;
+
+    average = average/samples;
+    qr.off_ax = average;
+
+/****************************************************/
+    for(i=0, average=0; i<samples; i++, catnap(1))
+        average += X32_QR_S2;
+
+    average = average/samples;
+    qr.off_ay = average;
+
+/****************************************************/
+    for(i=0, average=0; i<samples; i++, catnap(1))
+        average += X32_QR_S3;
+
+    average = average/samples;
+    qr.off_az = average;
+
+/****************************************************/
+    for(i=0, average=0; i<samples; i++, catnap(1))
+        average += X32_QR_S4;
+
+    average = average/samples;
+    qr.off_p = average;
+
+/****************************************************/
+    for(i=0, average=0; i<samples; i++, catnap(1))
+        average += X32_QR_S5;
+
+    average = average/samples;
+    qr.off_q = average;
+
+/****************************************************/
+    for(i=0, average=0; i<samples; i++, catnap(1))
+        average += X32_QR_S6;
+
+    average = average/samples;
+    qr.off_r = average;
 
     ENABLE_INTERRUPT(INTERRUPT_XUFO);
 
+    qr.current_mode = SAFE_MODE;
+    qr.flag_mode = 1;
     X32_LEDS = ALL_OFF;
 }
 
@@ -176,43 +221,51 @@ void yaw_mode()
 
     while(!qr.flag_mode)
     {
-        e = qr.yawrate_ref - qr.sr;
+        if(qr.lift_force)
+        {
+            e = qr.yawrate_ref - qr.sr;
 
-        qr.yaw_momentum = qr.controller_yaw * e;
+            qr.yaw_momentum = qr.controller_yaw * e;
 
-        ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-        ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
-        ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-        ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
 
-        ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
-        ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
-        ae3 = ae3 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
-        ae4 = ae4 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
+            ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
+            ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
+            ae3 = ae3 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
+            ae4 = ae4 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
 
-        qr.ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
-        qr.ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
-        qr.ae3 = ae3 > MAX_RPM ? MAX_RPM : (short)ae3;
-        qr.ae4 = ae4 > MAX_RPM ? MAX_RPM : (short)ae4;
+            ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
+            ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
+            ae3 = ae3 > MAX_RPM ? MAX_RPM : (short)ae3;
+            ae4 = ae4 > MAX_RPM ? MAX_RPM : (short)ae4;
 
-        DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : (short)ae1;
+            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : (short)ae2;
+            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : (short)ae3;
+            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : (short)ae4;
 
-        #ifdef PERIPHERAL_XUFO_A0
+            DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-        X32_QR_A1 = qr.ae1;
-        X32_QR_A2 = qr.ae2;
-        X32_QR_A3 = qr.ae3;
-        X32_QR_A4 = qr.ae4;
+            #ifdef PERIPHERAL_XUFO_A0
 
-        #endif
+            X32_QR_A1 = qr.ae1;
+            X32_QR_A2 = qr.ae2;
+            X32_QR_A3 = qr.ae3;
+            X32_QR_A4 = qr.ae4;
 
-        ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            #endif
+
+            ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+        }
     }
 
     X32_LEDS = ALL_OFF;
 }
 
-void full_mode(){ X32_LEDS = LED4; while(!qr.flag_mode); X32_LEDS = ALL_OFF; }
+void full_mode(){ X32_LEDS = LED6; while(!qr.flag_mode); X32_LEDS = ALL_OFF; }
 
 void clear_drone()
 {
@@ -235,6 +288,8 @@ void clear_drone()
     qr.scale_roll = 8240;
     qr.scale_yaw = 16400;
     qr.scale_lift = 16400;
+
+    qr.controller_yaw = 1;
 
     qr.step_pitch = 5;
     qr.step_roll = 5;

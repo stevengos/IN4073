@@ -22,12 +22,12 @@ void isr_buttons(void)
 
 void isr_sensors(void)
 {
-    qr.sax = X32_QR_S1;
-    qr.say = X32_QR_S2;
-    qr.saz = X32_QR_S3;
-    qr.sp = X32_QR_S4;
-    qr.sq = X32_QR_S5;
-    qr.sr = X32_QR_S6;
+    qr.sax = X32_QR_S1 - qr.off_ax;
+    qr.say = X32_QR_S2 - qr.off_ay;
+    qr.saz = X32_QR_S3 - qr.off_az;
+    qr.sp = X32_QR_S4 - qr.off_p;
+    qr.sq = X32_QR_S5 - qr.off_q;
+    qr.sr = X32_QR_S6 - qr.off_r;
 }
 
 void isr_rs232_rx(void)
@@ -40,9 +40,7 @@ void isr_rs232_rx(void)
     //X32_DISPLAY = debug++;
 
     if( !X32_RS232_READ )
-    {
         return;
-    }
 
     incoming.header = X32_RS232_DATA; //read first byte (HEADER)
 
@@ -83,13 +81,15 @@ void isr_timer(void)
 {
     if( qr.link_down )
     {
-        printf("board> PC Link is down! SAFE_MODE set.\n");
+        unsigned char i;
+
         qr.current_mode = SAFE_MODE;
         stop_motors();
         qr.exit = 1;
         qr.flag_mode = 1;
 
-        X32_LEDS = LED1;
+        for(i=0; i < 10; i++)
+            X32_LEDS = ALL_ON, catnap(500), X32_LEDS = ALL_OFF;
     }
 
     qr.link_down = 1;

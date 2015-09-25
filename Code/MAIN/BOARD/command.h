@@ -22,6 +22,7 @@ void set_scale_pitch(char);
 void set_scale_roll(char);
 void set_scale_yaw(char);
 void set_scale_lift(char);
+void set_controller_yaw(char command);
 
 // interface used by joystick
 void set_pitch(char);
