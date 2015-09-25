@@ -36,7 +36,7 @@ int main()
     SET_INTERRUPT_VECTOR(INTERRUPT_TIMER1, &isr_timer);
     SET_INTERRUPT_PRIORITY(INTERRUPT_TIMER1, 1);
 
-    #ifdef X32_DISPLAY
+    #ifdef PERIPHERAL_DISPLAY
     X32_DISPLAY = 0x0000;
     #endif
 
@@ -47,7 +47,7 @@ int main()
 
     run_drone();
 
-    #ifdef X32_DISPLAY
+    #ifdef PERIPHERAL_DISPLAY
     X32_DISPLAY = 0xC1A0;
     #endif
 

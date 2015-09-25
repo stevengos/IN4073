@@ -17,6 +17,13 @@ struct log_s
     short ae2;
     short ae3;
     short ae4;
+
+    short sax;
+    short say;
+    short saz;
+    short sp;
+    short sq;
+    short sr;
 };
 
 #endif // LOG_H

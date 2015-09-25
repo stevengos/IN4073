@@ -107,7 +107,9 @@ void manual_mode()
 
     while(!qr.flag_mode)
     {
+        #ifdef PERIPHERAL_DISPLAY
         X32_DISPLAY = debug++;
+        #endif
 
         ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
         ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
@@ -333,7 +335,7 @@ void add_log()
         return;
     }
 
-    printf("board> Adding Log.\n");
+    //printf("board> Adding Log.\n");
 
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL); //SAVE LOG ATOMICALLY
 
@@ -349,6 +351,10 @@ void add_log()
     new_log.ae2 = qr.ae2;
     new_log.ae3 = qr.ae3;
     new_log.ae4 = qr.ae4;
+
+    new_log.sp = qr.sp;
+    new_log.sq = qr.sq;
+    new_log.sr = qr.sr;
 
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL); //END LOG
 

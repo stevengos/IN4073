@@ -30,6 +30,8 @@
 #define Z           122
 #define Q           113
 #define W           119
+#define Y           121
+#define H           104
 #define U           117
 #define J           106
 #define I           105

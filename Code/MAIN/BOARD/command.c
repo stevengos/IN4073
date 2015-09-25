@@ -95,8 +95,6 @@ void perform_command(char header, char command)
                     acknowledge(ACK_INVALID);
     };
 
-    //print_drone();
-
     if(qr.log)
         add_log();
 }
@@ -175,6 +173,12 @@ void set_mode(char command)
     {
         acknowledge(ACK_INVALID);
         printf("board> Please go in SAFE_MODE if you want to change mode.\n");
+        return;
+    }
+
+    if( qr.lift_force )
+    {
+        acknowledge(ACK_INVALID);
         return;
     }
 
@@ -319,9 +323,11 @@ void upload_log()
     {
         struct log_s outgoing = qr.log_buffer[i];
         short* ptr_head = &outgoing.ae1; //************* FIRST STRUCT ELEMENT
-        short* ptr_tail = &outgoing.ae4; //************* LAST STRUCT ELEMENT
+        short* ptr_tail = &outgoing.sr; //************* LAST STRUCT ELEMENT
 
+        #ifdef PERIPHERAL_DISPLAY
         X32_DISPLAY = outgoing.id;
+        #endif
 
         /* Sending log id */
         counter_timeout = 0;
@@ -388,62 +394,54 @@ void upload_log()
 //{
 void set_pitch(char command)
 {
-    if( qr.current_mode == SAFE_MODE )
-    {
-        acknowledge(ACK_INVALID);
-        return;
-    }
+    qr.pitch_momentum = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
 
     if( qr.current_mode == MANUAL_MODE )
         qr.pitch_momentum = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
 
     if( qr.current_mode == FULL_MODE )
         qr.pitch_ref = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void set_roll(char command)
 {
-    if( qr.current_mode == SAFE_MODE )
-    {
-        acknowledge(ACK_INVALID);
-        return;
-    }
+    qr.roll_momentum = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
 
     if( qr.current_mode == MANUAL_MODE )
         qr.roll_momentum = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
 
     if( qr.current_mode == FULL_MODE )
         qr.roll_ref = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void set_lift(unsigned char command)
 {
-    if( qr.current_mode == SAFE_MODE )
-    {
-        acknowledge(ACK_INVALID);
-        return;
-    }
+    qr.lift_force = command > MAX_LIFT ? MAX_LIFT : command < MIN_LIFT ? MIN_LIFT : command;
 
     if( qr.current_mode == MANUAL_MODE )
         qr.lift_force = command > MAX_LIFT ? MAX_LIFT : command < MIN_LIFT ? MIN_LIFT : command;
 
     if( qr.current_mode == FULL_MODE )
         qr.lift_ref = command > MAX_LIFT ? MAX_LIFT : command < MIN_LIFT ? MIN_LIFT : command;
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void set_yawrate(char command)
 {
-    if( qr.current_mode == SAFE_MODE )
-    {
-        acknowledge(ACK_INVALID);
-        return;
-    }
+    qr.yaw_momentum = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
 
     if( qr.current_mode == MANUAL_MODE )
         qr.yaw_momentum = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
 
     if( qr.current_mode == FULL_MODE )
         qr.yawrate_ref = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
+
+    acknowledge(ACK_POSITIVE);
 }
 //}
 

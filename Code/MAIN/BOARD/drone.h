@@ -10,7 +10,7 @@
 #include "../interface/log.h"
 
 #define MAX_RPM     0x3ff
-#define MIN_RPM     0x00F
+#define MIN_RPM     0x000
 #define STEP_RPM    0x010
 
 #define MAX_PITCH   255
