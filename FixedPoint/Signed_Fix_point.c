@@ -4,33 +4,32 @@
 
 #define Q 14
 #define K (1 << (Q - 1))
-typedef  int q88;
+typedef  int q14;
 int normal2q (float x);
-q88 q_multiplication (q88 a, q88 b);
-float q2normal(q88 a);
-q88 q_division (q88 a, q88 b);
-q88 q_add(q88 a, q88 b);
-q88 q_subtract(q88 a, q88 b);
+q14 q_multiplication (q14 a, q14 b);
+float q2normal(q14 a);
+q14 q_division (q14 a, q14 b);
+q14 q_add(q14 a, q14 b);
+q14 q_subtract(q14 a, q14 b);
 
 
 int main(int argc, char *argv[])
 {
 
+  float x,y;
+  q14 res;
+
   if(argc < 3)
  {
-   printf("error usage %s float1    float2  ", argv[0]);
-   exit(1);
- }
-  q88 res;
- /*the values 3.75, 3.90625
  float x = -2.1477;
- float y = 1.533; */
- float x = atof(argv[1]);
- float y = atof(argv[2]);
- q88 first = normal2q(x);
- q88 second = normal2q(y);
- 
- //here you can define the operation type
+ float y = 1.533;
+ }
+   else{
+  x = atof(argv[1]);
+  y = atof(argv[2]);
+ }
+ q14 first = normal2q(x);
+ q14 second = normal2q(y);
  res = q_multiplication(first,second);
  /*if (strcmp(argv[3],'a') == 0){
         res = q_add(first,second);
@@ -51,7 +50,7 @@ int main(int argc, char *argv[])
         
 float result = q2normal(res);
 
-printf("The value float x = %f, float y = %f, x turned to q88 = %d, y turned to q88 =%d, q88 mult result = %d and the result is = %f\n",x ,y , first, second, res, result);
+printf("The value float x = %f, float y = %f, x turned to q14 = %d, y turned to q14 =%d, q14 mult result = %d and the result is = %f\n",x ,y , first, second, res, result);
 
 return 1;
 }
@@ -59,46 +58,49 @@ return 1;
 
 
 /***** this function recieves a float and 
- turn it to q88 value*********/
+ turn it to q14 value*********/
 
-q88 normal2q (float x) {   
+q14 normal2q (float x) {   
  int result;
+ /******Second edition-board *****
+ result = x * (1 << Q);*/
+
  
- /***********X32Version**************
- long d = (long) x << Q;
- result = (int) d
- */
+ 
+ /******First edition*/ 
  float y = pow(2,Q); 
  float d = y*x;
- /*r**Rounding to the closest int near the float value */
+ /*r**Rounding to the closest int near the float value*/ 
  int integerPart = floor(d);//return int value smaller than d. 
  if((d-(float)integerPart)>= 0.5){
     result = integerPart+1;
   }
  else {
     result = integerPart;
-  }
+  } 
    
  return result;
 }
 
-/******this function recieves a q88 value
+/******this function recieves a q14 value
  and turn it into floating point real value************/
 
- float q2normal(q88 a) {
- /************X32Version************
- long x = (long) a >> Q;
- return x;
- */
+ float q2normal(q14 a) {
+ float result;
+/******Second edition-board ** 
+ result = ((float) a) / (1 << Q);*/
+
+/***First edition*/
  float y = pow(2,Q);
  float x = a;
- return (x/y);
+ result = x/y; 
+ return (result);
 }
 
-/*********this function adds two q88 numbers*********/
+/*********this function adds two q14 numbers*********/
 
-q88 q_add(q88 a, q88 b){
- q88 result;
+q14 q_add(q14 a, q14 b){
+ q14 result;
  long tmp;
  tmp = (long)a + (long)b;
  //Add saturation
@@ -108,13 +110,13 @@ q88 q_add(q88 a, q88 b){
  if (tmp < -1 * 0x7FFF){
     tmp = -1 * 0x7FFF;
    }
- result = (q88) tmp;
+ result = (q14) tmp;
  return result;
 }
 
-/***********this function subtract two q88 numbers*******/
-q88 q_subtract(q88 a, q88 b){
-  q88 result;
+/***********this function subtract two q14 numbers*******/
+q14 q_subtract(q14 a, q14 b){
+  q14 result;
   result = a - b;
   return result;
 }
@@ -123,20 +125,20 @@ q88 q_subtract(q88 a, q88 b){
  
  /*********this function multiplies 2 x float numbers**/
 
-q88 q_multiplication (q88 a, q88 b){
-    q88 result;
+q14 q_multiplication (q14 a, q14 b){
+    q14 result;
     long temp;
     temp = (long)a * (long)b; 
     temp += K;
     // Correct by dividing by base
-    result = (q88)(temp >> Q);
+    result = (q14)(temp >> Q);
     return result;
 }
 
  /***********this function performs the division *************/
-q88 q_division (q88 a, q88 b){
+q14 q_division (q14 a, q14 b){
 
-	 q88 result;
+	 q14 result;
 	 long temp;
 	 temp=(long)a << Q;
 	// Rounding: mid values are rounded up.
@@ -144,7 +146,6 @@ q88 q_division (q88 a, q88 b){
             temp += b / 2;
          else
             temp -= b / 2;
-         result = (q88)(temp / b);
+         result = (q14)(temp / b);
 	 return result;
 }
-
