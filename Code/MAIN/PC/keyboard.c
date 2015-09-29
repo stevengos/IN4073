@@ -33,7 +33,7 @@ inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* n
 
     tcsetattr(0, TCSANOW, newTerminalSettings);
 
-//system ("/bin/stty raw");
+    //system ("/bin/stty raw");
     setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
