@@ -109,29 +109,33 @@ void manual_mode()
     {
         if( qr.lift_force )
         {
+    debug = X32_CLOCK_US;
+
             ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
 
-            ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
-            ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
-            ae3 = ae3 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
-            ae4 = ae4 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
+            ae1 = ae1 <= MIN_RPM ? MIN_RPM : sqrt(ae1);
+            ae2 = ae2 <= MIN_RPM ? MIN_RPM : sqrt(ae2);
+            ae3 = ae3 <= MIN_RPM ? MIN_RPM : sqrt(ae3);
+            ae4 = ae4 <= MIN_RPM ? MIN_RPM : sqrt(ae4);
 
-            ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
-            ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
-            ae3 = ae3 > MAX_RPM ? MAX_RPM : (short)ae3;
-            ae4 = ae4 > MAX_RPM ? MAX_RPM : (short)ae4;
+            ae1 = ae1 > MAX_RPM ? MAX_RPM : ae1;
+            ae2 = ae2 > MAX_RPM ? MAX_RPM : ae2;
+            ae3 = ae3 > MAX_RPM ? MAX_RPM : ae3;
+            ae4 = ae4 > MAX_RPM ? MAX_RPM : ae4;
 
-            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : (short)ae1;
-            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : (short)ae2;
-            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : (short)ae3;
-            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : (short)ae4;
-
-            DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : ae1;
+            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : ae2;
+            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : ae3;
+            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
             ucatnap(20);
+    X32_DISPLAY = X32_CLOCK_US - debug;
+
+
+            DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
             #ifdef PERIPHERAL_XUFO_A0
 
@@ -234,10 +238,10 @@ void yaw_mode()
             ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
 
-            ae1 = ae1 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae1) ) );
-            ae2 = ae2 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae2) ) );
-            ae3 = ae3 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae3) ) );
-            ae4 = ae4 <= MIN_RPM ? MIN_RPM : float32_to_int32( float32_sqrt( int32_to_float32(ae4) ) );
+            ae1 = ae1 <= MIN_RPM ? MIN_RPM : sqrt(ae1);
+            ae2 = ae2 <= MIN_RPM ? MIN_RPM : sqrt(ae2);
+            ae3 = ae3 <= MIN_RPM ? MIN_RPM : sqrt(ae3);
+            ae4 = ae4 <= MIN_RPM ? MIN_RPM : sqrt(ae4);
 
             ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
             ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
@@ -381,6 +385,17 @@ void ucatnap(int us)
     while( X32_CLOCK_US < now + us);
 }
 
+int sqrt(int square)
+{
+    int i=0;
+    int result = square/2;
+
+    for(; i<15; i++)
+        result = (result + square/result)/2;
+
+    return result;
+}
+
 void add_log()
 {
     struct log_s new_log;
@@ -388,7 +403,7 @@ void add_log()
     if( !qr.log )
         return;
 
-    if( qr.log_size >= LOG_BUFFER_SIZE )
+    if( qr.log_size >= LOG_BUFFER_SIZE/LOG_SIZE )
     {
         qr.log = 0;
         return;

@@ -28,7 +28,7 @@
 #define PANIC_RPM   200
 #define PANIC_TIME  5000
 
-#define LOG_BUFFER_SIZE     716800 //700kB = 700*1024 B, NUMBER OF INTEGERS = 700*1024/4
+#define LOG_BUFFER_SIZE     102400 //100k
 
 struct drone
 {
@@ -107,5 +107,6 @@ void full_mode(void);
 void stop_motors(void);
 void catnap(int);
 void ucatnap(int);
+int sqrt(int);
 
 #endif // DRONE_H

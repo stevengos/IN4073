@@ -178,7 +178,7 @@ void set_mode(char command)
         return;
     }
 
-    if( qr.lift_force )
+    if( qr.lift_force && ( command != SAFE_MODE && command != PANIC_MODE ) )
     {
         acknowledge(ACK_INVALID);
         return;

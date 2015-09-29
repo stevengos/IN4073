@@ -14,7 +14,7 @@
 #include "keyboard.h"
 #include "joystick.h"
 
-#define REFRESH_TIME    50
+#define REFRESH_TIME    100
 
 pthread_mutex_t lock_board;
 
@@ -55,7 +55,7 @@ void *is_alive(void* board)
 
         pthread_mutex_unlock( &lock_board );
 
-        usleep(50000); //50ms
+        usleep(REFRESH_TIME*1000); //50ms
     }
 }
 
