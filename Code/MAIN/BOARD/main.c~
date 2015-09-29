@@ -1,0 +1,58 @@
+/**
+@author Gianluca Savaia
+*/
+
+#include <stdio.h>
+#include "x32.h"
+#include "static.h"
+
+#include "drone.h"
+#include "isr.h"
+
+
+struct drone qr; // OUR DRONE
+
+int main()
+{
+    char c;
+
+    while (X32_RS232_READ)
+        c = X32_RS232_DATA; // empty buffer
+
+    //set ISR vector, buttons
+    SET_INTERRUPT_VECTOR(INTERRUPT_BUTTONS, &isr_buttons);
+    SET_INTERRUPT_PRIORITY(INTERRUPT_BUTTONS, 100);
+    ENABLE_INTERRUPT(INTERRUPT_BUTTONS);
+
+    //prepare rs232 rx interrupt
+    SET_INTERRUPT_VECTOR(INTERRUPT_PRIMARY_RX, &isr_rs232_rx);
+    SET_INTERRUPT_PRIORITY(INTERRUPT_PRIMARY_RX, 20);
+    ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+
+    //reset output
+<<<<<<< HEAD
+    X32_LEDS = 0x0000;
+    //X32_DISPLAY = 0x0000;
+=======
+//    X32_LEDS = 0x0000;
+//    X32_DISPLAY = 0x0000;
+>>>>>>> 2015-09-18-gsavaia-lab
+
+    //reset drone properties
+    clear_drone();
+
+    ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
+    run_drone();
+
+    //X32_DISPLAY = 0xC1A0;
+<<<<<<< HEAD
+    X32_LEDS = 0x0;
+=======
+
+    //X32_LEDS = ALL_ON;
+>>>>>>> 2015-09-18-gsavaia-lab
+
+    return 0;
+}
+

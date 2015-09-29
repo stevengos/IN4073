@@ -40,6 +40,7 @@ int main()
     X32_DISPLAY = 0x0000;
     #endif
 
+
     //reset drone properties
     clear_drone();
 

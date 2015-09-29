@@ -61,15 +61,10 @@ void    mon_delay_ms(unsigned int ms)
 }
 
 void set_throttle_command(char header, int throttle, int divisor){
-	float throttle_on_scale = 0, multiplier;
+	int throttle_on_scale = 0, multiplier;
 	char send_value;
-
-	//printf("\n>>> %d %d %d \n", header, throttle, divisor);
-
 	//throttle_division = axis[3]/JS_STEP_DIVISION;
 	throttle_on_scale = round_div(throttle,divisor);
-
-	//printf("\n>>> %d %d %d \n", header, throttle_on_scale, divisor);
 
 	if(throttle_on_scale > 1000){
 		throttle_on_scale = 1000;
@@ -79,9 +74,7 @@ void set_throttle_command(char header, int throttle, int divisor){
 	}
 
 	//scale int to char
-
-	if(divisor == JS_STEP_DIVISION_SMALL)
-	{
+	if(divisor == JS_STEP_DIVISION_SMALL){
 		multiplier = 127;
 	}
 	else{
@@ -89,19 +82,7 @@ void set_throttle_command(char header, int throttle, int divisor){
 	}
 
 	send_value = (float)throttle_on_scale/1000*multiplier;
-/*
-    if(header == SET_LIFT)
-        printf("Lift>>> Joystick=%f Command=%d MAX=%f \n", throttle_on_scale, send_value, multiplier);
-    if(header == SET_PITCH)
-        printf("Pitch>>> Joystick=%f Command=%d MAX=%f \n", throttle_on_scale, send_value, multiplier);
-    if(header == SET_ROLL)
-        printf("Roll>>> Joystick=%f Command=%d MAX=%f \n", throttle_on_scale, send_value, multiplier);
-    if(header == SET_YAWRATE)
-        printf("Yaw>>> Joystick=%f Command=%d MAX=%f \n", throttle_on_scale, send_value, multiplier);
-
-	//send the packet
-	//printf(" %c = %d | ", header, send_value);
-*/	
+	
 	//send the packet
 	printf(" %c = %d | ", header, send_value);
 
@@ -119,8 +100,8 @@ int set_js_command(int fd){
 
 	/* check up on JS
 	*/
-
-	while (read(fd, &js, sizeof(struct js_event)) == sizeof(struct js_event)){
+	while (read(fd, &js, sizeof(struct js_event)) == 
+	       			sizeof(struct js_event))  {
 
 		/* register data
 		 */
@@ -148,12 +129,13 @@ int set_js_command(int fd){
 	for (i = 0; i < 12; i++) {
 		printf("%d ",button[i]);
 	}
+	
+
 
 	printf(" |  ");
 	*/
-
-	//exit program
-
+	
+	//exit program	
 	if (button[0]){
 		return 1;
 	}
@@ -162,7 +144,6 @@ int set_js_command(int fd){
 	if(js_init_mode && axis[0] == 0 && axis[1] == 0 && axis[2] == 0){
 		js_init_2_op_counter++;
 	}
-
 
 	/* when a level of init_2_op of 5 is reached the joystick is considered out of 
 	 * biased init_mode
@@ -174,12 +155,11 @@ int set_js_command(int fd){
 
 	//--- DEBUG
 	if(js_init_mode){
-
-		printf("init_mode\n");
+		printf("init_mode");
 	}
 
 	if(js_operation_mode){
-		printf("op mode\n");
+		printf("op mode");
 	}
 	//---
 
@@ -222,7 +202,7 @@ int set_js_command(int fd){
 	if(throttle_total > JS_MIN_VALUE){
 		set_throttle_command(SET_LIFT, throttle_total, JS_STEP_DIVISION_BIG);
 
-		command_set = 1;
+		command_set = 1;		
 	}else{
 		set_throttle_command(SET_LIFT, 0, JS_STEP_DIVISION_BIG);
 
@@ -231,7 +211,7 @@ int set_js_command(int fd){
 
 	if(command_set == 0){
 		push_packet_t(EMPTY, EMPTY);
-	}
+	}	
 
 	return 0;
 }

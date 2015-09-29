@@ -11,6 +11,9 @@
 #include "keyboard.h"
 #include "../interface/hamming.h"
 
+/* from http://stackoverflow.com/questions/448944/c-non-blocking-keyboard-input
+ * check if keyboard was hit
+ */
 int kbhit()
 {
     struct timeval tv = { 0L, 0L };
@@ -30,6 +33,7 @@ inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* n
 
     tcsetattr(0, TCSANOW, newTerminalSettings);
 
+    //system ("/bin/stty raw");
     setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
@@ -40,13 +44,12 @@ inline void close_keyboard(struct termios* oldTerminalSettings)
 
 char getchar_keyboard()
 {
-    //char ch = getchar();
-    char ch;
-    int c;
+	char ch = 0;
+	int c;
 
-    if(kbhit())
-    {
-        ch = getchar();
+    //char ch = getchar();
+    if(kbhit()){
+	ch = getchar();
     }
 
     printf("%d ", ch);
@@ -141,13 +144,14 @@ packet_t encapsulate(char command)
 
         /* MANUAL CONTROL */
         case A:
-            outgoing.header     = D_LIFT;
+	    outgoing.header     = D_LIFT;
             outgoing.command    = INCREASE;
             break;
         case Z:
             outgoing.header     = D_LIFT;
             outgoing.command    = DECREASE;
             break;
+        
         case Q:
             outgoing.header     = D_YAWRATE;
             outgoing.command    = DECREASE;
