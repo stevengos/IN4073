@@ -131,6 +131,8 @@ void manual_mode()
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
+            ucatnap(20);
+
             #ifdef PERIPHERAL_XUFO_A0
 
             X32_QR_A1 = qr.ae1;
@@ -248,6 +250,8 @@ void yaw_mode()
             qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : (short)ae4;
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+
+            ucatnap(20);
 
             #ifdef PERIPHERAL_XUFO_A0
 
@@ -406,6 +410,10 @@ void add_log()
     new_log.ae2 = qr.ae2;
     new_log.ae3 = qr.ae3;
     new_log.ae4 = qr.ae4;
+
+    new_log.sax = qr.sax;
+    new_log.say = qr.say;
+    new_log.saz = qr.saz;
 
     new_log.sp = qr.sp;
     new_log.sq = qr.sq;

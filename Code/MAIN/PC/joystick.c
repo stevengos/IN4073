@@ -75,16 +75,16 @@ void set_throttle_command(char header, int throttle, int divisor)
 	else
 		multiplier = 255;
 
-	send_value = (float)throttle_on_scale/1000*multiplier;
+	send_value = throttle_on_scale/1000.0*multiplier;
 
     if(header == SET_LIFT)
-        printf("Lift>>> Joystick=%f Command=%d MAX=%f \n", throttle_on_scale, send_value, multiplier);
+        printf("Lift>>\t Joystick=%f\t Command=%d\t MAX=%f \n", throttle_on_scale, (unsigned char)send_value, multiplier);
     if(header == SET_PITCH)
-        printf("Pitch>>> Joystick=%f Command=%d MAX=%f \n", throttle_on_scale, send_value, multiplier);
+        printf("Pitch>>\t Joystick=%f\t Command=%d\t MAX=%f \n", throttle_on_scale, send_value, multiplier);
     if(header == SET_ROLL)
-        printf("Roll>>> Joystick=%f Command=%d MAX=%f \n", throttle_on_scale, send_value, multiplier);
+        printf("Roll>>\t Joystick=%f\t Command=%d\t MAX=%f \n", throttle_on_scale, send_value, multiplier);
     if(header == SET_YAWRATE)
-        printf("Yaw>>> Joystick=%f Command=%d MAX=%f \n", throttle_on_scale, send_value, multiplier);
+        printf("Yaw>>\t Joystick=%f\t Command=%d\t MAX=%f \n", throttle_on_scale, send_value, multiplier);
 
 	//send the packet
 	//printf(" %c = %d | ", header, send_value);
@@ -146,18 +146,6 @@ int set_js_command(int fd)
 
     /*************** PREPARE PACKET TO BE SENT *************************************/
 
-	//roll
-	if(axis[0] < -JS_MIN_VALUE || axis[0] > JS_MIN_VALUE)
-	{
-		set_throttle_command(SET_ROLL, axis[0], JS_STEP_DIVISION_SMALL);
-		command_set = 1;
-	}
-	else
-	{
-		set_throttle_command(SET_ROLL, 0, JS_STEP_DIVISION_SMALL);
-		command_set = 1;
-	}
-
 	//pitch
 	if(axis[1] < -JS_MIN_VALUE || axis[1] > JS_MIN_VALUE)
 	{
@@ -167,6 +155,18 @@ int set_js_command(int fd)
 	else
 	{
 		set_throttle_command(SET_PITCH, 0, JS_STEP_DIVISION_SMALL);
+		command_set = 1;
+	}
+
+    //roll
+	if(axis[0] < -JS_MIN_VALUE || axis[0] > JS_MIN_VALUE)
+	{
+		set_throttle_command(SET_ROLL, axis[0], JS_STEP_DIVISION_SMALL);
+		command_set = 1;
+	}
+	else
+	{
+		set_throttle_command(SET_ROLL, 0, JS_STEP_DIVISION_SMALL);
 		command_set = 1;
 	}
 

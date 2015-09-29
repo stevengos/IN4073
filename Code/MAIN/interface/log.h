@@ -21,6 +21,7 @@ struct log_s
     short sax;
     short say;
     short saz;
+
     short sp;
     short sq;
     short sr;

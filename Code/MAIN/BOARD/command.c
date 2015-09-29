@@ -99,9 +99,6 @@ void perform_command(char header, char command)
                     acknowledge(ACK_INVALID);
     };
 
-    if(qr.log)
-        add_log();
-
     //printf("%d\t%d\t%d\t%d\t%d\t%d\n", qr.sax, qr.say, qr.saz, qr.sp, qr.sq, qr.sr);
 }
 
@@ -375,7 +372,7 @@ void upload_log()
         send_int( outgoing.timestamp );
 
         /* Sending log data */
-        while( ptr_head != ptr_tail )
+        do
         {
             counter_timeout = 0;
 
@@ -394,6 +391,7 @@ void upload_log()
 
             ptr_head++;
         }
+        while( ptr_head != ptr_tail );
 
         send_short(LOG_END);
 

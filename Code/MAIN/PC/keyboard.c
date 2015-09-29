@@ -47,9 +47,8 @@ char getchar_keyboard()
     if(kbhit())
     {
         ch = getchar();
+        printf("keyboard> %d ", ch);
     }
-
-    printf("%d ", ch);
 
     if( ch == ESC )
     {

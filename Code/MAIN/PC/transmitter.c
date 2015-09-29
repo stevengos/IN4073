@@ -64,9 +64,7 @@ void logging(int board, packet_t p)
     printf("pc> Sending packet...\n");
 
     pthread_mutex_lock( &lock_board );
-
     send_packet(board, p);
-
     pthread_mutex_unlock( &lock_board );
 
     sleep(1); //give time to board to write output 1s
@@ -76,12 +74,12 @@ void logging(int board, packet_t p)
 
     int status = 1;
 
-    while( status = getint_board(board, &incoming_int) )
+    while( status = getint_board(board, &incoming_int) ) //while there's a new log line
     {
-        /*************************************************/
+        //read the log id
         printf("\t#%d ", incoming_int);
 
-        /*************************************************/
+        //read timestamp
         status = getint_board(board, &incoming_int);
 
         if( !status )
@@ -89,7 +87,7 @@ void logging(int board, packet_t p)
 
         printf("%d ", incoming_int);
 
-        /*************************************************/
+        //read data
         while(1)
         {
             status = getshort_board(board, &incoming_short);
@@ -103,7 +101,7 @@ void logging(int board, packet_t p)
         printf("\n");
     }
 
-    printf("\npc>Log retrival is over.\n\n");
+    printf("\npc>Log retrival is over. Press any key to continue.\n\n");
 
     getchar();
 }
@@ -181,7 +179,7 @@ int main()
 
 		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
 
-        if(packet_buffer[packet_counter].header == LOG)
+        if(packet_buffer[packet_counter].command == LOG_GET)
         {
             close_keyboard(&oldKeyboardSettings);
 
@@ -208,6 +206,8 @@ int main()
                 send_packet(board, p);
                 pthread_mutex_unlock( &lock_board );
 
+                printf("pc> Sending packet %d... ", i);
+
                 mon_delay_ms(REFRESH_TIME);
 
                 //pthread_mutex_lock( &lock_board );
@@ -222,15 +222,20 @@ int main()
                     else
                         usleep(500);
 
+                if( ack_received == ACK_NEGATIVE )
+                    printf("NACK received, trying again...\n"), counter++;
                 //pthread_mutex_unlock( &lock_board );
             }
-            while( ack_received == ACK_NEGATIVE );
+            while( ack_received == ACK_NEGATIVE && counter < 5);
 
+            printf("Command executed correctly.\n");
         }
 
         empty_packet_t();
         counter = 0;
-        system("clear");
+
+        if(ctty != ESC)
+            system("clear");
     }
 
     printf("End of communication.\n");

@@ -17,6 +17,12 @@ short debug = 0;
 
 void isr_buttons(void)
 {
+    char i;
+
+    for(i=0; i < 10; i++, catnap(500))
+
+        X32_LEDS = ALL_ON, catnap(500), X32_LEDS = ALL_OFF;
+
     stop();
 }
 
@@ -28,6 +34,9 @@ void isr_sensors(void)
     qr.sp = X32_QR_S4 - qr.off_p;
     qr.sq = X32_QR_S5 - qr.off_q;
     qr.sr = X32_QR_S6 - qr.off_r;
+
+    if( qr.log )
+        add_log();
 }
 
 void isr_rs232_rx(void)
@@ -88,8 +97,14 @@ void isr_timer(void)
         qr.exit = 1;
         qr.flag_mode = 1;
 
-        for(i=0; i < 10; i++)
+        for(i=0; i < 5; i++, catnap(500))
             X32_LEDS = ALL_ON, catnap(500), X32_LEDS = ALL_OFF;
+
+        #ifdef PERIPHERAL_DISPLAY
+            X32_DISPLAY = 0xf1fa;
+        #endif
+
+        DISABLE_INTERRUPT(INTERRUPT_TIMER1);
     }
 
     qr.link_down = 1;
