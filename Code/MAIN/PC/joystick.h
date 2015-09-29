@@ -5,7 +5,8 @@
 /******************************/
 /* Custom mapping             */
 /******************************/
-#define JS_DEV	"/dev/input/js0"
+#define JS_DEV0	"/dev/input/js0"
+#define JS_DEV1	"/dev/input/js1"
 
 #define JS_MIN_VALUE 100
 #define JS_STEP_DIVISION_SMALL 32

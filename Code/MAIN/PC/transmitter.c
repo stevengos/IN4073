@@ -14,7 +14,7 @@
 #include "keyboard.h"
 #include "joystick.h"
 
-#define REFRESH_TIME    100
+#define REFRESH_TIME    50
 
 pthread_mutex_t lock_board;
 
@@ -128,12 +128,14 @@ int main()
 	int js_exit = 0;
 
     /************* Open Joystick ********************************/
-    joystick = open(JS_DEV, O_RDONLY);
+    joystick = open(JS_DEV0, O_RDONLY);
 
 	if ( joystick < 0)
 	{
-		perror("jstest");
-		exit(1);
+        joystick = open(JS_DEV1, O_RDONLY);
+
+        if( joystick < 0 )
+            perror("jstest"), exit(1);
 	}
 
 	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode

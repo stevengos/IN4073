@@ -99,6 +99,9 @@ void perform_command(char header, char command)
                     acknowledge(ACK_INVALID);
     };
 
+    if( qr.log )
+        add_log();
+
     //printf("%d\t%d\t%d\t%d\t%d\t%d\n", qr.sax, qr.say, qr.saz, qr.sp, qr.sq, qr.sr);
 }
 

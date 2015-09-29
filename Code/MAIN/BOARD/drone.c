@@ -109,8 +109,6 @@ void manual_mode()
     {
         if( qr.lift_force )
         {
-    debug = X32_CLOCK_US;
-
             ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
@@ -132,8 +130,6 @@ void manual_mode()
             qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
             ucatnap(20);
-    X32_DISPLAY = X32_CLOCK_US - debug;
-
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
