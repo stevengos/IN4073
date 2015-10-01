@@ -6,3 +6,4 @@ CHECKLIST OF NEEDED DEBUG IN LAB
 4) if lift>0 cant go to safe mode
 5) in set_mode remove switch for mode=command
 6) ask INLINE
+7) problem allocating memory for logs
