@@ -9,9 +9,7 @@ extern struct drone qr;
 void perform_command(char header, char command)
 {
     if( qr.log )
-        add_log(), X32_LEDS = ALL_ON; //debug
-    else
-        X32_LEDS = LED7;
+        add_log();
 
     switch( header )
     {

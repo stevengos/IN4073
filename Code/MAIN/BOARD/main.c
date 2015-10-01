@@ -35,7 +35,7 @@ int main()
     SET_INTERRUPT_PRIORITY(INTERRUPT_TIMER1, 1);
 
     #ifdef PERIPHERAL_DISPLAY
-    X32_DISPLAY = 0x0000;
+    X32_DISPLAY = 0xAAAA;
     #endif
 
     //reset drone properties

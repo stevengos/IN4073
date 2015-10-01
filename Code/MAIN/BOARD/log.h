@@ -9,8 +9,8 @@
 #include "transmitter.h"
 #include <stdlib.h>
 
-#define LOG_SIZE            30//sizeof(struct log_s)
-#define LOG_BUFFER_SIZE     40 //PROBLEM IN ALLOCATING MEMORY
+#define LOG_SIZE            30   //sizeof(struct log_s)
+#define LOG_BUFFER_SIZE     250 //PROBLEM IN ALLOCATING MEMORY: CANNOT ALLOCATE BIG BUFFER (50 still safe)
 
 extern struct drone qr;
 

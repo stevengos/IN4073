@@ -187,7 +187,7 @@ int main()
 
 		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
 
-        if(packet_buffer[packet_counter].command == LOG_GET)
+        if( packet_buffer[packet_counter].header == LOG && packet_buffer[packet_counter].command == LOG_GET)
         {
             close_keyboard(&oldKeyboardSettings);
 
@@ -208,6 +208,7 @@ int main()
             do //send the same packet until I receive a positive ack
             {
                 int counter_waitack = 0;
+                ack_received = EMPTY;
 
                 //get exclusive access to the board and send the packet
                 pthread_mutex_lock( &lock_board );
@@ -232,6 +233,12 @@ int main()
 
                 if( ack_received == ACK_NEGATIVE )
                     printf("NACK received, trying again...\n"), counter++;
+                if( ack_received == ACK_INVALID )
+                    printf("Invalid, trying again...\n");
+                if( ack_received == ACK_POSITIVE )
+                    printf("Command executed correctly.\n");
+                if( ack_received == EMPTY )
+                    printf("No answer received, trying again...\n"), ack_received = ACK_NEGATIVE, counter++;
                 //pthread_mutex_unlock( &lock_board );
             }
             while( ack_received == ACK_NEGATIVE && counter < 5);

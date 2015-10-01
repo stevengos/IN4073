@@ -61,8 +61,8 @@
 #define LOG_START   0x1
 #define LOG_STOP    0x2
 #define LOG_GET     0x3
-#define LOG_NEWLINE 0x4
-#define LOG_END     0x5
+#define LOG_NEWLINE 0xeff
+#define LOG_END     0xfff
 
 /* Eligible values field when the header is "SET_LED" (use bitwise to operate on more than one led at once */
 #define ALL_OFF 0x00
