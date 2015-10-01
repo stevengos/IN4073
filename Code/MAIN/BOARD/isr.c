@@ -1,16 +1,8 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-15
 */
 
 #include "isr.h"
-
-#include "drone.h"
-
-#include "../interface/packet.h"
-#include "../interface/hamming.h"
-
-#include <stdio.h>
 
 extern struct drone qr;
 short debug = 0;
@@ -34,9 +26,6 @@ void isr_sensors(void)
     qr.sp = X32_QR_S4 - qr.off_p;
     qr.sq = X32_QR_S5 - qr.off_q;
     qr.sr = X32_QR_S6 - qr.off_r;
-
-    if( qr.log )
-        add_log();
 }
 
 void isr_rs232_rx(void)
@@ -45,8 +34,6 @@ void isr_rs232_rx(void)
     char counter = 0;
 
     qr.link_down = 0;
-
-    //X32_DISPLAY = debug++;
 
     if( !X32_RS232_READ )
         return;

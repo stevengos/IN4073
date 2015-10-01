@@ -2,13 +2,11 @@
 @author Gianluca Savaia
 */
 
-#include <stdio.h>
 #include "x32.h"
 #include "static.h"
 
 #include "drone.h"
 #include "isr.h"
-
 
 struct drone qr; // OUR DRONE
 

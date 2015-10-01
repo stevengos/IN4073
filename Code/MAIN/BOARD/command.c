@@ -4,18 +4,15 @@
 
 #include "command.h"
 
-#include "../interface/packet.h"
-#include "../interface/hamming.h"
-
-#include "drone.h"
-#include "isr.h"
-
-#include <stdio.h>
-
 extern struct drone qr;
 
 void perform_command(char header, char command)
 {
+    if( qr.log )
+        add_log(), X32_LEDS = ALL_ON; //debug
+    else
+        X32_LEDS = LED7;
+
     switch( header )
     {
         case SET_MODE:
@@ -92,64 +89,11 @@ void perform_command(char header, char command)
                     break;
 
         case STOP:
-                    printf("board> Stop signal received.\n");
                     stop();
                     break;
         default:
                     acknowledge(ACK_INVALID);
     };
-
-    if( qr.log )
-        add_log();
-
-    //printf("%d\t%d\t%d\t%d\t%d\t%d\n", qr.sax, qr.say, qr.saz, qr.sp, qr.sq, qr.sr);
-}
-
-void acknowledge(char response)
-{
-    char counter = 0;
-    packet_t packet;
-
-    if( response != ACK_POSITIVE && response != ACK_NEGATIVE && response != ACK_INVALID)
-    {
-        printf("board> Internal error: call to acknowledge() with input not defined by protocol.\n");
-        response = ACK_NEGATIVE;
-    }
-
-    while( !X32_RS232_WRITE )
-    {
-        if( counter++ > TIMEOUT_BUFFER_TX )
-            return;
-        else
-            ucatnap(SLEEP_BUFFER_TX);
-    }
-
-    X32_RS232_DATA = ACK;               //header
-
-    while( !X32_RS232_WRITE )
-    {
-        if( counter++ > TIMEOUT_BUFFER_TX )
-            return;
-        else
-            ucatnap(SLEEP_BUFFER_TX);
-    }
-
-    X32_RS232_DATA = response;          //command
-
-    while( !X32_RS232_WRITE )
-    {
-        if( counter++ > TIMEOUT_BUFFER_TX )
-            return;
-        else
-            ucatnap(SLEEP_BUFFER_TX);
-    }
-
-    packet.header = ACK;
-    packet.command = response;
-
-    compute_hamming(&packet);
-
-    X32_RS232_DATA = packet.crc;              //checksum
 }
 
 void stop()
@@ -157,14 +101,11 @@ void stop()
     if( qr.current_mode != SAFE_MODE ) //machine can be stopped only in SAFE_MODE
     {
         acknowledge(ACK_INVALID);
-        printf("board> Please, if you want to stop then go in SAFE_MODE first.\n");
         return;
     }
 
     qr.exit = 1;
     qr.flag_mode = 1;
-
-    printf("board> Machine Stopped\n");
 
     acknowledge(ACK_POSITIVE);
 }
@@ -267,8 +208,10 @@ void set_log(char command)
     switch(command)
     {
         case LOG_START:
-                qr.log = 1;
-                acknowledge(ACK_POSITIVE);
+                if( init_log() )
+                    qr.log = 1, acknowledge(ACK_POSITIVE);
+                else
+                    acknowledge(ACK_NEGATIVE);
                 break;
         case LOG_STOP:
                 qr.log = 0;
@@ -281,127 +224,6 @@ void set_log(char command)
                 acknowledge(ACK_INVALID);
                 return;
     }
-}
-
-void send_short(short value)
-{
-    unsigned char c1, c2;
-
-    c1 = value;
-    c2 = (value >> 8);
-
-    while(!X32_RS232_WRITE);
-    X32_RS232_DATA = c1;
-
-    while(!X32_RS232_WRITE);
-    X32_RS232_DATA = c2;
-}
-
-void send_int(int value)
-{
-    unsigned char c1, c2, c3, c4;
-
-    c1 = value;
-    c2 = (value >> 8);
-    c3 = (value >> 16);
-    c4 = (value >> 24);
-
-    while(!X32_RS232_WRITE);
-    X32_RS232_DATA = c1;
-
-    while(!X32_RS232_WRITE);
-    X32_RS232_DATA = c2;
-
-    while(!X32_RS232_WRITE);
-    X32_RS232_DATA = c3;
-
-    while(!X32_RS232_WRITE);
-    X32_RS232_DATA = c4;
-}
-
-void upload_log()
-{
-    int counter_timeout = 0;
-    int i = 0;
-
-    unsigned char cl, cr;
-
-    if( qr.current_mode != SAFE_MODE )
-    {
-        acknowledge(ACK_INVALID);
-        return;
-    }
-
-    while( i < qr.log_size )
-    {
-        struct log_s outgoing = qr.log_buffer[i];
-        short* ptr_head = &outgoing.ae1; //************* FIRST STRUCT ELEMENT
-        short* ptr_tail = &outgoing.sr; //************* LAST STRUCT ELEMENT
-
-        #ifdef PERIPHERAL_DISPLAY
-        X32_DISPLAY = outgoing.id;
-        #endif
-
-        /* Sending log id */
-        counter_timeout = 0;
-
-        while( !X32_RS232_WRITE )
-        {
-            if( counter_timeout++ > TIMEOUT_BUFFER_TX )
-            {
-                acknowledge(ACK_NEGATIVE);
-                return;
-            }
-            else
-                ucatnap(SLEEP_BUFFER_TX);
-        }
-
-        send_int(outgoing.id);
-
-        /* Sending timestamp */
-        counter_timeout = 0;
-
-        while( !X32_RS232_WRITE )
-        {
-            if( counter_timeout++ > TIMEOUT_BUFFER_TX )
-            {
-                acknowledge(ACK_NEGATIVE);
-                return;
-            }
-            else
-                ucatnap(SLEEP_BUFFER_TX);
-        }
-
-        send_int( outgoing.timestamp );
-
-        /* Sending log data */
-        do
-        {
-            counter_timeout = 0;
-
-            while( !X32_RS232_WRITE )
-            {
-                if( counter_timeout++ > TIMEOUT_BUFFER_TX )
-                {
-                    acknowledge(ACK_NEGATIVE);
-                    return;
-                }
-                else
-                    ucatnap(SLEEP_BUFFER_TX);
-            }
-
-            send_short( *ptr_head );
-
-            ptr_head++;
-        }
-        while( ptr_head != ptr_tail );
-
-        send_short(LOG_END);
-
-        i++;
-    }
-
-    acknowledge(ACK_POSITIVE);
 }
 
 /* JOYSTICK SECTION */

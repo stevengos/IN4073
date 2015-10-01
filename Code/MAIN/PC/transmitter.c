@@ -8,8 +8,6 @@
 #include <unistd.h>
 
 #include "../interface/packet.h"
-#include "../interface/hamming.h"
-#include "../interface/log.h"
 #include "board.h"
 #include "keyboard.h"
 #include "joystick.h"
@@ -72,30 +70,38 @@ void logging(int board, packet_t p)
     int incoming_int;
     short incoming_short;
 
+    int number_logs;
     int status = 1;
+    int debug = 0;
 
-    while( status = getint_board(board, &incoming_int) ) //while there's a new log line
+    /********* receive length of message ******/
+    status = getint_board(board, &incoming_int);
+    number_logs = incoming_int;
+
+    /********* read logs **********************/
+    while( number_logs-- > 0 ) //while there's a new log line
     {
-        //read the log id
-        printf("\t#%d ", incoming_int);
-
-        //read timestamp
         status = getint_board(board, &incoming_int);
 
         if( !status )
             break;
 
-        printf("%d ", incoming_int);
+        printf("#%d %d ", number_logs, incoming_int);
 
-        //read data
-        while(1)
+        debug = 0;//read data
+        while(debug < 20)
         {
             status = getshort_board(board, &incoming_short);
 
-            if(incoming_short == LOG_END)
+            if(incoming_short == LOG_NEWLINE)
                 break;
 
+            if( incoming_short == ACK_INVALID )
+                exit(0);
+
             printf("%d ", incoming_short);
+
+            debug++;
         }
 
         printf("\n");
@@ -128,17 +134,17 @@ int main()
 	int js_exit = 0;
 
     /************* Open Joystick ********************************/
-    joystick = open(JS_DEV0, O_RDONLY);
-
-	if ( joystick < 0)
-	{
-        joystick = open(JS_DEV1, O_RDONLY);
-
-        if( joystick < 0 )
-            perror("jstest"), exit(1);
-	}
-
-	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+//    joystick = open(JS_DEV0, O_RDONLY);
+//
+//	if ( joystick < 0)
+//	{
+//        joystick = open(JS_DEV1, O_RDONLY);
+//
+//        if( joystick < 0 )
+//            perror("jstest"), exit(1);
+//	}
+//
+//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
     /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
@@ -175,7 +181,7 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-        js_exit = set_js_command(joystick); //read the joystick configuration
+        //js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 

@@ -5,8 +5,13 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#define TIMEOUT_BUFFER_TX   10 //counter
-#define SLEEP_BUFFER_TX     10 //usec
+#include "../interface/packet.h"
+#include "../interface/hamming.h"
+
+#include "drone.h"
+#include "isr.h"
+#include "transmitter.h"
+#include "log.h"
 
 void perform_command(char,char);
 void acknowledge(char);

@@ -3,10 +3,6 @@
 */
 
 #include "drone.h"
-#include "../interface/packet.h"
-#include "../interface/log.h"
-
-#include <stdio.h>
 
 extern struct drone qr;
 
@@ -81,7 +77,7 @@ void panic_mode()
 
     #endif // PERIPHERAL_XUFO_A0
 
-    qr.lift_force       = qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
+    qr.lift_force       =  qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
     qr.pitch_momentum   =  0;
     qr.roll_momentum    =  0;
     qr.yaw_momentum     =  0;
@@ -319,7 +315,6 @@ void clear_drone()
     qr.exit = 0;
     qr.link_down = 0;
     qr.log = 0;
-    qr.log_size = 0;
 }
 
 void stop_motors()
@@ -352,90 +347,5 @@ void stop_motors()
     qr.pitch_ref = 0;
     qr.roll_ref = 0;
     qr.yawrate_ref = 0;
-}
-
-void print_drone() //PRINT DRONE STATUS
-{
-    printf("board> printing drone status:\n");
-    printf("mode=%d ", qr.current_mode);
-    printf("log=%d ", qr.log);
-    printf("flag=%d ", qr.flag_mode);
-    printf("link=%d ", qr.link_down);
-    printf("exit=%d\n", qr.exit);
-    printf("scales: pitch=%d roll=%d yawrate=%d lift=%d\n", qr.scale_pitch, qr.scale_roll, qr.scale_yaw, qr.scale_lift);
-    printf("ae1=%d ae2=%d ae3=%d ae4=%d\n", qr.ae1, qr.ae2, qr.ae3, qr.ae4);
-    printf("pitch=%d roll=%d yawrate=%d lift=%d\n", qr.pitch_momentum, qr.roll_momentum, qr.yaw_momentum, qr.lift_force);
-}
-
-void catnap(int ms)
-{
-    int now = X32_CLOCK_MS;
-
-    while( X32_CLOCK_MS < now + ms);
-}
-
-void ucatnap(int us)
-{
-    int now = X32_CLOCK_US;
-
-    while( X32_CLOCK_US < now + us);
-}
-
-int sqrt(int square)
-{
-    int i=0;
-    int result = square/2;
-
-    for(; i<15; i++)
-        result = (result + square/result)/2;
-
-    return result;
-}
-
-void add_log()
-{
-    struct log_s new_log;
-
-    if( !qr.log )
-        return;
-
-    if( qr.log_size >= LOG_BUFFER_SIZE/LOG_SIZE )
-    {
-        qr.log = 0;
-        return;
-    }
-
-    //printf("board> Adding Log.\n");
-
-    DISABLE_INTERRUPT(INTERRUPT_GLOBAL); //SAVE LOG ATOMICALLY
-
-    new_log.id = qr.log_size;
-
-    #ifdef X32_XUFO_TIMESTAMP
-    new_log.timestamp = X32_XUFO_TIMESTAMP;
-    #else
-    new_log.timestamp = X32_CLOCK_MS;
-    #endif
-
-    new_log.ae1 = qr.ae1;
-    new_log.ae2 = qr.ae2;
-    new_log.ae3 = qr.ae3;
-    new_log.ae4 = qr.ae4;
-
-    new_log.sax = qr.sax;
-    new_log.say = qr.say;
-    new_log.saz = qr.saz;
-
-    new_log.sp = qr.sp;
-    new_log.sq = qr.sq;
-    new_log.sr = qr.sr;
-
-    ENABLE_INTERRUPT(INTERRUPT_GLOBAL); //END LOG
-
-    qr.log_buffer[qr.log_size] = new_log; // write log into buffer
-
-    qr.log_size++;
-
-    //printf("board> Log added %d %d %d %d %d %d.\n", new_log.id, new_log.timestamp, new_log.ae1, new_log.ae2, new_log.ae3, new_log.ae4);
 }
 

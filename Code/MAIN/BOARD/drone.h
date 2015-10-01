@@ -7,7 +7,8 @@
 
 #include "x32.h"
 #include "static.h"
-#include "../interface/log.h"
+#include "utility.h"
+#include "../interface/packet.h"
 
 #define MAX_RPM     0x3ff
 #define MIN_RPM     0x00a
@@ -27,8 +28,6 @@
 
 #define PANIC_RPM   200
 #define PANIC_TIME  5000
-
-#define LOG_BUFFER_SIZE     102400 //100k
 
 struct drone
 {
@@ -86,16 +85,10 @@ struct drone
     char exit;
     char link_down;
     char log;
-
-    //logs buffer
-    struct log_s log_buffer[LOG_BUFFER_SIZE/LOG_SIZE];
-    int log_size;
 };
 
 void run_drone();
 void clear_drone();
-void print_drone();
-void add_log();
 
 void safe_mode(void);
 void panic_mode(void);
@@ -105,8 +98,5 @@ void yaw_mode(void);
 void full_mode(void);
 
 void stop_motors(void);
-void catnap(int);
-void ucatnap(int);
-int sqrt(int);
 
 #endif // DRONE_H

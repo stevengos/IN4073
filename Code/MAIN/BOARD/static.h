@@ -1,6 +1,5 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-15
 */
 
 #ifndef STATIC_H
@@ -30,5 +29,11 @@
 #define X32_RS232_STATUS	peripherals[PERIPHERAL_PRIMARY_STATUS]
 #define X32_RS232_WRITE     (X32_RS232_STATUS & 0x01)
 #define X32_RS232_READ      (X32_RS232_STATUS & 0x02)
+
+#define TIMEOUT_BUFFER_TX   10  //counter
+#define SLEEP_BUFFER_TX     10  //usec
+
+#define TIMEOUT_BUFFER_RX   10  //counter
+#define SLEEP_BUFFER_RX     10  //usec
 
 #endif // STATIC_H
