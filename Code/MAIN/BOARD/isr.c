@@ -3,6 +3,7 @@
 */
 
 #include "isr.h"
+#include "butterworth.h"
 
 extern struct drone qr;
 short debug = 0;
@@ -20,12 +21,18 @@ void isr_buttons(void)
 
 void isr_sensors(void)
 {
+    DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
     qr.sax = X32_QR_S1 - qr.off_ax;
     qr.say = X32_QR_S2 - qr.off_ay;
     qr.saz = X32_QR_S3 - qr.off_az;
     qr.sp = X32_QR_S4 - qr.off_p;
     qr.sq = X32_QR_S5 - qr.off_q;
     qr.sr = X32_QR_S6 - qr.off_r;
+
+    butter_second();
+
+    ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 }
 
 void isr_rs232_rx(void)

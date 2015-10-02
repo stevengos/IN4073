@@ -33,6 +33,10 @@ struct log_s
     short sq;
     short sr;
 
+    short fp;
+    short fq;
+    short fr;
+
     short end;
 };
 

@@ -288,15 +288,15 @@ void clear_drone()
     qr.yawrate_ref = 0;
     qr.lift_ref = 0;
 
-//    qr.scale_pitch = 8240;
-//    qr.scale_roll = 8240;
-//    qr.scale_yaw = 16400;
-//    qr.scale_lift = 16400;
+    qr.scale_pitch = 8240;
+    qr.scale_roll = 8240;
+    qr.scale_yaw = 16400;
+    qr.scale_lift = 16400;
 
-    qr.scale_pitch = 8240/2;
-    qr.scale_roll = 8240/2;
-    qr.scale_yaw = 16400/2;
-    qr.scale_lift = 16400/2;
+//    qr.scale_pitch = 8240/2;
+//    qr.scale_roll = 8240/2;
+//    qr.scale_yaw = 16400/2;
+//    qr.scale_lift = 16400/2;
 
     qr.controller_yaw = 1;
 

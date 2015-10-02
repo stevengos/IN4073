@@ -52,6 +52,10 @@ void add_log()
     new_log.sq = qr.sq;
     new_log.sr = qr.sr;
 
+    new_log.fp = qr.fp;
+    new_log.fq = qr.fq;
+    new_log.fr = qr.fr;
+
     log_buffer[log_size] = new_log; // write log into buffer
 
     log_size++;

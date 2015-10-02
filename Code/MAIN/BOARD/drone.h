@@ -71,6 +71,14 @@ struct drone
     short sq;
     short sr;
 
+    //filtered data
+    short fax;
+    short fay;
+    short faz;
+    short fp;
+    short fq;
+    short fr;
+
     //sensor offsets
     short off_ax;
     short off_ay;

@@ -12,7 +12,7 @@
 
 
 #define a0 329 //Second-Order Butterworth constants in q14
-#define a1 658 
+#define a1 658
 #define a2 329
 #define b1 -25576
 #define b2 10508
@@ -25,17 +25,12 @@ int Sample=0;
 
 struct butter_s  //Structure that will contain the buffered data
 {
-  
-   short int sp;
-   short int sq;
-   short int sr;
+   short sp;
+   short sq;
+   short sr;
 };
 
-/*struct butter_s* butter_buffer;
-butter_buffer = (struct butter_s*)malloc(BUTTER_SIZE*BUTTERWORTH_DATA_BUFFER_SIZE);*/
-//struct butter_s  butter_buffer[BUTTER_SIZE * BUTTERWORTH_DATA_BUFFER_SIZE];
-
-struct butter_s butter_buffer[BUTTER_SIZE * BUTTERWORTH_DATA_BUFFER_SIZE];
+//struct butter_s butter_buffer[BUTTER_SIZE * BUTTERWORTH_DATA_BUFFER_SIZE];
 
 short x[3][3];
 short y[3][3];
