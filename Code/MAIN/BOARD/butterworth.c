@@ -12,20 +12,14 @@ int x2_1, x2_2, x2_3;
 int y1_1, y1_2, y1_3; 
 int y2_1, y2_2, y2_3;
  
-
-
 void butter_second()
 {
-  
   struct butter_s new_data;
   
   if (Sample ==99)
   {
     reset_sample();
   }
-
-
- 
 
  /**update the history**/
 

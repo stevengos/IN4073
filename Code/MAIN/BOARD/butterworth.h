@@ -33,7 +33,9 @@ struct butter_s  //Structure that will contain the buffered data
 
 /*struct butter_s* butter_buffer;
 butter_buffer = (struct butter_s*)malloc(BUTTER_SIZE*BUTTERWORTH_DATA_BUFFER_SIZE);*/
-struct butter_s  butter_buffer[BUTTER_SIZE * BUTTERWORTH_DATA_BUFFER_SIZE];
+//struct butter_s  butter_buffer[BUTTER_SIZE * BUTTERWORTH_DATA_BUFFER_SIZE];
+
+struct butter_s butter_buffer[BUTTER_SIZE * BUTTERWORTH_DATA_BUFFER_SIZE];
 
 short x[3][3];
 short y[3][3];

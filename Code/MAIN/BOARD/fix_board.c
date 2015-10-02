@@ -11,10 +11,10 @@ q14 normal2q (int x) {
 
 
  int q2normal(q14 a) {
- int result;
-/******Second edition-board ***/ 
- result =  a / (1 << Q);
- return result;
+	 int result;
+	/******Second edition-board ***/ 
+	 result =  a / (1 << Q);
+	 return result;
 }
 
 /*********this function adds two q14 numbers*********/
@@ -75,7 +75,7 @@ q14 q_sqrt (q14 a){
   q14 result =0;
   int i;
   for (i =0; i<15; i++){
-      result=(0.5)*(result+result/(float)a);
+      result=(1/2)*(result+result/(int)a);
       }
    return (q14) result;
 }

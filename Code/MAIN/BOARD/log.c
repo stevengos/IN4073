@@ -13,13 +13,13 @@ void add_log()
 
     if( log_size >= LOG_BUFFER_SIZE )
     {
-        X32_DISPLAY = 0xffff;
+        //X32_DISPLAY = 0xffff;
         //X32_LEDS = ALL_OFF; //debug
         qr.log = 0;
         return;
     }
 
-    X32_DISPLAY = log_size; //debug
+    //X32_DISPLAY = log_size; //debug
 
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL); //SAVE LOG ATOMICALLY
 
