@@ -305,7 +305,7 @@ int main()
                         usleep(500);
 
                 if( ack_received == ACK_NEGATIVE )
-                    printf("NACK received, trying again...***************************************************************************************\n"), counter++;
+                    printf("NACK received, trying again...\n"), counter++;
                 if( ack_received == ACK_INVALID )
                     printf("Invalid, trying again...\n");
                 if( ack_received == ACK_POSITIVE )

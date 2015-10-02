@@ -20,9 +20,9 @@ void ucatnap(int us)
 
 int sqrt(int square)
 {
-    register int prev;
-    register int diff;
-    register int result;
+    int prev = 0;
+    int diff = 100;
+    int result = 0;
 
     result = square/MAGIC_NUMBER == 0 ? 1 : square/MAGIC_NUMBER;
 

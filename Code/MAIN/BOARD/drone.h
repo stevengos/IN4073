@@ -13,6 +13,7 @@
 #define MAX_RPM     0x3ff
 #define MIN_RPM     0x00a
 #define STEP_RPM    0x010
+#define MOTOR_REFRESH   200
 
 #define MAX_PITCH   255
 #define MAX_ROLL    255

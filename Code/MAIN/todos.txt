@@ -7,3 +7,5 @@ CHECKLIST OF NEEDED DEBUG IN LAB
 5) in set_mode remove switch for mode=command
 6) ask INLINE
 7) problem allocating memory for logs
+8) yaw with filters
+
