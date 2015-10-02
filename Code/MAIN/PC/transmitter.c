@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "../interface/packet.h"
 #include "board.h"
@@ -18,6 +19,69 @@ pthread_mutex_t lock_board;
 
 packet_t packet_buffer[10];
 int packet_counter = 0;
+
+//{
+
+char* get_current_time_string(){
+	time_t current_time;
+	struct tm * time_info;
+	char* timeString;  // space for "%Y_%m_%d_%H_%M_%S\0"
+	timeString = malloc(sizeof(char) * 21);
+
+	time(&current_time);
+	time_info = localtime(&current_time);
+
+	strftime(timeString, sizeof(char) * 21, "%Y_%m_%d_%H_%M_%S", time_info);
+	puts(timeString);
+
+	return timeString;
+}
+
+char* readFile(char* filename)
+{
+    FILE* file = fopen(filename,"r");
+    if(file == NULL)
+    {
+        return NULL;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long int size = ftell(file);
+    rewind(file);
+
+    char* content = calloc(size + 1, 1);
+
+    fread(content,1,size,file);
+
+    return content;
+}
+
+void safe_measurement_to_file(char* filename, char* t_string){
+	//int sz;
+	//char* buff_string;
+
+	FILE *fp;
+	fp = fopen (filename, "aw+");
+
+	/*fseek(fp, 0L, SEEK_END);
+	sz = ftell(fp);
+	fseek(fp, 0L, SEEK_SET);
+	buff_string = malloc(sz);
+*/
+	fprintf(fp, "%s", t_string);
+
+ 	fclose(fp);
+}
+
+void safe_int_measurement_to_file(char* filename, int t_int){
+	char temp_value[100];
+
+	sprintf(temp_value, "%d ", t_int);
+
+	safe_measurement_to_file(filename, temp_value);
+}
+
+//}
 
 void push_packet_t(char header, char command)
 {
@@ -69,6 +133,11 @@ void logging(int board, packet_t p)
 
     int incoming_int;
     short incoming_short;
+    char file_name[100];
+
+    strcpy(file_name, "measurements/meas_");
+    strcat(file_name, get_current_time_string());
+    strcat(file_name, ".txt");
 
     int number_logs;
     int status = 1;
@@ -81,12 +150,14 @@ void logging(int board, packet_t p)
     /********* read logs **********************/
     while( number_logs-- > 0 ) //while there's a new log line
     {
-        status = getint_board(board, &incoming_int);
+        status = getint_board(board, &incoming_int); //receive timestamp
+        //safe_int_measurement_to_file(file_name, incoming_int);
 
         if( !status )
             break;
 
         printf("#%d %d ", number_logs, incoming_int);
+        safe_int_measurement_to_file(file_name, incoming_int);
 
         debug = 0;//read data
         while(debug < 20)
@@ -100,11 +171,13 @@ void logging(int board, packet_t p)
                 exit(0);
 
             printf("%d ", incoming_short);
+            safe_int_measurement_to_file(file_name, incoming_short);
 
             debug++;
         }
 
         printf("\n");
+        safe_measurement_to_file(file_name, "\n");
     }
 
     printf("\npc>Log retrival is over. Press any key to continue.\n\n");
@@ -134,17 +207,17 @@ int main()
 	int js_exit = 0;
 
     /************* Open Joystick ********************************/
-//    joystick = open(JS_DEV0, O_RDONLY);
-//
-//	if ( joystick < 0)
-//	{
-//        joystick = open(JS_DEV1, O_RDONLY);
-//
-//        if( joystick < 0 )
-//            perror("jstest"), exit(1);
-//	}
-//
-//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+    joystick = open(JS_DEV0, O_RDONLY);
+
+	if ( joystick < 0)
+	{
+        joystick = open(JS_DEV1, O_RDONLY);
+
+        if( joystick < 0 )
+            perror("jstest"), exit(1);
+	}
+
+	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
     /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
@@ -181,7 +254,7 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-        //js_exit = set_js_command(joystick); //read the joystick configuration
+        js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 
@@ -232,7 +305,7 @@ int main()
                         usleep(500);
 
                 if( ack_received == ACK_NEGATIVE )
-                    printf("NACK received, trying again...\n"), counter++;
+                    printf("NACK received, trying again...***************************************************************************************\n"), counter++;
                 if( ack_received == ACK_INVALID )
                     printf("Invalid, trying again...\n");
                 if( ack_received == ACK_POSITIVE )
