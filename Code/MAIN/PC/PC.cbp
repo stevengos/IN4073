@@ -17,13 +17,14 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="board.h" />
+		<Unit filename="joystick.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="joystick.h" />
 		<Unit filename="keyboard.c">
 			<Option compilerVar="CC" />
-			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="keyboard.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="keyboard.h" />
 		<Unit filename="transmitter.c">
 			<Option compilerVar="CC" />
 		</Unit>

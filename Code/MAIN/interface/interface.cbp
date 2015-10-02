@@ -26,6 +26,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="hamming.h" />
+		<Unit filename="log.h" />
 		<Unit filename="packet.h" />
 		<Extensions>
 			<code_completion />

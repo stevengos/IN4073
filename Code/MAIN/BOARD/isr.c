@@ -1,23 +1,31 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-15
 */
 
 #include "isr.h"
-
-#include "drone.h"
-
-#include "../interface/packet.h"
-#include "../interface/hamming.h"
-
-#include <stdio.h>
 
 extern struct drone qr;
 short debug = 0;
 
 void isr_buttons(void)
 {
+    char i;
+
+    for(i=0; i < 10; i++, catnap(500))
+
+        X32_LEDS = ALL_ON, catnap(500), X32_LEDS = ALL_OFF;
+
     stop();
+}
+
+void isr_sensors(void)
+{
+    qr.sax = X32_QR_S1 - qr.off_ax;
+    qr.say = X32_QR_S2 - qr.off_ay;
+    qr.saz = X32_QR_S3 - qr.off_az;
+    qr.sp = X32_QR_S4 - qr.off_p;
+    qr.sq = X32_QR_S5 - qr.off_q;
+    qr.sr = X32_QR_S6 - qr.off_r;
 }
 
 void isr_rs232_rx(void)
@@ -27,14 +35,8 @@ void isr_rs232_rx(void)
 
     qr.link_down = 0;
 
-    DISABLE_INTERRUPT( INTERRUPT_PRIMARY_RX );
-
     if( !X32_RS232_READ )
-    {
-        printf("board> Interrupt from RS232 arrived, but buffer was empty.\n");
-        ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
         return;
-    }
 
     incoming.header = X32_RS232_DATA; //read first byte (HEADER)
 
@@ -42,13 +44,11 @@ void isr_rs232_rx(void)
     {
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
-            printf("board> Packet incomplete.\n");
-            ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
             acknowledge(ACK_NEGATIVE);
             return;
         }
         else
-            usleep(SLEEP_BUFFER_RX);
+            ucatnap(SLEEP_BUFFER_RX);
     }
 
     incoming.command = X32_RS232_DATA; //read second byte (COMMAND)
@@ -57,13 +57,11 @@ void isr_rs232_rx(void)
     {
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
-            printf("board> Waiting for checksum...\n");
-            ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
             acknowledge(ACK_NEGATIVE);
             return;
         }
         else
-            usleep(SLEEP_BUFFER_RX);
+            ucatnap(SLEEP_BUFFER_RX);
     }
 
     incoming.crc = X32_RS232_DATA; //read third byte (CRC)
@@ -72,10 +70,6 @@ void isr_rs232_rx(void)
         perform_command(incoming.header, incoming.command);
     else
         acknowledge(ACK_NEGATIVE);
-
-    X32_DISPLAY = debug++;
-
-    ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 }
 
 
@@ -83,12 +77,21 @@ void isr_timer(void)
 {
     if( qr.link_down )
     {
-        printf("board> PC Link is down! SAFE_MODE set.\n");
+        unsigned char i;
+
         qr.current_mode = SAFE_MODE;
         stop_motors();
         qr.exit = 1;
         qr.flag_mode = 1;
-        X32_DISPLAY = 0x0FF;
+
+        for(i=0; i < 5; i++, catnap(500))
+            X32_LEDS = ALL_ON, catnap(500), X32_LEDS = ALL_OFF;
+
+        #ifdef PERIPHERAL_DISPLAY
+            X32_DISPLAY = 0xf1fa;
+        #endif
+
+        DISABLE_INTERRUPT(INTERRUPT_TIMER1);
     }
 
     qr.link_down = 1;

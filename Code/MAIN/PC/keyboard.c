@@ -2,8 +2,23 @@
 @author Gianluca Savaia
 */
 
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/select.h>
+#include <termios.h>
+
 #include "keyboard.h"
 #include "../interface/hamming.h"
+
+int kbhit()
+{
+    struct timeval tv = { 0L, 0L };
+    fd_set fds;
+    FD_ZERO(&fds);
+    FD_SET(0, &fds);
+    return select(1, &fds, NULL, NULL, &tv);
+}
 
 inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTerminalSettings)
 {
@@ -14,6 +29,8 @@ inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* n
     newTerminalSettings->c_lflag &= (~ICANON & ~ECHO); //dont wait for enter, dont print to terminal
 
     tcsetattr(0, TCSANOW, newTerminalSettings);
+
+    setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
 inline void close_keyboard(struct termios* oldTerminalSettings)
@@ -23,9 +40,15 @@ inline void close_keyboard(struct termios* oldTerminalSettings)
 
 char getchar_keyboard()
 {
-    char ch = getchar();
+    //char ch = getchar();
+    char ch;
+    int c;
 
-    printf("%d ", ch);
+    if(kbhit())
+    {
+        ch = getchar();
+        printf("keyboard> %d ", ch);
+    }
 
     if( ch == ESC )
     {
@@ -102,6 +125,18 @@ packet_t encapsulate(char command)
             outgoing.header     = SET_MODE;
             outgoing.command    = FULL_MODE;
             break;
+        case SEVEN:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_START;
+            break;
+        case EIGHT:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_STOP;
+            break;
+        case NINE:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_GET;
+            break;
 
         /* MANUAL CONTROL */
         case A:
@@ -138,25 +173,47 @@ packet_t encapsulate(char command)
             break;
 
         /* CONTROLLER SETTINGS */
-        case U:
-            outgoing.header     = EMPTY;
+        case Y:
+            outgoing.header     = SET_SCALE_LIFT;
+            outgoing.command    = INCREASE;
+            break;
+        case H:
+            outgoing.header     = SET_SCALE_LIFT;
             outgoing.command    = DECREASE;
             break;
+        case U:
+            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.command    = INCREASE;
+            break;
         case J:
-            outgoing.header     = EMPTY;
-            outgoing.command    = EMPTY;
+            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.command    = DECREASE;
+            break;
+        case I:
+            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.command    = INCREASE;
             break;
         case K:
-            outgoing.header     = EMPTY;
-            outgoing.command    = EMPTY;
+            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.command    = DECREASE;
             break;
         case O:
-            outgoing.header     = EMPTY;
-            outgoing.command    = EMPTY;
+            outgoing.header     = SET_SCALE_YAW;
+            outgoing.command    = INCREASE;
             break;
         case L:
-            outgoing.header     = EMPTY;
-            outgoing.command    = EMPTY;
+            outgoing.header     = SET_SCALE_YAW;
+            outgoing.command    = DECREASE;
+            break;
+
+        case N:
+            outgoing.header     = SET_CONTROLLER_YAW;
+            outgoing.command    = INCREASE;
+            break;
+
+        case M:
+            outgoing.header     = SET_CONTROLLER_YAW;
+            outgoing.command    = DECREASE;
             break;
 
         /* NOT RECOGNIZED */
