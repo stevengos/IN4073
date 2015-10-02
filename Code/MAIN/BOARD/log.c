@@ -19,6 +19,7 @@ void add_log()
         #ifdef PERIPHERAL_DISPLAY
         X32_DISPLAY = 0xffff;
         #endif
+
         qr.log = 0;
         X32_LEDS = LED1;
         return;
