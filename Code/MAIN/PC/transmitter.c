@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include <unistd.h>
 
@@ -59,6 +60,65 @@ void *is_alive(void* board)
     }
 }
 
+char* get_current_time_string(){
+	time_t current_time;
+	struct tm * time_info;
+	char* timeString;  // space for "%Y_%m_%d_%H_%M_%S\0"
+	timeString = malloc(sizeof(char) * 21);
+
+	time(&current_time);
+	time_info = localtime(&current_time);
+
+	strftime(timeString, sizeof(char) * 21, "%Y_%m_%d_%H_%M_%S", time_info);
+	puts(timeString);
+
+	return timeString;
+}
+
+char* readFile(char* filename)
+{
+    FILE* file = fopen(filename,"r");
+    if(file == NULL)
+    {
+        return NULL;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long int size = ftell(file);
+    rewind(file);
+
+    char* content = calloc(size + 1, 1);
+
+    fread(content,1,size,file);
+
+    return content;
+}
+
+void safe_measurement_to_file(char* filename, char* t_string){
+	//int sz;
+	//char* buff_string;
+
+	FILE *fp;
+	fp = fopen (filename, "aw+");
+	
+	/*fseek(fp, 0L, SEEK_END);
+	sz = ftell(fp);
+	fseek(fp, 0L, SEEK_SET);
+	buff_string = malloc(sz);
+*/
+	fprintf(fp, "%s", t_string);
+
+ 	fclose(fp);
+}
+
+void safe_int_measurement_to_file(char* filename, int t_int){
+	char temp_value[100];
+
+	sprintf(temp_value, "%d ", t_int);
+
+	safe_measurement_to_file(filename, temp_value);
+}
+
 void logging(int board, packet_t p)
 {
     printf("pc> Sending packet...\n");
@@ -71,13 +131,22 @@ void logging(int board, packet_t p)
 
     int incoming_int;
     short incoming_short;
+    char file_name[100];
+    
+
+    strcpy(file_name, "measurements/meas_");
+    strcat(file_name, get_current_time_string());
+    strcat(file_name, ".txt");
+
+    //safe_measurement_to_file(file_name, "hello world!\n");
 
     int status = 1;
 
     while( status = getint_board(board, &incoming_int) ) //while there's a new log line
     {
         //read the log id
-        printf("\t#%d ", incoming_int);
+        //printf("\t#%d ", incoming_int);
+	safe_int_measurement_to_file(file_name, incoming_int);
 
         //read timestamp
         status = getint_board(board, &incoming_int);
@@ -85,7 +154,8 @@ void logging(int board, packet_t p)
         if( !status )
             break;
 
-        printf("%d ", incoming_int);
+        //printf("%d ", incoming_int);
+	safe_int_measurement_to_file(file_name, incoming_int);
 
         //read data
         while(1)
@@ -95,10 +165,12 @@ void logging(int board, packet_t p)
             if(incoming_short == LOG_END)
                 break;
 
-            printf("%d ", incoming_short);
+            //printf("%d ", incoming_short);
+		safe_int_measurement_to_file(file_name, incoming_short);
         }
 
-        printf("\n");
+        //printf("\n");
+	safe_measurement_to_file(file_name, "\n");
     }
 
     printf("\npc>Log retrival is over. Press any key to continue.\n\n");
@@ -108,6 +180,20 @@ void logging(int board, packet_t p)
 
 int main()
 {
+    /*char temp_string[] = "hello world!\n";
+
+	char* file_name;
+	file_name = malloc(sizeof(char) * 100);
+
+    //strcpy(file_name, "../measurements/meas_");
+    strcpy(file_name, "measurements/meas_");
+    strcat(file_name, get_current_time_string());
+    strcat(file_name, ".txt");
+
+    safe_measurement_to_file(file_name, temp_string);
+    safe_measurement_to_file(file_name, temp_string);
+    return 0;*/
+
     struct termios boardSettings;
     struct termios oldBoardSettings;
 
