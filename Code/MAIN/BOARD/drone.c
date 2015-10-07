@@ -242,15 +242,15 @@ void yaw_mode()
             ae3 = ae3 <= MIN_RPM ? MIN_RPM : sqrt(ae3);
             ae4 = ae4 <= MIN_RPM ? MIN_RPM : sqrt(ae4);
 
-            ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
-            ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
-            ae3 = ae3 > MAX_RPM ? MAX_RPM : (short)ae3;
-            ae4 = ae4 > MAX_RPM ? MAX_RPM : (short)ae4;
+            ae1 = ae1 > MAX_RPM ? MAX_RPM : ae1;
+            ae2 = ae2 > MAX_RPM ? MAX_RPM : ae2;
+            ae3 = ae3 > MAX_RPM ? MAX_RPM : ae3;
+            ae4 = ae4 > MAX_RPM ? MAX_RPM : ae4;
 
-            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : (short)ae1;
-            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : (short)ae2;
-            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : (short)ae3;
-            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : (short)ae4;
+            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : ae1;
+            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : ae2;
+            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : ae3;
+            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
@@ -328,7 +328,9 @@ void clear_drone()
     qr.flag_mode = 0;
     qr.exit = 0;
     qr.link_down = 0;
+
     qr.log = 0;
+    qr.log_full = 0;
 }
 
 void stop_motors()

@@ -9,7 +9,7 @@ void acknowledge(char response)
     char counter = 0;
     packet_t packet;
 
-    if( response != ACK_POSITIVE && response != ACK_NEGATIVE && response != ACK_INVALID)
+    if( response != ACK_POSITIVE && response != ACK_NEGATIVE && response != ACK_INVALID && response != ACK_HAMMING)
         response = ACK_NEGATIVE;
 
     while( !X32_RS232_WRITE )

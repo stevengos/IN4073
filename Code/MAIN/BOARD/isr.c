@@ -12,6 +12,8 @@ void isr_buttons(void)
 {
     char i;
 
+    DISABLE_INTERRUPT(INTERRUPT_BUTTONS);
+
     for(i=0; i < 10; i++, catnap(500))
 
         X32_LEDS = ALL_ON, catnap(500), X32_LEDS = ALL_OFF;
@@ -52,6 +54,7 @@ void isr_rs232_rx(void)
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
             acknowledge(ACK_NEGATIVE);
+            flush_buffer();
             return;
         }
         else
@@ -65,6 +68,7 @@ void isr_rs232_rx(void)
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
             acknowledge(ACK_NEGATIVE);
+            flush_buffer();
             return;
         }
         else
@@ -76,7 +80,10 @@ void isr_rs232_rx(void)
     if( check_hamming(incoming) )
         perform_command(incoming.header, incoming.command);
     else
-        acknowledge(ACK_NEGATIVE);
+    {
+        acknowledge(ACK_HAMMING);
+        flush_buffer();
+    }
 }
 
 

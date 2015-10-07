@@ -3,6 +3,21 @@
 */
 
 #include "utility.h"
+#include "../interface/packet.h"
+
+void flush_buffer()
+{
+    while(X32_RS232_READ){ char c = X32_RS232_DATA; }
+}
+
+void synchro()
+{
+    char c;
+
+    while( (c = X32_RS232_DATA) != ALIVE );
+    while( (c = X32_RS232_DATA) != EMPTY );
+    while( (c = X32_RS232_DATA) != 0x9 );
+}
 
 void catnap(int ms)
 {
@@ -21,7 +36,7 @@ void ucatnap(int us)
 int sqrt(int square)
 {
     int prev = 0;
-    int diff = 100;
+    int diff = MAGIC_NUMBER;
     int result = 0;
 
     result = square/MAGIC_NUMBER == 0 ? 1 : square/MAGIC_NUMBER;

@@ -93,7 +93,9 @@ struct drone
     char flag_mode;
     char exit;
     char link_down;
+
     char log;
+    char log_full;
 };
 
 void run_drone();

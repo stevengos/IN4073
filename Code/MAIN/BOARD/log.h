@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #define LOG_SIZE            sizeof(struct log_s)
-#define LOG_BUFFER_SIZE     300 //PROBLEM IN ALLOCATING MEMORY: CANNOT ALLOCATE BIG BUFFER (50 still safe)
+#define LOG_BUFFER_SIZE_KB  10240  //10kB
 
 extern struct drone qr;
 
@@ -40,7 +40,6 @@ struct log_s
     short end;
 };
 
-void reset_log(void);
 char init_log(void);
 void add_log(void);
 void upload_log(void);

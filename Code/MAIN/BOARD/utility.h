@@ -10,6 +10,8 @@
 
 #define MAGIC_NUMBER 650
 
+void flush_buffer(void);
+void synchro(void);
 void catnap(int);
 void ucatnap(int);
 int sqrt(int);
