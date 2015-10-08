@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #define LOG_SIZE            sizeof(struct log_s)
-#define LOG_BUFFER_SIZE_KB  10240  //10kB
+#define LOG_BUFFER_SIZE_KB  100*1024  //100kB
 
 extern struct drone qr;
 
@@ -43,6 +43,7 @@ struct log_s
 char init_log(void);
 void add_log(void);
 void upload_log(void);
+char check_sanity(struct log_s*, struct log_s*);
 
 
 #endif // LOG_H

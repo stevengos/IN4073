@@ -35,7 +35,7 @@ void add_log()
 
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL); //SAVE LOG ATOMICALLY
 
-//    #ifdef PERIPHERAL_XUFO_TIMESTAMP
+//    #ifdef PERIPHERAL_XUFO_TIMESTAMP ******************************************************************
 //    new_log.timestamp = X32_QR_TIME;
 //    #else
     new_log.timestamp = X32_CLOCK_MS;
@@ -57,8 +57,33 @@ void add_log()
     new_log.fp = qr.fp;
     new_log.fq = qr.fq;
     new_log.fr = qr.fr;
+//    new_log.ae1 = 1;
+//    new_log.ae2 = 2;
+//    new_log.ae3 = 3;
+//    new_log.ae4 = 4;
+//
+//    new_log.sax = 5;
+//    new_log.say = 6;
+//    new_log.saz = 7;
+//
+//    new_log.sp = 8;
+//    new_log.sq = 9;
+//    new_log.sr = 10;
+//
+//    new_log.fp = 11;
+//    new_log.fq = 12;
+//    new_log.fr = 13;
 
     log_buffer[log_size] = new_log; // write log into buffer
+
+    if( !check_sanity(&new_log, &log_buffer[log_size]) )
+    {
+        qr.log = 0;
+        qr.log_full = 1;
+
+        X32_LEDS = ALL_ON;
+        return;
+    }
 
     log_size++;
 
@@ -112,17 +137,13 @@ void upload_log()
     X32_DISPLAY = log_size;
     #endif
 
-    while( i < log_size )
+    while( i < log_size-1 )
     {
         struct log_s outgoing = log_buffer[i];
         short* ptr_head = &outgoing.start; //************* FIRST STRUCT ELEMENT
         short* ptr_tail = &outgoing.end;   //************* LAST  STRUCT ELEMENT
 
         i++;
-
-        #ifdef PERIPHERAL_DISPLAY
-        X32_DISPLAY = log_size - i;
-        #endif
 
         /***** Sending timestamp **********/
         counter_timeout = 0;
@@ -161,6 +182,10 @@ void upload_log()
             send_short( *ptr_head );
 
             ptr_head++;
+
+            #ifdef PERIPHERAL_DISPLAY
+            X32_DISPLAY = i;
+            #endif
         }
 
         send_short(LOG_NEWLINE);
@@ -197,4 +222,25 @@ char init_log(void)
     log_buffer_size = ( LOG_BUFFER_SIZE_KB - decrease_kb )/LOG_SIZE;
 
     return log_buffer ? 1 : 0;
+}
+
+char check_sanity(struct log_s* log1, struct log_s* log2)
+{
+    short* ptr_1   = &(log1->start);
+    short* ptr_2   = &(log2->start);
+    short* ptr_end = &(log1->end);
+
+    if( log1->timestamp != log2->timestamp )
+        return 0;
+
+    ptr_1++;
+    ptr_2++;
+
+    while( ptr_1 != ptr_end )
+        if( *ptr_1 != *ptr_2 )
+            return 0;
+        else
+            ptr_1++, ptr_2++;
+
+    return 1;
 }

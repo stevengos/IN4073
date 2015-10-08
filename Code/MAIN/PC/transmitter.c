@@ -145,13 +145,14 @@ void logging(int board, packet_t p)
     number_logs = incoming_int;
 
     /********* read logs **********************/
-    while( number_logs-- > 0 ) //while there's a new log line
+    while( number_logs-- > 1 ) //while there's a new log line
     {
         status = getint_board(board, &incoming_int); //receive timestamp
 
         if( !status )
         {
             while( getchar_board(board) );
+            printf("\npc>Flushing the shit out of the buffer.\n");
             break;
         }
 
@@ -163,26 +164,37 @@ void logging(int board, packet_t p)
         {
             status = getshort_board(board, &incoming_short);
 
-            if(incoming_short == LOG_NEWLINE)
+            if( !status )
+            {
+                printf("pc> Error while reading integer.\n");
                 break;
+            }
 
-            if( incoming_short == ACK_INVALID )
+            if(incoming_short == LOG_NEWLINE)
+            {
+                printf("\n");
+                break;
+            }
+
+            if( incoming_short == ACK_NEGATIVE )
                 printf("\n\npc> Error while reading logs from the board. Abort!\n"), exit(0);
 
             printf("%d ", incoming_short);
             safe_int_measurement_to_file(file_name, incoming_short);
 
             debug++;
+
+            if( debug == 50 )
+                printf("pc> Got in a loop whilst reading logging!\n");
         }
 
-        printf("\n");
         safe_measurement_to_file(file_name, "\n");
     }
 
-    pthread_mutex_unlock( &lock_board );//*****************************************************************************
-
     mon_delay_ms(500);
     while( getchar_board(board) );
+
+    pthread_mutex_unlock( &lock_board );//*****************************************************************************
 
     printf("\npc>Log retrival is over. Press any key to continue.\n\n");
 
@@ -242,7 +254,7 @@ int main()
 
     printf("Connection successful!\n\n");
 
-    /************* Create Polling (keep_alive) ********************/ //do we still need it?
+    /************* Create Polling (keep_alive) ********************/
 
     pthread_mutex_init(&lock_board, NULL);
 
