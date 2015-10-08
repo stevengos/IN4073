@@ -3,6 +3,7 @@
 */
 
 #include "isr.h"
+#include "butterworth.h"
 
 extern struct drone qr;
 short debug = 0;
@@ -10,6 +11,8 @@ short debug = 0;
 void isr_buttons(void)
 {
     char i;
+
+    DISABLE_INTERRUPT(INTERRUPT_BUTTONS);
 
     for(i=0; i < 10; i++, catnap(500))
 
@@ -20,12 +23,18 @@ void isr_buttons(void)
 
 void isr_sensors(void)
 {
+    DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
     qr.sax = X32_QR_S1 - qr.off_ax;
     qr.say = X32_QR_S2 - qr.off_ay;
     qr.saz = X32_QR_S3 - qr.off_az;
     qr.sp = X32_QR_S4 - qr.off_p;
     qr.sq = X32_QR_S5 - qr.off_q;
     qr.sr = X32_QR_S6 - qr.off_r;
+
+    butter_second();
+
+    ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 }
 
 void isr_rs232_rx(void)
@@ -45,6 +54,7 @@ void isr_rs232_rx(void)
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
             acknowledge(ACK_NEGATIVE);
+            flush_buffer();
             return;
         }
         else
@@ -58,6 +68,7 @@ void isr_rs232_rx(void)
         if( counter++ > TIMEOUT_BUFFER_RX )
         {
             acknowledge(ACK_NEGATIVE);
+            flush_buffer();
             return;
         }
         else
@@ -69,7 +80,10 @@ void isr_rs232_rx(void)
     if( check_hamming(incoming) )
         perform_command(incoming.header, incoming.command);
     else
-        acknowledge(ACK_NEGATIVE);
+    {
+        acknowledge(ACK_HAMMING);
+        flush_buffer();
+    }
 }
 
 

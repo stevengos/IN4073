@@ -9,8 +9,8 @@
 #include "transmitter.h"
 #include <stdlib.h>
 
-#define LOG_SIZE            30   //sizeof(struct log_s)
-#define LOG_BUFFER_SIZE     250 //PROBLEM IN ALLOCATING MEMORY: CANNOT ALLOCATE BIG BUFFER (50 still safe)
+#define LOG_SIZE            sizeof(struct log_s)
+#define LOG_BUFFER_SIZE_KB  100*1024  //100kB
 
 extern struct drone qr;
 
@@ -33,19 +33,17 @@ struct log_s
     short sq;
     short sr;
 
+    short fp;
+    short fq;
+    short fr;
+
     short end;
 };
 
-struct log_s*   log_buffer;
-int log_size = 0;
-
-char malloc_memory[LOG_SIZE * LOG_BUFFER_SIZE];
-int malloc_memory_size = LOG_SIZE * LOG_BUFFER_SIZE;
-
-void reset_log(void);
 char init_log(void);
 void add_log(void);
 void upload_log(void);
+char check_sanity(struct log_s*, struct log_s*);
 
 
 #endif // LOG_H

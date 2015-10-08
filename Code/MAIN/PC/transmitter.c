@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "../interface/packet.h"
 #include "board.h"
@@ -15,9 +16,73 @@
 #define REFRESH_TIME    50
 
 pthread_mutex_t lock_board;
+int end_communication = 0;
 
 packet_t packet_buffer[10];
 int packet_counter = 0;
+
+//{
+
+char* get_current_time_string(){
+	time_t current_time;
+	struct tm * time_info;
+	char* timeString;  // space for "%Y_%m_%d_%H_%M_%S\0"
+	timeString = malloc(sizeof(char) * 21);
+
+	time(&current_time);
+	time_info = localtime(&current_time);
+
+	strftime(timeString, sizeof(char) * 21, "%Y_%m_%d_%H_%M_%S", time_info);
+	puts(timeString);
+
+	return timeString;
+}
+
+char* readFile(char* filename)
+{
+    FILE* file = fopen(filename,"r");
+    if(file == NULL)
+    {
+        return NULL;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long int size = ftell(file);
+    rewind(file);
+
+    char* content = calloc(size + 1, 1);
+
+    fread(content,1,size,file);
+
+    return content;
+}
+
+void safe_measurement_to_file(char* filename, char* t_string){
+	//int sz;
+	//char* buff_string;
+
+	FILE *fp;
+	fp = fopen (filename, "aw+");
+
+	/*fseek(fp, 0L, SEEK_END);
+	sz = ftell(fp);
+	fseek(fp, 0L, SEEK_SET);
+	buff_string = malloc(sz);
+*/
+	fprintf(fp, "%s", t_string);
+
+ 	fclose(fp);
+}
+
+void safe_int_measurement_to_file(char* filename, int t_int){
+	char temp_value[100];
+
+	sprintf(temp_value, "%d ", t_int);
+
+	safe_measurement_to_file(filename, temp_value);
+}
+
+//}
 
 void push_packet_t(char header, char command)
 {
@@ -39,7 +104,7 @@ void *is_alive(void* board)
 {
     int idboard = *( (int*)(board) );
 
-    while(1)
+    while(!end_communication)
     {
         packet_t p;
         p.header = ALIVE;
@@ -59,53 +124,77 @@ void *is_alive(void* board)
 
 void logging(int board, packet_t p)
 {
-    printf("pc> Sending packet...\n");
-
-    pthread_mutex_lock( &lock_board );
-    send_packet(board, p);
-    pthread_mutex_unlock( &lock_board );
-
-    sleep(1); //give time to board to write output 1s
+    printf("pc> Retrieving Log Data...\n");
 
     int incoming_int;
     short incoming_short;
+    char file_name[100];
+
+    strcpy(file_name, "measurements/meas_");
+    strcat(file_name, get_current_time_string());
+    strcat(file_name, ".txt");
 
     int number_logs;
     int status = 1;
     int debug = 0;
 
-    /********* receive length of message ******/
+    pthread_mutex_lock( &lock_board ); //*******************************************************************
+
+    /********* receive number of logs ******/
     status = getint_board(board, &incoming_int);
     number_logs = incoming_int;
 
     /********* read logs **********************/
-    while( number_logs-- > 0 ) //while there's a new log line
+    while( number_logs-- > 1 ) //while there's a new log line
     {
-        status = getint_board(board, &incoming_int);
+        status = getint_board(board, &incoming_int); //receive timestamp
 
         if( !status )
+        {
+            while( getchar_board(board) );
+            printf("\npc>Flushing the shit out of the buffer.\n");
             break;
+        }
 
         printf("#%d %d ", number_logs, incoming_int);
+        safe_int_measurement_to_file(file_name, incoming_int);
 
-        debug = 0;//read data
-        while(debug < 20)
+        debug = 0;
+        while(debug < 50)
         {
             status = getshort_board(board, &incoming_short);
 
-            if(incoming_short == LOG_NEWLINE)
+            if( !status )
+            {
+                printf("pc> Error while reading integer.\n");
                 break;
+            }
 
-            if( incoming_short == ACK_INVALID )
-                exit(0);
+            if(incoming_short == LOG_NEWLINE)
+            {
+                printf("\n");
+                break;
+            }
+
+            if( incoming_short == ACK_NEGATIVE )
+                printf("\n\npc> Error while reading logs from the board. Abort!\n"), exit(0);
 
             printf("%d ", incoming_short);
+            safe_int_measurement_to_file(file_name, incoming_short);
 
             debug++;
+
+            if( debug == 50 )
+                printf("pc> Got in a loop whilst reading logging!\n");
         }
 
-        printf("\n");
+        safe_measurement_to_file(file_name, "\n");
     }
+
+    mon_delay_ms(500);
+    while( getchar_board(board) );
+
+    pthread_mutex_unlock( &lock_board );//*****************************************************************************
 
     printf("\npc>Log retrival is over. Press any key to continue.\n\n");
 
@@ -165,7 +254,7 @@ int main()
 
     printf("Connection successful!\n\n");
 
-    /************* Create Polling (keep_alive) ********************/ //do we still need it?
+    /************* Create Polling (keep_alive) ********************/
 
     pthread_mutex_init(&lock_board, NULL);
 
@@ -181,24 +270,24 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-        //js_exit = set_js_command(joystick); //read the joystick configuration
+//        js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 
 		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
 
-        if( packet_buffer[packet_counter].header == LOG && packet_buffer[packet_counter].command == LOG_GET)
-        {
-            close_keyboard(&oldKeyboardSettings);
+//        if( packet_buffer[packet_counter].header == LOG && packet_buffer[packet_counter].command == LOG_GET)
+//        {
+//            close_keyboard(&oldKeyboardSettings);
+//
+//            logging(board, packet_buffer[packet_counter]);
+//
+//            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+//
+//            continue;
+//        }
 
-            logging(board, packet_buffer[packet_counter]);
-
-            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
-
-            continue;
-        }
-
-		if( packet_buffer[packet_counter].header != EMPTY )  //if it is a valid one, then push it, else ignore
+		if( packet_buffer[packet_counter].header != EMPTY )  //if keyboard command is a valid one then push it, else ignore
             packet_counter++;
 
         for(i = 0; i < packet_counter; i++) //send a burst of packets
@@ -219,7 +308,8 @@ int main()
 
                 mon_delay_ms(REFRESH_TIME);
 
-                //pthread_mutex_lock( &lock_board );
+                /********* WAIT FOR ACKNOWLEDGMENT ***************/
+                pthread_mutex_lock( &lock_board );
 
                 for(counter_waitack=0; counter_waitack < 5; counter_waitack++)
                     if( (cboard = getchar_board(board)) == ACK ) //wait for acknowledgment
@@ -231,19 +321,60 @@ int main()
                     else
                         usleep(500);
 
-                if( ack_received == ACK_NEGATIVE )
-                    printf("NACK received, trying again...\n"), counter++;
-                if( ack_received == ACK_INVALID )
-                    printf("Invalid, trying again...\n");
-                if( ack_received == ACK_POSITIVE )
-                    printf("Command executed correctly.\n");
-                if( ack_received == EMPTY )
-                    printf("No answer received, trying again...\n"), ack_received = ACK_NEGATIVE, counter++;
-                //pthread_mutex_unlock( &lock_board );
-            }
-            while( ack_received == ACK_NEGATIVE && counter < 5);
+                pthread_mutex_unlock( &lock_board );
 
-            printf("Command executed correctly.\n");
+                /********* EVALUATE ACKNOWLEDGMENT ************/
+                switch(ack_received)
+                {
+                    case ACK_NEGATIVE:
+                        printf("NACK received, trying again...\n"), counter++;
+
+                        pthread_mutex_lock( &lock_board );
+
+                        while( getchar_board(board) );
+
+                        pthread_mutex_unlock( &lock_board );
+
+                        break;
+
+                    case ACK_HAMMING:
+                        printf("Checksum is wrong, rejected\n"), mon_delay_ms(500);
+
+                        pthread_mutex_lock( &lock_board );
+
+                        while( getchar_board(board) );
+
+                        pthread_mutex_unlock( &lock_board );
+
+                        break;
+
+                    case ACK_INVALID:
+                        printf("Invalid command, rejected.\n"), mon_delay_ms(500);
+
+                        break;
+
+                    case ACK_POSITIVE:
+                        printf("Command executed correctly.\n"), mon_delay_ms(500);
+
+                        if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
+                        {
+                            close_keyboard(&oldKeyboardSettings);
+                            logging(board, packet_buffer[packet_counter]);
+                            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+                        }
+
+                        break;
+
+                    case EMPTY:
+                        printf("No answer received, trying again...\n"), counter++;
+
+                        while( getchar_board(board) );
+
+                        break;
+                };
+
+            }
+            while( (ack_received == ACK_NEGATIVE || ack_received == EMPTY) && counter < 5);
         }
 
         empty_packet_t();
@@ -254,6 +385,10 @@ int main()
     }
 
     printf("End of communication.\n");
+
+    end_communication = 1;
+    mon_delay_ms(500);
+    pthread_cancel(polling);
 
     close_keyboard(&oldKeyboardSettings);
     close_board(board, &oldBoardSettings);

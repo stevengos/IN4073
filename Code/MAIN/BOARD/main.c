@@ -12,7 +12,7 @@ struct drone qr; // OUR DRONE
 
 int main()
 {
-    while (X32_RS232_READ) { char c = X32_RS232_DATA; } // empty buffer
+    flush_buffer();
 
     //enable interrupt for buttons
     SET_INTERRUPT_VECTOR(INTERRUPT_BUTTONS, &isr_buttons);

@@ -105,10 +105,12 @@ void manual_mode()
     {
         if( qr.lift_force )
         {
+            DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
             ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
             ae1 = ae1 <= MIN_RPM ? MIN_RPM : sqrt(ae1);
             ae2 = ae2 <= MIN_RPM ? MIN_RPM : sqrt(ae2);
@@ -125,9 +127,9 @@ void manual_mode()
             qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : ae3;
             qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
-            ucatnap(20);
+            ucatnap(MOTOR_REFRESH);
 
-            DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
             #ifdef PERIPHERAL_XUFO_A0
 
@@ -138,8 +140,10 @@ void manual_mode()
 
             #endif
 
-            ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+            ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
         }
+        else
+            stop_motors();
     }
 
     //X32_DISPLAY = debug++;
@@ -221,8 +225,9 @@ void yaw_mode()
     {
         if(qr.lift_force)
         {
-            e = qr.yawrate_ref - qr.sr;
+            DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
+            e = qr.yawrate_ref - qr.fr;
             qr.yaw_momentum = qr.controller_yaw * e;
 
             ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
@@ -230,24 +235,26 @@ void yaw_mode()
             ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
 
+            ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
             ae1 = ae1 <= MIN_RPM ? MIN_RPM : sqrt(ae1);
             ae2 = ae2 <= MIN_RPM ? MIN_RPM : sqrt(ae2);
             ae3 = ae3 <= MIN_RPM ? MIN_RPM : sqrt(ae3);
             ae4 = ae4 <= MIN_RPM ? MIN_RPM : sqrt(ae4);
 
-            ae1 = ae1 > MAX_RPM ? MAX_RPM : (short)ae1;
-            ae2 = ae2 > MAX_RPM ? MAX_RPM : (short)ae2;
-            ae3 = ae3 > MAX_RPM ? MAX_RPM : (short)ae3;
-            ae4 = ae4 > MAX_RPM ? MAX_RPM : (short)ae4;
+            ae1 = ae1 > MAX_RPM ? MAX_RPM : ae1;
+            ae2 = ae2 > MAX_RPM ? MAX_RPM : ae2;
+            ae3 = ae3 > MAX_RPM ? MAX_RPM : ae3;
+            ae4 = ae4 > MAX_RPM ? MAX_RPM : ae4;
 
-            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : (short)ae1;
-            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : (short)ae2;
-            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : (short)ae3;
-            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : (short)ae4;
+            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : ae1;
+            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : ae2;
+            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : ae3;
+            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-            ucatnap(20);
+            ucatnap(MOTOR_REFRESH);
 
             #ifdef PERIPHERAL_XUFO_A0
 
@@ -260,6 +267,8 @@ void yaw_mode()
 
             ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
         }
+        else
+            stop_motors();
     }
 
     X32_LEDS = ALL_OFF;
@@ -284,10 +293,15 @@ void clear_drone()
     qr.yawrate_ref = 0;
     qr.lift_ref = 0;
 
-    qr.scale_pitch = 8240;
-    qr.scale_roll = 8240;
-    qr.scale_yaw = 16400;
-    qr.scale_lift = 16400;
+//    qr.scale_pitch = 8240;
+//    qr.scale_roll = 8240;
+//    qr.scale_yaw = 16400;
+//    qr.scale_lift = 16400;
+
+    qr.scale_pitch = 8240/2;
+    qr.scale_roll = 8240/2;
+    qr.scale_yaw = 16400/2;
+    qr.scale_lift = 16400/2;
 
     qr.controller_yaw = 1;
 
@@ -314,7 +328,9 @@ void clear_drone()
     qr.flag_mode = 0;
     qr.exit = 0;
     qr.link_down = 0;
+
     qr.log = 0;
+    qr.log_full = 0;
 }
 
 void stop_motors()

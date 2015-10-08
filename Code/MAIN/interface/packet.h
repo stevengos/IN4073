@@ -56,6 +56,7 @@
 #define ACK_POSITIVE 0x0
 #define ACK_NEGATIVE 0x1F
 #define ACK_INVALID  0x2F
+#define ACK_HAMMING  0x3F
 
 /* Eligible values files when the header is "LOG" */
 #define LOG_START   0x1

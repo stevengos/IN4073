@@ -1,6 +1,6 @@
 #ifndef FIXH
 #define FIXH
-#define Q 14
+#define Q 15
 #define K (1 << (Q - 1))
 typedef  short int q14;
 

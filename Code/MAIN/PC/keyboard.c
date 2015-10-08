@@ -14,13 +14,15 @@
 int kbhit()
 {
     struct timeval tv = { 0L, 0L };
+
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(0, &fds);
+
     return select(1, &fds, NULL, NULL, &tv);
 }
 
-inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTerminalSettings)
+void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTerminalSettings)
 {
     tcgetattr(0, oldTerminalSettings);
 
@@ -33,14 +35,13 @@ inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* n
     setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
-inline void close_keyboard(struct termios* oldTerminalSettings)
+void close_keyboard(struct termios* oldTerminalSettings)
 {
     tcsetattr(0, TCSANOW, oldTerminalSettings);
 }
 
 char getchar_keyboard()
 {
-    //char ch = getchar();
     char ch;
     int c;
 

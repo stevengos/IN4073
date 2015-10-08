@@ -64,10 +64,8 @@ int getshort_board(int board, short* value)
     unsigned char c1, c2;
     *value = 0;
 
-    if( !read(board, &c1, 1) )
-        return 0;
-    if( !read(board, &c2, 1) )
-        return 0;
+    while( !read(board, &c1, 1) );
+    while( !read(board, &c2, 1) );
 
     *value |= c2;
     *value = *value << 8;
@@ -81,14 +79,10 @@ int getint_board(int board, int* value)
     unsigned char c1, c2, c3, c4;
     *value = 0;
 
-    if( !read(board, &c1, 1) )
-        return 0;
-    if( !read(board, &c2, 1) )
-        return 0;
-    if( !read(board, &c3, 1) )
-        return 0;
-    if( !read(board, &c4, 1) )
-        return 0;
+    while( !read(board, &c1, 1) );
+    while( !read(board, &c2, 1) );
+    while( !read(board, &c3, 1) );
+    while( !read(board, &c4, 1) );
 
     *value |= c4;
     *value = *value << 8;

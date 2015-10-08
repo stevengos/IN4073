@@ -13,6 +13,7 @@
 #define MAX_RPM     0x3ff
 #define MIN_RPM     0x00a
 #define STEP_RPM    0x010
+#define MOTOR_REFRESH   200
 
 #define MAX_PITCH   255
 #define MAX_ROLL    255
@@ -71,6 +72,14 @@ struct drone
     short sq;
     short sr;
 
+    //filtered data
+    short fax;
+    short fay;
+    short faz;
+    short fp;
+    short fq;
+    short fr;
+
     //sensor offsets
     short off_ax;
     short off_ay;
@@ -84,7 +93,9 @@ struct drone
     char flag_mode;
     char exit;
     char link_down;
+
     char log;
+    char log_full;
 };
 
 void run_drone();
