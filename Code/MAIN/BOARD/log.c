@@ -35,11 +35,11 @@ void add_log()
 
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL); //SAVE LOG ATOMICALLY
 
-//    #ifdef PERIPHERAL_XUFO_TIMESTAMP ******************************************************************
-//    new_log.timestamp = X32_QR_TIME;
-//    #else
+    #ifdef PERIPHERAL_XUFO_TIMESTAMP
+    new_log.timestamp = X32_QR_TIME;
+    #else
     new_log.timestamp = X32_CLOCK_MS;
-//    #endif
+    #endif
 
     new_log.ae1 = qr.ae1;
     new_log.ae2 = qr.ae2;
