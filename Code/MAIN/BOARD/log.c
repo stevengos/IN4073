@@ -41,10 +41,10 @@ void add_log()
     new_log.timestamp = X32_CLOCK_MS;
     #endif
 
-    new_log.ae1 = qr.ae1;
-    new_log.ae2 = qr.ae2;
-    new_log.ae3 = qr.ae3;
-    new_log.ae4 = qr.ae4;
+//    new_log.ae1 = qr.ae1;
+//    new_log.ae2 = qr.ae2;
+//    new_log.ae3 = qr.ae3;
+//    new_log.ae4 = qr.ae4;
 
     new_log.sax = qr.sax;
     new_log.say = qr.say;
@@ -53,6 +53,10 @@ void add_log()
     new_log.sp = qr.sp;
     new_log.sq = qr.sq;
     new_log.sr = qr.sr;
+
+    new_log.fax = qr.fax;
+    new_log.fay = qr.fay;
+    new_log.faz = qr.faz;
 
     new_log.fp = qr.fp;
     new_log.fq = qr.fq;

@@ -10,19 +10,19 @@
 #include <stdlib.h>
 
 
-/*
+
 #define a0 329 //Second-Order Butterworth constants in q14
 #define a1 658
 #define a2 329
 #define b1 -25576
 #define b2 10508
-*/
+/*
 #define a0 658 //Second-Order Butterworth constants in q15
 #define a1 1316
 #define a2 658
 #define b1 -51151
 #define b2 21016
-
+*/
 #define BUTTER_SIZE 10// 6 * char take 10 to be shure
 #define BUTTERWORTH_DATA_BUFFER_SIZE   100 // we save 100 x data in buffer for now
 

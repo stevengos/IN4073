@@ -175,27 +175,27 @@ packet_t encapsulate(char command)
 
         /* CONTROLLER SETTINGS */
         case Y:
-            outgoing.header     = SET_SCALE_LIFT;
+            outgoing.header     = SET_CONTROLLER_PITCH;
             outgoing.command    = INCREASE;
             break;
         case H:
-            outgoing.header     = SET_SCALE_LIFT;
+            outgoing.header     = SET_CONTROLLER_PITCH;
             outgoing.command    = DECREASE;
             break;
         case U:
-            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.header     = SET_CONTROLLER_ROLL;
             outgoing.command    = INCREASE;
             break;
         case J:
-            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.header     = SET_CONTROLLER_ROLL;
             outgoing.command    = DECREASE;
             break;
         case I:
-            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.header     = SET_CONTROLLER_YAW;
             outgoing.command    = INCREASE;
             break;
         case K:
-            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.header     = SET_CONTROLLER_YAW;
             outgoing.command    = DECREASE;
             break;
         case O:

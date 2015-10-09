@@ -185,7 +185,7 @@ void logging(int board, packet_t p)
             debug++;
 
             if( debug == 50 )
-                printf("pc> Got in a loop whilst reading logging!\n");
+                printf("\n\npc> Got in a loop whilst reading logging!\n");
         }
 
         safe_measurement_to_file(file_name, "\n");

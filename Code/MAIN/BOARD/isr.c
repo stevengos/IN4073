@@ -3,7 +3,7 @@
 */
 
 #include "isr.h"
-#include "butterworth.h"
+#include "mafilter.h"
 
 extern struct drone qr;
 short debug = 0;
@@ -32,7 +32,7 @@ void isr_sensors(void)
     qr.sq = X32_QR_S5 - qr.off_q;
     qr.sr = X32_QR_S6 - qr.off_r;
 
-    butter_second();
+    mafilter();
 
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 }
