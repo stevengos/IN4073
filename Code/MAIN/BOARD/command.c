@@ -213,6 +213,7 @@ void set_log(char command)
                 break;
         case LOG_STOP:
                 qr.log = 0;
+                qr.log_full = 1;
                 acknowledge(ACK_POSITIVE);
                 break;
         case LOG_GET:
