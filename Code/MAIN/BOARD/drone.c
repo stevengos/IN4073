@@ -294,13 +294,16 @@ void full_mode()
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
+/* CASCADE CONTROLLER */
             e_ax = qr.pitch_ref - qr.fax;
-            e_p = qr.pitch_ref - qr.fp;
+            e_p = qr.controller_pitch*e_ax - qr.fp;
             qr.pitch_momentum = qr.controller_pitch * e_p;
 
-            e_q = qr.roll_ref - qr.fq;
+            e_ay = qr.roll_ref - qr.fay;
+            e_q = qr.controller_roll*e_ay - qr.fq;
             qr.roll_momentum = qr.controller_roll * e_q;
 
+/* RATE CONTROL */
 //            e_p = qr.pitch_ref - qr.fp;
 //            qr.pitch_momentum = qr.controller_pitch * e_p;
 //
