@@ -47,9 +47,9 @@ void butter_second()
     y2_3 = y[2][2];
     /********Calculate the values *****/
 
-    y[0][0] = short((q_multiplication(a0,(q14)x0_1)+q_multiplication(a1,(q14)x1_1)+q_multiplication(a2,(q14)x2_1)-q_multiplication(b1,(q14)y1_1)-q_multiplication(b2,(q14)y2_1)));
-    y[0][1] = short((q_multiplication(a0,(q14)x0_2)+q_multiplication(a1,(q14)x1_2)+q_multiplication(a2,(q14)x2_2)-q_multiplication(b1,(q14)y1_2)-q_multiplication(b2,(q14)y2_2)));
-    y[0][2] = short((q_multiplication(a0,(q14)x0_3)+q_multiplication(a1,(q14)x1_3)+q_multiplication(a2,(q14)x2_3)-q_multiplication(b1,(q14)y1_3)-q_multiplication(b2,(q14)y2_3)));
+    y[0][0] = (q_multiplication(a0,(q14)x0_1)+q_multiplication(a1,(q14)x1_1)+q_multiplication(a2,(q14)x2_1)-q_multiplication(b1,(q14)y1_1)-q_multiplication(b2,(q14)y2_1));
+    y[0][1] = (q_multiplication(a0,(q14)x0_2)+q_multiplication(a1,(q14)x1_2)+q_multiplication(a2,(q14)x2_2)-q_multiplication(b1,(q14)y1_2)-q_multiplication(b2,(q14)y2_2));
+    y[0][2] = (q_multiplication(a0,(q14)x0_3)+q_multiplication(a1,(q14)x1_3)+q_multiplication(a2,(q14)x2_3)-q_multiplication(b1,(q14)y1_3)-q_multiplication(b2,(q14)y2_3));
 
 
     /********Write the results to structure ******/
