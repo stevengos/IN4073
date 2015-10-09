@@ -223,17 +223,17 @@ int main()
 	int js_exit = 0;
 
     /************* Open Joystick ********************************/
-//    joystick = open(JS_DEV0, O_RDONLY);
-//
-//	if ( joystick < 0)
-//	{
-//        joystick = open(JS_DEV1, O_RDONLY);
-//
-//        if( joystick < 0 )
-//            perror("jstest"), exit(1);
-//	}
-//
-//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+    joystick = open(JS_DEV0, O_RDONLY);
+
+	if ( joystick < 0)
+	{
+        joystick = open(JS_DEV1, O_RDONLY);
+
+        if( joystick < 0 )
+            perror("jstest"), exit(1);
+	}
+
+	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
     /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
@@ -270,22 +270,11 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-//        js_exit = set_js_command(joystick); //read the joystick configuration
+        js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 
 		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
-
-//        if( packet_buffer[packet_counter].header == LOG && packet_buffer[packet_counter].command == LOG_GET)
-//        {
-//            close_keyboard(&oldKeyboardSettings);
-//
-//            logging(board, packet_buffer[packet_counter]);
-//
-//            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
-//
-//            continue;
-//        }
 
 		if( packet_buffer[packet_counter].header != EMPTY )  //if keyboard command is a valid one then push it, else ignore
             packet_counter++;
@@ -338,7 +327,7 @@ int main()
                         break;
 
                     case ACK_HAMMING:
-                        printf("Checksum is wrong, rejected\n"), mon_delay_ms(500);
+                        printf("Checksum is wrong, rejected\n");
 
                         pthread_mutex_lock( &lock_board );
 
@@ -349,12 +338,12 @@ int main()
                         break;
 
                     case ACK_INVALID:
-                        printf("Invalid command, rejected.\n"), mon_delay_ms(500);
+                        printf("Invalid command, rejected.\n");
 
                         break;
 
                     case ACK_POSITIVE:
-                        printf("Command executed correctly.\n"), mon_delay_ms(500);
+                        printf("Command executed correctly.\n");
 
                         if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
                         {
