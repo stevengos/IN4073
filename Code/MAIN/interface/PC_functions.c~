@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 char* readFile(char* filename)
 {
     FILE* file = fopen(filename,"r");
@@ -15,6 +18,7 @@ char* readFile(char* filename)
     fread(content,1,size,file);
 
     return content;
+    //return NULL;
 }
 
 
@@ -23,7 +27,7 @@ void safe_measurement_to_file(char* filename, char* t_string){
 	//char* buff_string;
 
 	FILE *fp;
-	fp = fopen (filename, "aw+");
+	fp = fopen(filename, "aw+");
 
 	/*fseek(fp, 0L, SEEK_END);
 	sz = ftell(fp);
@@ -48,7 +52,5 @@ char** PC_read_errors(){
 
 	for(i = 0; i < max_size; i++){
 		t_arr[i] = malloc(150);
-
-		
 	}
 }

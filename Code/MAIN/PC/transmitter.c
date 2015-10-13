@@ -40,6 +40,13 @@ char* get_current_time_string(){
 	return timeString;
 }
 
+void safe_measurement_to_file(char* filename, char* t_string){
+	FILE *fp;
+	fp = fopen(filename, "aw+");
+	fprintf(fp, "%s", t_string);
+	fclose(fp);
+}
+
 void safe_int_measurement_to_file(char* filename, int t_int){
 	char temp_value[100];
 
@@ -47,8 +54,6 @@ void safe_int_measurement_to_file(char* filename, int t_int){
 
 	safe_measurement_to_file(filename, temp_value);
 }
-
-//}
 
 void push_packet_t(char header, char command)
 {
