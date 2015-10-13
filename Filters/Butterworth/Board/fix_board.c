@@ -1,45 +1,28 @@
 
-#include "fix.h"
+#include "fix_board.h"
 
-q14 normal2q (double x) {   
+q14 normal2q (int x) {   
  int result;
- /******Second edition-board *****
- result = x * (1 << Q);*/
-
- /******First edition*/ 
- double y = pow(2,Q); 
- double d = y*x;
- /*r**Rounding to the closest int near the double value*/ 
- int integerPart = floor(d);//return int value smaller than d. 
- if((d-(double)integerPart)>= 0.5){
-    result = integerPart+1;
-  }
- else {
-    result = integerPart;
-  } 
+ /******Second edition-board ******/
+ result = x * (1 << Q);
    
  return result;
 }
 
 
- double q2normal(q14 a) {
- double result;
-/******Second edition-board ** 
- result = ((double) a) / (1 << Q);*/
-
-/***First edition*/
- double y = pow(2,Q);
- double x = a;
- result = x/y; 
- return (result);
+ int q2normal(q14 a) {
+ int result;
+/******Second edition-board ***/ 
+ result =  a / (1 << Q);
+ return result;
 }
 
 /*********this function adds two q14 numbers*********/
 
 q14 q_add(q14 a, q14 b){
  q14 result;
- long tmp;
- tmp = (long)a + (long)b;
+ int tmp;
+ tmp = (int)a + (int)b;
  //Add saturation
  if (tmp > 0x7FFF){
     tmp = 0x7FFF;
@@ -60,12 +43,12 @@ q14 q_subtract(q14 a, q14 b){
  
  
  
- /*********this function multiplies 2 x double numbers**/
+ /*********this function multiplies 2 x float numbers**/
 
 q14 q_multiplication (q14 a, q14 b){
     q14 result;
-    long temp;
-    temp = (long)a * (long)b; 
+    int temp;
+    temp = a * b; 
     temp += K;
     // Correct by dividing by base
     result = (q14)(temp >> Q);
@@ -76,8 +59,8 @@ q14 q_multiplication (q14 a, q14 b){
 q14 q_division (q14 a, q14 b){
 
 	 q14 result;
-	 long temp;
-	 temp=(long)a << Q;
+	 int temp;
+	 temp=(int)a << Q;
 	// Rounding: mid values are rounded up.
          if ((temp >= 0 && b >= 0) || (temp < 0 && b < 0))
             temp += b / 2;
@@ -86,5 +69,16 @@ q14 q_division (q14 a, q14 b){
          result = (q14)(temp / b);
 	 return result;
 }
+
+/************************This function calculates Square root ***************/
+q14 q_sqrt (q14 a){
+  q14 result =0;
+  int i;
+  for (i =0; i<15; i++){
+      result=(0.5)*(result+result/(float)a);
+      }
+   return (q14) result;
+}
+          
 
 
