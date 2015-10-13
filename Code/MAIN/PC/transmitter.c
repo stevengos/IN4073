@@ -323,7 +323,7 @@ int main()
                         break;
 
                     case ACK_HAMMING:
-                        printf("Checksum is wrong, rejected\n"), mon_delay_ms(500);
+                        printf("Checksum is wrong, rejected\n");
 
                         pthread_mutex_lock( &lock_board );
 
@@ -334,12 +334,12 @@ int main()
                         break;
 
                     case ACK_INVALID:
-                        printf("Invalid command, rejected.\n"), mon_delay_ms(500);
+                        printf("Invalid command, rejected.\n");
 
                         break;
 
                     case ACK_POSITIVE:
-                        printf("Command executed correctly.\n"), mon_delay_ms(500);
+                        printf("Command executed correctly.\n");
 
                         if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
                         {
