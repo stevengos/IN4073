@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <sys/types.h>
+
 #include "../interface/packet.h"
 #include "board.h"
 #include "keyboard.h"
@@ -36,42 +38,6 @@ char* get_current_time_string(){
 	puts(timeString);
 
 	return timeString;
-}
-
-char* readFile(char* filename)
-{
-    FILE* file = fopen(filename,"r");
-    if(file == NULL)
-    {
-        return NULL;
-    }
-
-    fseek(file, 0, SEEK_END);
-    long int size = ftell(file);
-    rewind(file);
-
-    char* content = calloc(size + 1, 1);
-
-    fread(content,1,size,file);
-
-    return content;
-}
-
-void safe_measurement_to_file(char* filename, char* t_string){
-	//int sz;
-	//char* buff_string;
-
-	FILE *fp;
-	fp = fopen (filename, "aw+");
-
-	/*fseek(fp, 0L, SEEK_END);
-	sz = ftell(fp);
-	fseek(fp, 0L, SEEK_SET);
-	buff_string = malloc(sz);
-*/
-	fprintf(fp, "%s", t_string);
-
- 	fclose(fp);
 }
 
 void safe_int_measurement_to_file(char* filename, int t_int){
@@ -201,6 +167,10 @@ void logging(int board, packet_t p)
     getchar();
 }
 
+void* open_status_terminal(){
+     system("gnome-terminal -x sh -c \"./status_terminal; bash\"");
+}
+
 int main()
 {
     struct termios boardSettings;
@@ -217,23 +187,33 @@ int main()
     char ack_received = 0;
     char counter = 0;
 
-    pthread_t polling;
+    pthread_t polling, status_terminal;
     int status, i = 0;
 
-	int js_exit = 0;
+    int js_exit = 0;
+
+    pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
+
+    printf("into main!\n");
+
+    sleep(1);
+
+    pthread_cancel(status_terminal);
+    pthread_exit(NULL);
+    return 0;
 
     /************* Open Joystick ********************************/
-    joystick = open(JS_DEV0, O_RDONLY);
-
-	if ( joystick < 0)
-	{
-        joystick = open(JS_DEV1, O_RDONLY);
-
-        if( joystick < 0 )
-            perror("jstest"), exit(1);
-	}
-
-	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+//    joystick = open(JS_DEV0, O_RDONLY);
+//
+//	if ( joystick < 0)
+//	{
+//        joystick = open(JS_DEV1, O_RDONLY);
+//
+//        if( joystick < 0 )
+//            perror("jstest"), exit(1);
+//	}
+//
+//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
     /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
@@ -270,11 +250,22 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-        js_exit = set_js_command(joystick); //read the joystick configuration
+//        js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 
 		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
+
+//        if( packet_buffer[packet_counter].header == LOG && packet_buffer[packet_counter].command == LOG_GET)
+//        {
+//            close_keyboard(&oldKeyboardSettings);
+//
+//            logging(board, packet_buffer[packet_counter]);
+//
+//            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+//
+//            continue;
+//        }
 
 		if( packet_buffer[packet_counter].header != EMPTY )  //if keyboard command is a valid one then push it, else ignore
             packet_counter++;
@@ -327,7 +318,7 @@ int main()
                         break;
 
                     case ACK_HAMMING:
-                        printf("Checksum is wrong, rejected\n");
+                        printf("Checksum is wrong, rejected\n"), mon_delay_ms(500);
 
                         pthread_mutex_lock( &lock_board );
 
@@ -338,12 +329,12 @@ int main()
                         break;
 
                     case ACK_INVALID:
-                        printf("Invalid command, rejected.\n");
+                        printf("Invalid command, rejected.\n"), mon_delay_ms(500);
 
                         break;
 
                     case ACK_POSITIVE:
-                        printf("Command executed correctly.\n");
+                        printf("Command executed correctly.\n"), mon_delay_ms(500);
 
                         if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
                         {
@@ -378,6 +369,7 @@ int main()
     end_communication = 1;
     mon_delay_ms(500);
     pthread_cancel(polling);
+    pthread_cancel(status_terminal);
 
     close_keyboard(&oldKeyboardSettings);
     close_board(board, &oldBoardSettings);

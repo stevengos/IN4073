@@ -32,7 +32,7 @@ void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTermi
 
     tcsetattr(0, TCSANOW, newTerminalSettings);
 
-    setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
+    git setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
 void close_keyboard(struct termios* oldTerminalSettings)
