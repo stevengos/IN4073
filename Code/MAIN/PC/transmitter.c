@@ -191,11 +191,11 @@ int main()
     char cboard = 0;
     char ack_received = 0;
     char counter = 0;
-    pthread_t polling;
+    pthread_t polling, status_terminal;
     int status, i = 0;
 
 //---- open joystick
-	int 		fd, js_exit = 0;
+	int  fd, js_exit = 0;
 
 	if ((fd = open(JS_DEV, O_RDONLY)) < 0) {
 		perror("jstest");
