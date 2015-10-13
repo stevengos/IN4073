@@ -271,9 +271,6 @@ void set_lift(unsigned char command)
 {
     qr.lift_force = command > MAX_LIFT ? MAX_LIFT : command < MIN_LIFT ? MIN_LIFT : command;
 
-    if( qr.current_mode == FULL_MODE )
-        qr.lift_ref = command > MAX_LIFT ? MAX_LIFT : command < MIN_LIFT ? MIN_LIFT : command;
-
     acknowledge(ACK_POSITIVE);
 }
 
@@ -281,7 +278,7 @@ void set_yawrate(char command)
 {
     qr.yaw_momentum = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
 
-    if( qr.current_mode == FULL_MODE )
+    if( qr.current_mode == YAW_MODE || qr.current_mode == FULL_MODE)
         qr.yawrate_ref = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
 
     acknowledge(ACK_POSITIVE);
