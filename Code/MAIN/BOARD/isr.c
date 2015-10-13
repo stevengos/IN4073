@@ -91,8 +91,6 @@ void isr_rs232_rx(void)
 
 void isr_timer(void)
 {
-    X32_DISPLAY = ++debug;
-
     if( qr.link_down )
     {
         unsigned char i;
