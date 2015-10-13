@@ -1,8 +1,8 @@
 #ifndef FIXH
 #define FIXH
-#define Q 15
+#define Q 14
 #define K (1 << (Q - 1))
-typedef  short int q14;
+typedef  short q14;
 
 q14 normal2q (int x);
 

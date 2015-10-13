@@ -25,7 +25,9 @@
 #define SET_SCALE_YAW   0xB
 #define SET_SCALE_LIFT  0xC
 
-#define SET_CONTROLLER_YAW  0xD
+#define SET_CONTROLLER_PITCH  0xD
+#define SET_CONTROLLER_ROLL   0xE
+#define SET_CONTROLLER_YAW    0xF
 
 #define ALIVE           0x10
 #define ACK             0x11
@@ -54,9 +56,9 @@
 
 /* Eligible values files when the header is "ACK" */
 #define ACK_POSITIVE 0x0
-#define ACK_NEGATIVE 0x1F
-#define ACK_INVALID  0x2F
-#define ACK_HAMMING  0x3F
+#define ACK_NEGATIVE 0x5F
+#define ACK_INVALID  0x6F
+#define ACK_HAMMING  0x7F
 
 /* Eligible values files when the header is "LOG" */
 #define LOG_START   0x1

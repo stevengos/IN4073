@@ -4,6 +4,8 @@
 
 #include "drone.h"
 
+#include "mafilter.h"
+
 extern struct drone qr;
 
 void run_drone()
@@ -274,7 +276,86 @@ void yaw_mode()
     X32_LEDS = ALL_OFF;
 }
 
-void full_mode(){ X32_LEDS = LED6; while(!qr.flag_mode); X32_LEDS = ALL_OFF; }
+void full_mode()
+{
+    short e_ax;
+    short e_ay;
+
+    short e_p;
+    short e_q;
+    short e_r;
+    int ae1, ae2, ae3, ae4;
+
+    X32_LEDS = LED6;
+
+    while(!qr.flag_mode)
+    {
+        if(qr.lift_force)
+        {
+            DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
+/* CASCADE CONTROLLER */
+            e_ax = qr.pitch_ref - qr.fax;
+            e_p = qr.controller_pitch*e_ax - qr.fp;
+            qr.pitch_momentum = qr.controller_pitch * e_p;
+
+            e_ay = qr.roll_ref - qr.fay;
+            e_q = qr.controller_roll*e_ay - qr.fq;
+            qr.roll_momentum = qr.controller_roll * e_q;
+
+/* RATE CONTROL */
+//            e_p = qr.pitch_ref - qr.fp;
+//            qr.pitch_momentum = qr.controller_pitch * e_p;
+//
+//            e_q = qr.roll_ref - qr.fq;
+//            qr.roll_momentum = qr.controller_roll * e_q;
+
+            e_r = qr.yawrate_ref - qr.fr;
+            qr.yaw_momentum = qr.controller_yaw * e_r;
+
+            ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+
+            ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
+            ae1 = ae1 <= MIN_RPM ? MIN_RPM : sqrt(ae1);
+            ae2 = ae2 <= MIN_RPM ? MIN_RPM : sqrt(ae2);
+            ae3 = ae3 <= MIN_RPM ? MIN_RPM : sqrt(ae3);
+            ae4 = ae4 <= MIN_RPM ? MIN_RPM : sqrt(ae4);
+
+            ae1 = ae1 > MAX_RPM ? MAX_RPM : ae1;
+            ae2 = ae2 > MAX_RPM ? MAX_RPM : ae2;
+            ae3 = ae3 > MAX_RPM ? MAX_RPM : ae3;
+            ae4 = ae4 > MAX_RPM ? MAX_RPM : ae4;
+
+            qr.ae1 = ae1 - qr.ae1 > STEP_RPM ? qr.ae1 + STEP_RPM : qr.ae1 - ae1 > STEP_RPM ? qr.ae1 - STEP_RPM : ae1;
+            qr.ae2 = ae2 - qr.ae2 > STEP_RPM ? qr.ae2 + STEP_RPM : qr.ae2 - ae2 > STEP_RPM ? qr.ae2 - STEP_RPM : ae2;
+            qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : ae3;
+            qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
+
+            DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+
+            ucatnap(MOTOR_REFRESH);
+
+            #ifdef PERIPHERAL_XUFO_A0
+
+            X32_QR_A1 = qr.ae1;
+            X32_QR_A2 = qr.ae2;
+            X32_QR_A3 = qr.ae3;
+            X32_QR_A4 = qr.ae4;
+
+            #endif
+
+            ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
+        }
+        else
+            stop_motors();
+    }
+
+    X32_LEDS = ALL_OFF;
+}
 
 void clear_drone()
 {
@@ -298,12 +379,14 @@ void clear_drone()
 //    qr.scale_yaw = 16400;
 //    qr.scale_lift = 16400;
 
-    qr.scale_pitch = 8240/2;
-    qr.scale_roll = 8240/2;
+    qr.scale_pitch = 8240/4;
+    qr.scale_roll = 8240/4;
     qr.scale_yaw = 16400/2;
     qr.scale_lift = 16400/2;
 
-    qr.controller_yaw = 1;
+    qr.controller_pitch = 1;
+    qr.controller_roll = 1;
+    qr.controller_yaw = 3;
 
     qr.step_pitch = 5;
     qr.step_roll = 5;
@@ -331,6 +414,8 @@ void clear_drone()
 
     qr.log = 0;
     qr.log_full = 0;
+
+    initfilter();
 }
 
 void stop_motors()

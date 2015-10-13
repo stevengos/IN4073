@@ -68,6 +68,12 @@ void perform_command(char header, char command)
                     break;
         //}
 
+        case SET_CONTROLLER_PITCH:
+                    set_controller_pitch(command);
+                    break;
+        case SET_CONTROLLER_ROLL:
+                    set_controller_roll(command);
+                    break;
         case SET_CONTROLLER_YAW:
                     set_controller_yaw(command);
                     break;
@@ -193,6 +199,20 @@ void set_scale_lift(char command)
 }
 //}
 
+void set_controller_pitch(char command)
+{
+    if(command == INCREASE)
+        qr.controller_pitch += 1;
+    else
+        qr.controller_pitch = qr.controller_pitch-1 >= 0 ? qr.controller_pitch-1 : 0;
+}
+void set_controller_roll(char command)
+{
+    if(command == INCREASE)
+        qr.controller_roll += 1;
+    else
+        qr.controller_roll = qr.controller_roll-1 >= 0 ? qr.controller_roll-1 : 0;
+}
 void set_controller_yaw(char command)
 {
     if(command == INCREASE)
