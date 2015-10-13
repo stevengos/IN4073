@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #define LOG_SIZE            sizeof(struct log_s)
-#define LOG_BUFFER_SIZE_KB  100*1024  //100kB
+#define LOG_BUFFER_SIZE_KB  10*1024  //100kB
 
 extern struct drone qr;
 
@@ -20,10 +20,10 @@ struct log_s
 
     short start;
 
-    short ae1;
-    short ae2;
-    short ae3;
-    short ae4;
+//    short ae1;
+//    short ae2;
+//    short ae3;
+//    short ae4;
 
     short sax;
     short say;
@@ -32,6 +32,10 @@ struct log_s
     short sp;
     short sq;
     short sr;
+
+    short fax;
+    short fay;
+    short faz;
 
     short fp;
     short fq;

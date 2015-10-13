@@ -1,24 +1,179 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-11
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <termios.h>
+#include <string.h>
+
+#include <sys/types.h>
 
 #include "../interface/packet.h"
 #include "board.h"
+#include "keyboard.h"
+#include "joystick.h"
 
-char getchar_tty()
+#define REFRESH_TIME    50
+
+pthread_mutex_t lock_board;
+int end_communication = 0;
+
+packet_t packet_buffer[10];
+int packet_counter = 0;
+
+//{
+
+char* get_current_time_string(){
+	time_t current_time;
+	struct tm * time_info;
+	char* timeString;  // space for "%Y_%m_%d_%H_%M_%S\0"
+	timeString = malloc(sizeof(char) * 21);
+
+	time(&current_time);
+	time_info = localtime(&current_time);
+
+	strftime(timeString, sizeof(char) * 21, "%Y_%m_%d_%H_%M_%S", time_info);
+	puts(timeString);
+
+	return timeString;
+}
+
+void safe_measurement_to_file(char* filename, char* t_string){
+	FILE *fp;
+	fp = fopen(filename, "aw+");
+	fprintf(fp, "%s", t_string);
+	fclose(fp);
+}
+
+void safe_int_measurement_to_file(char* filename, int t_int){
+	char temp_value[100];
+
+	sprintf(temp_value, "%d ", t_int);
+
+	safe_measurement_to_file(filename, temp_value);
+}
+
+void push_packet_t(char header, char command)
 {
-    char ch = getchar();
+	packet_t p;
 
-    //while( getchar() != '\n' );
+	p.header = header;
+	p.command = command;
+	compute_hamming(&p);
 
-    return ch;
+	packet_buffer[packet_counter++] = p;
+}
+
+void empty_packet_t()
+{
+	packet_counter = 0;
+}
+
+void *is_alive(void* board)
+{
+    int idboard = *( (int*)(board) );
+
+    while(!end_communication)
+    {
+        packet_t p;
+        p.header = ALIVE;
+        p.command = EMPTY;
+
+        compute_hamming(&p);
+
+        pthread_mutex_lock( &lock_board );
+
+        send_packet(idboard, p);
+
+        pthread_mutex_unlock( &lock_board );
+
+        usleep(REFRESH_TIME*1000); //50ms
+    }
+}
+
+void logging(int board, packet_t p)
+{
+    printf("pc> Retrieving Log Data...\n");
+
+    int incoming_int;
+    short incoming_short;
+    char file_name[100];
+
+    strcpy(file_name, "measurements/meas_");
+    strcat(file_name, get_current_time_string());
+    strcat(file_name, ".txt");
+
+    int number_logs;
+    int status = 1;
+    int debug = 0;
+
+    pthread_mutex_lock( &lock_board ); //*******************************************************************
+
+    /********* receive number of logs ******/
+    status = getint_board(board, &incoming_int);
+    number_logs = incoming_int;
+
+    /********* read logs **********************/
+    while( number_logs-- > 1 ) //while there's a new log line
+    {
+        status = getint_board(board, &incoming_int); //receive timestamp
+
+        if( !status )
+        {
+            while( getchar_board(board) );
+            printf("\npc>Flushing the shit out of the buffer.\n");
+            break;
+        }
+
+        printf("#%d %d ", number_logs, incoming_int);
+        safe_int_measurement_to_file(file_name, incoming_int);
+
+        debug = 0;
+        while(debug < 50)
+        {
+            status = getshort_board(board, &incoming_short);
+
+            if( !status )
+            {
+                printf("pc> Error while reading integer.\n");
+                break;
+            }
+
+            if(incoming_short == LOG_NEWLINE)
+            {
+                printf("\n");
+                break;
+            }
+
+            if( incoming_short == ACK_NEGATIVE )
+                printf("\n\npc> Error while reading logs from the board. Abort!\n"), exit(0);
+
+            printf("%d ", incoming_short);
+            safe_int_measurement_to_file(file_name, incoming_short);
+
+            debug++;
+
+            if( debug == 50 )
+                printf("\n\npc> Got in a loop whilst reading logging!\n");
+        }
+
+        safe_measurement_to_file(file_name, "\n");
+    }
+
+    mon_delay_ms(500);
+    while( getchar_board(board) );
+
+    pthread_mutex_unlock( &lock_board );//*****************************************************************************
+
+    printf("\npc>Log retrival is over. Press any key to continue.\n\n");
+
+    getchar();
+}
+
+void* open_status_terminal(){
+     system("gnome-terminal -x sh -c \"./status_terminal; bash\"");
 }
 
 int main()
@@ -26,18 +181,53 @@ int main()
     struct termios boardSettings;
     struct termios oldBoardSettings;
 
+    struct termios oldKeyboardSettings;
+    struct termios keyboardSettings;
+
     int board;
-    int sent;
+    int joystick;
 
     char ctty = 0;
     char cboard = 0;
     char ack_received = 0;
     char counter = 0;
 
+    pthread_t polling, status_terminal;
+    int status, i = 0;
+
+    int js_exit = 0;
+
+    pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
+
+    printf("into main!\n");
+
+    sleep(1);
+
+    pthread_cancel(status_terminal);
+    pthread_exit(NULL);
+    return 0;
+
+    /************* Open Joystick ********************************/
+//    joystick = open(JS_DEV0, O_RDONLY);
+//
+//	if ( joystick < 0)
+//	{
+//        joystick = open(JS_DEV1, O_RDONLY);
+//
+//        if( joystick < 0 )
+//            perror("jstest"), exit(1);
+//	}
+//
+//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+
+    /************* Open Keyboard ********************************/
+    open_keyboard(&oldKeyboardSettings, &keyboardSettings);
 
     printf("TERMINAL\n\n");
 
     printf("Trying to connect to the board...");
+
+    /************* Open Board ***********************************/
 
     board = open_board(&oldBoardSettings, &boardSettings);
 
@@ -49,274 +239,146 @@ int main()
 
     printf("Connection successful!\n\n");
 
-	/** DEBUG **/
-struct termios old_tio, new_tio;
-unsigned char c;
-unsigned int arrow_key = 0;
+    /************* Create Polling (keep_alive) ********************/
 
-//using termios code from http://shtrom.ssji.net/skb/getc.html
-/* get the terminal settings for stdin */
-tcgetattr(STDIN_FILENO,&old_tio);
+    pthread_mutex_init(&lock_board, NULL);
 
-/* we want to keep the old setting to restore them a the end */
-new_tio=old_tio;
+    status = pthread_create(&polling, NULL, is_alive, (void*)&board);
 
-/* disable canonical mode (buffered i/o) and local echo */
-new_tio.c_lflag &=(~ICANON & ~ECHO);
-
-/* set the new settings immediately */
-tcsetattr(STDIN_FILENO,TCSANOW,&new_tio);
-
-do {
-	packet_t p;
-        p.header = 0x0;
-        p.command = 0x0;
-	
-	printf("user> ");
-
-	c=getchar();
-
-	printf("%d \n",c);
-
-	//detect esc key
-	if(c == 27 && arrow_key){
-		break;	
-	}
-
-	//detection of arrow key press
-	//for example the sequence kan be 27, 91, 66 or 27, 91, 68
-	if(c == 27){
-		arrow_key = 1;
-	}
-
-	//left key - roll up
-	if(c == 68 && arrow_key == 1){
-		p.header	= D_ROLL;
-        	p.command	= INCREASE;
-	}
-
-	//right key - roll down
-	if(c == 67 && arrow_key == 1){
-		p.header	= D_ROLL;
-        	p.command	= DECREASE;
-	}
-
-	//up key
-	if(c == 65 && arrow_key == 1){
-		p.header	= D_PITCH;
-        	p.command	= INCREASE;
-	}
-
-	//down key
-	if(c == 66 && arrow_key == 1){
-		p.header	= D_PITCH;
-        	p.command	= DECREASE;
-	}
-
-	//0 - SAFE_MODE
-	if(c == 48){
-		p.header	= SET_MODE;
-        	p.command	= SAFE_MODE;
-	}
-
-	//1 - PANIC_MODE
-	if(c == 49){
-		p.header	= SET_MODE;
-        	p.command	= PANIC_MODE;
-	}
-
-	//2 - MANUAL_MODE
-	if(c == 50){
-		p.header	= SET_MODE;
-        	p.command	= MANUAL_MODE;
-	}
-
-	//3 - CALIBRATION_MODE
-	if(c == 51){
-		p.header	= SET_MODE;
-        	p.command	= CALIBRATION_MODE;
-	}
-
-	//4 - YAW_MODE
-	if(c == 52){
-		p.header	= SET_MODE;
-        	p.command	= YAW_MODE;
-	}
-
-	//5 - FULL_MODE
-	if(c == 53){
-		p.header	= SET_MODE;
-        	p.command	= FULL_MODE;
-	}
-
-	//a - lift up
-	if(c == 97){
-		p.header	= D_LIFT;
-        	p.command	= INCREASE;
-	}
-
-	//z - lift down
-	if(c == 122){
-		p.header	= D_LIFT;
-        	p.command	= DECREASE;
-	}
-
-	//w - yaw up
-	if(c = 119){
-		p.header	= D_YAWRATE;
-        	p.command	= INCREASE;
-	}
-
-	//q - yaw down
-	if(c = 133){
-		p.header	= D_YAWRATE;
-        	p.command	= DECREASE;
-	}
-
-	while(!ack_received)
-        {
-            if(ctty)
-                send_packet(board, p);
-
-            sleep(1); //give time to board to write output
-
-            while( (cboard = getchar_board(board)) )
-            {
-                if( cboard == ACK ) //ack coming
-                {
-                    cboard = getchar_board(board); //response: positive or negative
-
-                    getchar_board(board); //ignore crc
-
-                    if( cboard == ACK_POSITIVE )
-                        printf("pc> Positive acknowledge received.\n"), ack_received = 1;
-                    else
-                        if( cboard == ACK_NEGATIVE )
-                            printf("pc> Negative acknowledge received.\n");
-                    else
-                        printf("pc> Unexpected message from board.\n");
-                }
-                else
-                    printf("%c", cboard);
-            }
-
-            if(counter++>3)
-            {
-                printf("pc> Timeout: ACK not received.\n");
-                break;
-            }
-        }
-
-        ack_received = 0;
-} while(c!='x');
-
-/* restore the former settings */
-tcsetattr(STDIN_FILENO,TCSANOW,&old_tio);
-
-printf("quit\n");
-
-	/** 	  **/
-/*
-    printf("TERMINAL\n\n");
-
-    printf("Trying to connect to the board...");
-
-    board = open_board(&oldBoardSettings, &boardSettings);
-
-    if( board < 0 )
+    if( status )
     {
-        printf("Error: connection to board failed.");
-        return 1;
+        printf("pc> Error while creating polling thread. Session Aborted.\n");
+        ctty = ESC;
     }
 
-    printf("Connection successful!\n\n");
+    /************* Main Loop ********************************/
 
-    while(ctty != 'q')
+    while(js_exit != 1 && ctty != ESC)
     {
-        printf("user> ");
+//        js_exit = set_js_command(joystick); //read the joystick configuration
 
-        packet_t p;
-        p.header = 0x0;
-        p.command = 0x0;
+		ctty = getchar_keyboard();          //read the keyboard
 
-        ctty = getchar_tty();
+		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
 
-        switch(ctty)
+//        if( packet_buffer[packet_counter].header == LOG && packet_buffer[packet_counter].command == LOG_GET)
+//        {
+//            close_keyboard(&oldKeyboardSettings);
+//
+//            logging(board, packet_buffer[packet_counter]);
+//
+//            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+//
+//            continue;
+//        }
+
+		if( packet_buffer[packet_counter].header != EMPTY )  //if keyboard command is a valid one then push it, else ignore
+            packet_counter++;
+
+        for(i = 0; i < packet_counter; i++) //send a burst of packets
         {
-            case '1':
-                printf("pc> turn on led1.\n");
-                p.header = SET_LED;
-                p.command = LED1;
-                break;
-            case '2':
-                p.header = SET_LED;
-                p.command = LED2;
-                break;
-            case '3':
-                p.header = SET_LED;
-                p.command = LED3;
-                break;
-            case '4':
-                p.header = SET_LED;
-                p.command = LED4;
-                break;
-            case 'a':
-                p.header = SET_LED;
-                p.command = ALL_ON;
-                break;
-            case 'q':
-                p.header = STOP;
-                p.command = 0;
-                break;
-            default:
-                ctty = 0;
-                ack_received = 1;
-                printf("pc> Command not recognized.\n");
-        };
+            packet_t p = packet_buffer[i];
 
-        while(!ack_received)
-        {
-            if(ctty)
+            do //send the same packet until I receive a positive ack
+            {
+                int counter_waitack = 0;
+                ack_received = EMPTY;
+
+                //get exclusive access to the board and send the packet
+                pthread_mutex_lock( &lock_board );
                 send_packet(board, p);
+                pthread_mutex_unlock( &lock_board );
 
-            sleep(1); //give time to board to write output
+                printf("pc> Sending packet %d... ", i);
 
-            while( (cboard = getchar_board(board)) )
-            {
-                if( cboard == ACK ) //ack coming
+                mon_delay_ms(REFRESH_TIME);
+
+                /********* WAIT FOR ACKNOWLEDGMENT ***************/
+                pthread_mutex_lock( &lock_board );
+
+                for(counter_waitack=0; counter_waitack < 5; counter_waitack++)
+                    if( (cboard = getchar_board(board)) == ACK ) //wait for acknowledgment
+                    {
+                        ack_received = getchar_board(board);    //response
+                        getchar_board(board);                   //ignore crc
+                        break;
+                    }
+                    else
+                        usleep(500);
+
+                pthread_mutex_unlock( &lock_board );
+
+                /********* EVALUATE ACKNOWLEDGMENT ************/
+                switch(ack_received)
                 {
-                    cboard = getchar_board(board); //response: positive or negative
+                    case ACK_NEGATIVE:
+                        printf("NACK received, trying again...\n"), counter++;
 
-                    getchar_board(board); //ignore crc
+                        pthread_mutex_lock( &lock_board );
 
-                    if( cboard == ACK_POSITIVE )
-                        printf("pc> Positive acknowledge received.\n"), ack_received = 1;
-                    else
-                        if( cboard == ACK_NEGATIVE )
-                            printf("pc> Negative acknowledge received.\n");
-                    else
-                        printf("pc> Unexpected message from board.\n");
-                }
-                else
-                    printf("%c", cboard);
+                        while( getchar_board(board) );
+
+                        pthread_mutex_unlock( &lock_board );
+
+                        break;
+
+                    case ACK_HAMMING:
+                        printf("Checksum is wrong, rejected\n"), mon_delay_ms(500);
+
+                        pthread_mutex_lock( &lock_board );
+
+                        while( getchar_board(board) );
+
+                        pthread_mutex_unlock( &lock_board );
+
+                        break;
+
+                    case ACK_INVALID:
+                        printf("Invalid command, rejected.\n"), mon_delay_ms(500);
+
+                        break;
+
+                    case ACK_POSITIVE:
+                        printf("Command executed correctly.\n"), mon_delay_ms(500);
+
+                        if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
+                        {
+                            close_keyboard(&oldKeyboardSettings);
+                            logging(board, packet_buffer[packet_counter]);
+                            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+                        }
+
+                        break;
+
+                    case EMPTY:
+                        printf("No answer received, trying again...\n"), counter++;
+
+                        while( getchar_board(board) );
+
+                        break;
+                };
+
             }
-
-            if(counter++>3)
-            {
-                printf("pc> Timeout: ACK not received.\n");
-                break;
-            }
+            while( (ack_received == ACK_NEGATIVE || ack_received == EMPTY) && counter < 5);
         }
 
-        ack_received = 0;
+        empty_packet_t();
+        counter = 0;
 
-        printf("\n");
+        if(ctty != ESC)
+            system("clear");
     }
 
     printf("End of communication.\n");
 
+    end_communication = 1;
+    mon_delay_ms(500);
+    pthread_cancel(polling);
+    pthread_cancel(status_terminal);
+
+    close_keyboard(&oldKeyboardSettings);
     close_board(board, &oldBoardSettings);
-*/
+    //does the joystick need closing?
+
     return 0;
 }
-

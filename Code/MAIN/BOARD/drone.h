@@ -62,6 +62,8 @@ struct drone
     short step_lift;
 
     //Parameter Yaw Mode
+    short controller_pitch;
+    short controller_roll;
     short controller_yaw;
 
     //sensed data
