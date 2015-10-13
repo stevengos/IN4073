@@ -13,6 +13,9 @@ void perform_command(char header, char command)
 
     switch( header )
     {
+        case ALIVE:
+                    return;
+
         case SET_MODE:
                     set_mode(command);
                     break;
@@ -76,16 +79,6 @@ void perform_command(char header, char command)
                     break;
         case SET_CONTROLLER_YAW:
                     set_controller_yaw(command);
-                    break;
-
-        case ALIVE:
-                    return;
-
-        case BLINK_LED:
-                    break;
-
-        case SET_LED:
-                    set_led(command);
                     break;
 
         case LOG:
@@ -199,6 +192,8 @@ void set_scale_lift(char command)
 }
 //}
 
+/* Set controller parameters */
+//{
 void set_controller_pitch(char command)
 {
     if(command == INCREASE)
@@ -220,6 +215,7 @@ void set_controller_yaw(char command)
     else
         qr.controller_yaw = qr.controller_yaw-1 >= 0 ? qr.controller_yaw-1 : 0;
 }
+//}
 
 void set_log(char command)
 {
@@ -285,7 +281,7 @@ void set_yawrate(char command)
 }
 //}
 
-/* KEYBOARD SESSION */
+/* KEYBOARD SECTION */
 //{
 
 void d_pitch(char command)
@@ -397,12 +393,6 @@ void d_lift(char command)
                 qr.lift_force = MIN_LIFT, acknowledge(ACK_INVALID);
             else
                 qr.lift_force -= qr.step_lift, acknowledge(ACK_POSITIVE);
-}
-
-void set_led(char command)
-{
-    X32_LEDS = command;
-    acknowledge(ACK_POSITIVE);
 }
 
 //}

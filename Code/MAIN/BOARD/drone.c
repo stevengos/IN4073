@@ -108,6 +108,7 @@ void manual_mode()
         if( qr.lift_force )
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
             ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
             ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
@@ -129,8 +130,6 @@ void manual_mode()
             qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : ae3;
             qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
-            ucatnap(MOTOR_REFRESH);
-
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
             #ifdef PERIPHERAL_XUFO_A0
@@ -147,8 +146,6 @@ void manual_mode()
         else
             stop_motors();
     }
-
-    //X32_DISPLAY = debug++;
 
     stop_motors();
 
@@ -220,6 +217,7 @@ void yaw_mode()
 {
     short e;
     int ae1, ae2, ae3, ae4;
+    short debug = 0;
 
     X32_LEDS = LED5;
 
@@ -255,8 +253,6 @@ void yaw_mode()
             qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
-
-            ucatnap(MOTOR_REFRESH);
 
             #ifdef PERIPHERAL_XUFO_A0
 
@@ -336,8 +332,6 @@ void full_mode()
             qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
-
-            ucatnap(MOTOR_REFRESH);
 
             #ifdef PERIPHERAL_XUFO_A0
 
