@@ -13,6 +13,11 @@
 				<Option compiler="null" />
 			</Target>
 		</Build>
+		<Unit filename="BOARD.cbp" />
+		<Unit filename="butterworth.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="butterworth.h" />
 		<Unit filename="command.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -23,14 +28,30 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="drone.h" />
+		<Unit filename="fix_board.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="fix_board.h" />
 		<Unit filename="isr.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="isr.h" />
+		<Unit filename="log.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="log.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="static.h" />
+		<Unit filename="transmitter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="transmitter.h" />
+		<Unit filename="utility.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utility.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

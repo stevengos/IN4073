@@ -1,6 +1,5 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-17
 */
 
 /* In the following we list the admissable values for the fields of the struct packet_s */
@@ -25,6 +24,10 @@
 #define SET_SCALE_ROLL  0xA
 #define SET_SCALE_YAW   0xB
 #define SET_SCALE_LIFT  0xC
+
+#define SET_CONTROLLER_PITCH  0xD
+#define SET_CONTROLLER_ROLL   0xE
+#define SET_CONTROLLER_YAW    0xF
 
 #define ALIVE           0x10
 #define ACK             0x11
@@ -53,13 +56,16 @@
 
 /* Eligible values files when the header is "ACK" */
 #define ACK_POSITIVE 0x0
-#define ACK_NEGATIVE 0x1F
-#define ACK_INVALID  0x2F
+#define ACK_NEGATIVE 0x5F
+#define ACK_INVALID  0x6F
+#define ACK_HAMMING  0x7F
 
 /* Eligible values files when the header is "LOG" */
 #define LOG_START   0x1
 #define LOG_STOP    0x2
 #define LOG_GET     0x3
+#define LOG_NEWLINE 0xeff
+#define LOG_END     0xfff
 
 /* Eligible values field when the header is "SET_LED" (use bitwise to operate on more than one led at once */
 #define ALL_OFF 0x00

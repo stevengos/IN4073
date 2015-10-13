@@ -23,7 +23,7 @@ int kbhit()
     return select(1, &fds, NULL, NULL, &tv);
 }
 
-inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTerminalSettings)
+void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTerminalSettings)
 {
     tcgetattr(0, oldTerminalSettings);
 
@@ -33,11 +33,10 @@ inline void open_keyboard(struct termios* oldTerminalSettings, struct termios* n
 
     tcsetattr(0, TCSANOW, newTerminalSettings);
 
-    //system ("/bin/stty raw");
     setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
-inline void close_keyboard(struct termios* oldTerminalSettings)
+void close_keyboard(struct termios* oldTerminalSettings)
 {
     tcsetattr(0, TCSANOW, oldTerminalSettings);
 }
@@ -52,7 +51,12 @@ char getchar_keyboard()
 	ch = getchar();
     }
 
-    printf("%d ", ch);
+
+    if(kbhit())
+    {
+        ch = getchar();
+        printf("keyboard> %d ", ch);
+    }
 
     if( ch == ESC )
     {
@@ -129,6 +133,18 @@ packet_t encapsulate(char command)
             outgoing.header     = SET_MODE;
             outgoing.command    = FULL_MODE;
             break;
+        case SEVEN:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_START;
+            break;
+        case EIGHT:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_STOP;
+            break;
+        case NINE:
+            outgoing.header     = LOG;
+            outgoing.command    = LOG_GET;
+            break;
 
         /* MANUAL CONTROL */
         case A:
@@ -166,20 +182,28 @@ packet_t encapsulate(char command)
             break;
 
         /* CONTROLLER SETTINGS */
+        case Y:
+            outgoing.header     = SET_CONTROLLER_PITCH;
+            outgoing.command    = INCREASE;
+            break;
+        case H:
+            outgoing.header     = SET_CONTROLLER_PITCH;
+            outgoing.command    = DECREASE;
+            break;
         case U:
-            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.header     = SET_CONTROLLER_ROLL;
             outgoing.command    = INCREASE;
             break;
         case J:
-            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.header     = SET_CONTROLLER_ROLL;
             outgoing.command    = DECREASE;
             break;
         case I:
-            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.header     = SET_CONTROLLER_YAW;
             outgoing.command    = INCREASE;
             break;
         case K:
-            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.header     = SET_CONTROLLER_YAW;
             outgoing.command    = DECREASE;
             break;
         case O:
@@ -188,6 +212,16 @@ packet_t encapsulate(char command)
             break;
         case L:
             outgoing.header     = SET_SCALE_YAW;
+            outgoing.command    = DECREASE;
+            break;
+
+        case N:
+            outgoing.header     = SET_CONTROLLER_YAW;
+            outgoing.command    = INCREASE;
+            break;
+
+        case M:
+            outgoing.header     = SET_CONTROLLER_YAW;
             outgoing.command    = DECREASE;
             break;
 

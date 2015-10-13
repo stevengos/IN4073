@@ -59,6 +59,42 @@ char getchar_board(int board)
         return c;
 }
 
+int getshort_board(int board, short* value)
+{
+    unsigned char c1, c2;
+    *value = 0;
+
+    while( !read(board, &c1, 1) );
+    while( !read(board, &c2, 1) );
+
+    *value |= c2;
+    *value = *value << 8;
+    *value |= c1;
+
+    return 1;
+}
+
+int getint_board(int board, int* value)
+{
+    unsigned char c1, c2, c3, c4;
+    *value = 0;
+
+    while( !read(board, &c1, 1) );
+    while( !read(board, &c2, 1) );
+    while( !read(board, &c3, 1) );
+    while( !read(board, &c4, 1) );
+
+    *value |= c4;
+    *value = *value << 8;
+    *value |= c3;
+    *value = *value << 8;
+    *value |= c2;
+    *value = *value << 8;
+    *value |= c1;
+
+    return 1;
+}
+
 int send_packet(int board, packet_t p)
 {
     int done = 0;

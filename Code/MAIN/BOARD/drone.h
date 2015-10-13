@@ -7,10 +7,13 @@
 
 #include "x32.h"
 #include "static.h"
+#include "utility.h"
+#include "../interface/packet.h"
 
 #define MAX_RPM     0x3ff
-#define MIN_RPM     0x00F
+#define MIN_RPM     0x00a
 #define STEP_RPM    0x010
+#define MOTOR_REFRESH   200
 
 #define MAX_PITCH   255
 #define MAX_ROLL    255
@@ -24,8 +27,8 @@
 
 #define STEP_SCALE_PARAMETER 1000
 
-#define PANIC_RPM 50
-#define PANIC_TIME 5000
+#define PANIC_RPM   200
+#define PANIC_TIME  5000
 
 struct drone
 {
@@ -35,13 +38,19 @@ struct drone
     short ae3;
     short ae4;
 
-    //setpoints for configuration
-    short pitch;
-    short roll;
-    short yawrate;
-    short lift;
+    //openloop control input
+    short pitch_momentum;
+    short roll_momentum;
+    short yaw_momentum;
+    short lift_force;
 
-    //parameters
+    //references for control mode
+    short pitch_ref;
+    short roll_ref;
+    short yawrate_ref;
+    short lift_ref;
+
+    //parameters Manual Mode
     short scale_pitch;
     short scale_roll;
     short scale_yaw;
@@ -52,30 +61,47 @@ struct drone
     short step_yawrate;
     short step_lift;
 
+    //Parameter Yaw Mode
+    short controller_pitch;
+    short controller_roll;
+    short controller_yaw;
+
     //sensed data
-    char sax;
-    char say;
-    char saz;
-    char sp;
-    char sq;
-    char sr;
+    short sax;
+    short say;
+    short saz;
+    short sp;
+    short sq;
+    short sr;
+
+    //filtered data
+    short fax;
+    short fay;
+    short faz;
+    short fp;
+    short fq;
+    short fr;
+
+    //sensor offsets
+    short off_ax;
+    short off_ay;
+    short off_az;
+    short off_p;
+    short off_q;
+    short off_r;
 
     //flags
     char current_mode;
     char flag_mode;
     char exit;
     char link_down;
-    char log;
 
-    //logs buffer
-    int log_buffer[LOG_BUFFER_SIZE];
-    int log_size;
+    char log;
+    char log_full;
 };
 
 void run_drone();
 void clear_drone();
-void print_drone();
-void add_log();
 
 void safe_mode(void);
 void panic_mode(void);
@@ -85,7 +111,5 @@ void yaw_mode(void);
 void full_mode(void);
 
 void stop_motors(void);
-void catnap(int);
-void ucatnap(int);
 
 #endif // DRONE_H

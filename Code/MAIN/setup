@@ -1,6 +1,0 @@
-#!/bin/bash
-# Setup
-
-cd ../../../in4073_NEXYS/
-source setup_in4073
-cd ../IN4073/Code/MAIN

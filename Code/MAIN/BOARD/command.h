@@ -5,8 +5,13 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#define TIMEOUT_BUFFER_TX   10 //counter
-#define SLEEP_BUFFER_TX     10 //usec
+#include "../interface/packet.h"
+#include "../interface/hamming.h"
+
+#include "drone.h"
+#include "isr.h"
+#include "transmitter.h"
+#include "log.h"
 
 void perform_command(char,char);
 void acknowledge(char);
@@ -22,6 +27,10 @@ void set_scale_pitch(char);
 void set_scale_roll(char);
 void set_scale_yaw(char);
 void set_scale_lift(char);
+
+void set_controller_pitch(char command);
+void set_controller_roll(char command);
+void set_controller_yaw(char command);
 
 // interface used by joystick
 void set_pitch(char);
