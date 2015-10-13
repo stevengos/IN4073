@@ -6,6 +6,18 @@ CHECKLIST OF NEEDED DEBUG IN LAB
 4) if lift>0 cant go to safe mode (v)
 5) in set_mode remove switch for mode=command
 6) ask INLINE
-7) problem allocating memory for logs
-8) yaw with filters
+7) problem allocating memory for logs (v)
+8) yaw with filters (v)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+1) no ucatnap in loop
+2) check safety
+3) panic mode when fire button 
+4) battery
+5) in safe mode, RPMs = 0
+6) LIFT = joystick + keyboard
+7) trimming calibration
+8) signals name must be standard
+9) keyboard mapping
+10) led mapping
