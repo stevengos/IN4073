@@ -32,14 +32,14 @@
 #define ALIVE           0x10
 #define ACK             0x11
 
-#define BLINK_LED       0x12
-#define SET_LED         0x13
-
 #define LOG             0x20
 
 #define STOP            0x30
 
 #define EMPTY           0x40
+
+#define OPEN_LOOP       0x50
+
 /* ############ COMMAND ############# */
 
 /* Eligible values when the header is "SET_MODE" */

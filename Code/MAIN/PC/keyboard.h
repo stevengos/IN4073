@@ -14,6 +14,7 @@
 
 #define ESC 27
 
+//set modes
 #define ZERO        48
 #define ONE         49
 #define TWO         50
@@ -25,25 +26,30 @@
 #define EIGHT       56
 #define NINE        57
 
-/*lowercase*/
-#define A           97
-#define Z           122
-#define Q           113
-#define W           119
-
 //scale parameters
+#define E           101
+#define D           100
+#define R           114
+#define F           102
+#define T           116
+#define G           103
 #define Y           121
 #define H           104
+
+//tune controller
 #define U           117
 #define J           106
 #define I           105
 #define K           107
 #define O           111
 #define L           108
+#define SPACE       32
 
-//tune controller
-#define N           110
-#define M           109
+//offset pitch/roll/yaw
+#define A           97
+#define Z           122
+#define Q           113
+#define W           119
 
 #define ARROW_U     65
 #define ARROW_D     66

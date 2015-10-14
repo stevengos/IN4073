@@ -91,9 +91,11 @@ void isr_rs232_rx(void)
 
 void isr_timer(void)
 {
-    if( qr.link_down )
+    if( qr.link_down || 1000 < BATTERY_LOW )  //X32_QR_BATTERY FIX
     {
         unsigned char i;
+
+        panic_mode();
 
         qr.current_mode = SAFE_MODE;
         stop_motors();

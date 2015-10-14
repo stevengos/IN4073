@@ -13,7 +13,7 @@
 #include "keyboard.h"
 #include "joystick.h"
 
-#define REFRESH_TIME    50
+#define REFRESH_TIME    50 //ms
 
 pthread_mutex_t lock_board;
 int end_communication = 0;
@@ -223,17 +223,17 @@ int main()
 	int js_exit = 0;
 
     /************* Open Joystick ********************************/
-    joystick = open(JS_DEV0, O_RDONLY);
-
-	if ( joystick < 0)
-	{
-        joystick = open(JS_DEV1, O_RDONLY);
-
-        if( joystick < 0 )
-            perror("jstest"), exit(1);
-	}
-
-	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+//    joystick = open(JS_DEV0, O_RDONLY);
+//
+//	if ( joystick < 0)
+//	{
+//        joystick = open(JS_DEV1, O_RDONLY);
+//
+//        if( joystick < 0 )
+//            perror("jstest"), exit(1);
+//	}
+//
+//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
     /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
@@ -270,7 +270,7 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-        js_exit = set_js_command(joystick); //read the joystick configuration
+        //js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 

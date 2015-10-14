@@ -14,6 +14,7 @@
 #include "../interface/hamming.h"
 
 #define TIMEOUT_TIMER       250 //ms
+#define BATTERY_LOW         200
 
 void isr_buttons(void);
 void isr_rs232_rx(void);

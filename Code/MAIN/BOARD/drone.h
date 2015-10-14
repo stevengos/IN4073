@@ -10,25 +10,30 @@
 #include "utility.h"
 #include "../interface/packet.h"
 
-#define MAX_RPM     0x3ff
-#define MIN_RPM     0x00a
-#define STEP_RPM    0x010
+#define MAX_RPM         0x3ff
+#define MIN_RPM         0x00a
+#define STEP_RPM        0x00f
 #define MOTOR_REFRESH   200
 
-#define MAX_PITCH   255
-#define MAX_ROLL    255
-#define MAX_YAWRATE 255
+#define MAX_PITCH   127
+#define MAX_ROLL    127
+#define MAX_YAWRATE 127
 #define MAX_LIFT    255
 
-#define MIN_PITCH   -255
-#define MIN_ROLL    -255
-#define MIN_YAWRATE -255
+#define MIN_PITCH   -127
+#define MIN_ROLL    -127
+#define MIN_YAWRATE -127
 #define MIN_LIFT    0
+
+#define STEP_PITCH  5
+#define STEP_ROLL   5
+#define STEP_YAW    10
+#define STEP_LIFT   5
 
 #define STEP_SCALE_PARAMETER 1000
 
 #define PANIC_RPM   200
-#define PANIC_TIME  5000
+#define PANIC_TIME  3000
 
 struct drone
 {
@@ -48,7 +53,6 @@ struct drone
     short pitch_ref;
     short roll_ref;
     short yawrate_ref;
-    short lift_ref;
 
     //parameters Manual Mode
     short scale_pitch;
@@ -56,10 +60,10 @@ struct drone
     short scale_yaw;
     short scale_lift;
 
-    short step_pitch;
-    short step_roll;
-    short step_yawrate;
-    short step_lift;
+    short off_pitch;
+    short off_roll;
+    short off_yawrate;
+    short off_lift;
 
     //Parameter Yaw Mode
     short controller_pitch;

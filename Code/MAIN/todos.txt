@@ -14,10 +14,10 @@ CHECKLIST OF NEEDED DEBUG IN LAB
 1) no ucatnap in loop
 2) check safety
 3) panic mode when fire button 
-4) battery
-5) in safe mode, RPMs = 0
-6) LIFT = joystick + keyboard
+4) battery (v)
+5) in safe mode, RPMs = 0 (v)
+6) LIFT = joystick + keyboard (v)
 7) trimming calibration
 8) signals name must be standard
-9) keyboard mapping
+9) keyboard mapping (v)
 10) led mapping
