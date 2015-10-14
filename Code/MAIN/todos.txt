@@ -1,7 +1,7 @@
 CHECKLIST OF NEEDED DEBUG IN LAB
 
 1) UCATNAP WHEN APPLYING MOTOR SPEED (v)
-2) chrono the code
+2) chrono the code (v)
 3) check new square root function (v)
 4) if lift>0 cant go to safe mode (v)
 5) in set_mode remove switch for mode=command

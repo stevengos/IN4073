@@ -270,6 +270,9 @@ void yaw_mode()
     X32_LEDS = ALL_OFF;
 }
 
+/**
+@Profiling: 540us for the main loop
+*/
 void full_mode()
 {
     short e_ax;
@@ -288,14 +291,18 @@ void full_mode()
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
-/* CASCADE CONTROLLER */ //what about integrating the rates?
-//            e_ax = qr.pitch_ref - qr.fax;
-//            e_p = qr.controller_pitch*e_ax - qr.fp;
-//            qr.pitch_momentum = qr.controller_pitch * e_p;
-//
-//            e_ay = qr.roll_ref - qr.fay;
-//            e_q = qr.controller_roll*e_ay - qr.fq;
-//            qr.roll_momentum = qr.controller_roll * e_q;
+/* CASCADE CONTROLLER
+            qr.fax += qr.fp; //estimated angle by integration
+            qr.fay += qr.sq; //estimated angle by integration
+
+            e_ax = qr.pitch_ref - qr.fax;
+            e_p = qr.controller_pitch*e_ax - qr.fp;
+            qr.pitch_momentum = qr.controller_pitch * e_p;
+
+            e_ay = qr.roll_ref - qr.fay;
+            e_q = qr.controller_roll*e_ay - qr.fq;
+            qr.roll_momentum = qr.controller_roll * e_q;
+*/
 
 /* RATE CONTROL */
             e_p = qr.pitch_ref - qr.fp;
@@ -303,6 +310,7 @@ void full_mode()
 
             e_q = qr.roll_ref - qr.fq;
             qr.roll_momentum = qr.controller_roll * e_q;
+/* END RATE CONTROL*/
 
             e_r = qr.yawrate_ref - qr.fr;
             qr.yaw_momentum = qr.controller_yaw * e_r;

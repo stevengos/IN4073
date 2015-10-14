@@ -35,6 +35,6 @@
 #define SLEEP_BUFFER_TX     200  //usec
 
 #define TIMEOUT_BUFFER_RX   20  //counter
-#define SLEEP_BUFFER_RX     20  //usec
+#define SLEEP_BUFFER_RX     10  //usec
 
 #endif // STATIC_H
