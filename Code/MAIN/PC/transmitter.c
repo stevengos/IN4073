@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <sys/types.h>
+
 #include "../interface/packet.h"
 #include "board.h"
 #include "keyboard.h"
@@ -38,40 +40,11 @@ char* get_current_time_string(){
 	return timeString;
 }
 
-char* readFile(char* filename)
-{
-    FILE* file = fopen(filename,"r");
-    if(file == NULL)
-    {
-        return NULL;
-    }
-
-    fseek(file, 0, SEEK_END);
-    long int size = ftell(file);
-    rewind(file);
-
-    char* content = calloc(size + 1, 1);
-
-    fread(content,1,size,file);
-
-    return content;
-}
-
 void safe_measurement_to_file(char* filename, char* t_string){
-	//int sz;
-	//char* buff_string;
-
 	FILE *fp;
-	fp = fopen (filename, "aw+");
-
-	/*fseek(fp, 0L, SEEK_END);
-	sz = ftell(fp);
-	fseek(fp, 0L, SEEK_SET);
-	buff_string = malloc(sz);
-*/
+	fp = fopen(filename, "aw+");
 	fprintf(fp, "%s", t_string);
-
- 	fclose(fp);
+	fclose(fp);
 }
 
 void safe_int_measurement_to_file(char* filename, int t_int){
@@ -81,8 +54,6 @@ void safe_int_measurement_to_file(char* filename, int t_int){
 
 	safe_measurement_to_file(filename, temp_value);
 }
-
-//}
 
 void push_packet_t(char header, char command)
 {
@@ -201,6 +172,10 @@ void logging(int board, packet_t p)
     getchar();
 }
 
+void* open_status_terminal(){
+     system("gnome-terminal -x sh -c \"./status_terminal; bash\"");
+}
+
 int main()
 {
     struct termios boardSettings;
@@ -217,10 +192,20 @@ int main()
     char ack_received = 0;
     char counter = 0;
 
-    pthread_t polling;
+    pthread_t polling, status_terminal;
     int status, i = 0;
 
-	int js_exit = 0;
+    int js_exit = 0;
+
+    pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
+
+    printf("into main!\n");
+
+    sleep(1);
+
+    pthread_cancel(status_terminal);
+    pthread_exit(NULL);
+    return 0;
 
     /************* Open Joystick ********************************/
 //    joystick = open(JS_DEV0, O_RDONLY);
@@ -275,6 +260,17 @@ int main()
 		ctty = getchar_keyboard();          //read the keyboard
 
 		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
+
+//        if( packet_buffer[packet_counter].header == LOG && packet_buffer[packet_counter].command == LOG_GET)
+//        {
+//            close_keyboard(&oldKeyboardSettings);
+//
+//            logging(board, packet_buffer[packet_counter]);
+//
+//            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
+//
+//            continue;
+//        }
 
 		if( packet_buffer[packet_counter].header != EMPTY )  //if keyboard command is a valid one then push it, else ignore
             packet_counter++;
@@ -378,6 +374,7 @@ int main()
     end_communication = 1;
     mon_delay_ms(500);
     pthread_cancel(polling);
+    pthread_cancel(status_terminal);
 
     close_keyboard(&oldKeyboardSettings);
     close_board(board, &oldBoardSettings);
