@@ -124,10 +124,10 @@ int set_js_command(int fd)
 		exit(1);
 	}
 
-	//exit program *********** SHOULD GO IN PANIC MODE?
+	//Panic Mode
 	if (button[0]){
 		push_packet_t(SET_MODE, PANIC_MODE);
-		return 1;
+		return 0;
 	}
 
     /*************** ENABLE JOYSTICK AFTER EVERYTHING IS SET TO ZERO *****************/

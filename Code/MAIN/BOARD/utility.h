@@ -10,10 +10,11 @@
 
 #define MAGIC_NUMBER 650
 
-#define BLINK_LED(X) if( X32_CLOCK_MS % 1000 > 750 ) X32_LEDS |= X; else X32_LEDS &= !X;
+#define BLINK_LED(X) if( X32_CLOCK_MS % 1000 > 750 ) X32_LEDS |= X; else X32_LEDS &= ~X;
 #define TURNON_LED(X) X32_LEDS |= X;
-#define TURNOFF_LED(X) X32_LEDS &= !X;
+#define TURNOFF_LED(X) X32_LEDS &= ~X;
 
+void panic_blink(int);
 void flush_buffer(void);
 void synchro(void);
 void catnap(int);

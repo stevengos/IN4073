@@ -16,22 +16,25 @@ void add_log()
     struct log_s new_log;
 
     if( !qr.log )
+    {
+        TURNOFF_LED(LED4);
         return;
+    }
 
     if( log_size >= log_buffer_size )
     {
         qr.log = 0;
         qr.log_full = 1;
+        TURNOFF_LED(LED4);
 
-        X32_LEDS = LED1;
         return;
     }
+
+    TURNON_LED(LED4);
 
     #ifdef PERIPHERAL_DISPLAY
     X32_DISPLAY = log_size;
     #endif
-
-    X32_LEDS = LED8;
 
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL); //SAVE LOG ATOMICALLY
 
@@ -84,8 +87,8 @@ void add_log()
     {
         qr.log = 0;
         qr.log_full = 1;
+        TURNOFF_LED(LED4);
 
-        X32_LEDS = ALL_ON;
         return;
     }
 
@@ -195,10 +198,10 @@ void upload_log()
         send_short(LOG_NEWLINE);
     }
 
-    synchro();
+    //synchro();
     ENABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-    catnap(3000);
+    catnap(1000);
 
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 }

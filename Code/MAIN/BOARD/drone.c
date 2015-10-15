@@ -53,16 +53,15 @@ void safe_mode()
 
     stop_motors();
 
-    while(!qr.flag_mode)
-        BLINK_LED(LED1);
+    TURNON_LED(LED8);
 
-    X32_LEDS = ALL_OFF;
+    while(!qr.flag_mode) BLINK_LED(LED1);
+
+    TURNOFF_LED(LED8);
 }
 
 void panic_mode()
 {
-    X32_LEDS = LED2;
-
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
     if( qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4 )
@@ -84,6 +83,8 @@ void panic_mode()
     qr.roll_momentum    =  0;
     qr.yaw_momentum     =  0;
 
+    panic_blink(5);
+
     catnap(PANIC_TIME);
 
     qr.current_mode = SAFE_MODE;
@@ -100,10 +101,12 @@ void manual_mode()
     int ae3 = 0;
     int ae4 = 0;
 
-    X32_LEDS = LED3;
+    TURNON_LED(LED7);
 
     while(!qr.flag_mode)
     {
+        BLINK_LED(LED1);
+
         if( qr.lift_force )
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
@@ -147,7 +150,7 @@ void manual_mode()
 
     stop_motors();
 
-    X32_LEDS = ALL_OFF;
+    TURNOFF_LED(LED7);
 }
 
 void calibration_mode()
@@ -156,11 +159,9 @@ void calibration_mode()
     int i = 0;
     int average = 0;
 
-    X32_LEDS = LED4;
-
     DISABLE_INTERRUPT(INTERRUPT_XUFO);
 
-    catnap(1000);
+    panic_blink(2);
 
 /****************************************************/
     for(i=0, average=0; i<samples; i++, catnap(1))
@@ -208,7 +209,6 @@ void calibration_mode()
 
     qr.current_mode = SAFE_MODE;
     qr.flag_mode = 1;
-    X32_LEDS = ALL_OFF;
 }
 
 void yaw_mode()
@@ -219,10 +219,12 @@ void yaw_mode()
     int ae3 = 0;
     int ae4 = 0;
 
-    X32_LEDS = LED5;
+    TURNON_LED(LED6);
 
     while(!qr.flag_mode)
     {
+        BLINK_LED(LED1);
+
         if(qr.lift_force)
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
@@ -269,7 +271,7 @@ void yaw_mode()
             stop_motors();
     }
 
-    X32_LEDS = ALL_OFF;
+    TURNOFF_LED(LED6);
 }
 
 /**
@@ -289,10 +291,12 @@ void full_mode()
     int ae3 = 0;
     int ae4 = 0;
 
-    X32_LEDS = LED6;
+    TURNON_LED(LED5);
 
     while(!qr.flag_mode)
     {
+        BLINK_LED(LED1);
+
         if(qr.lift_force)
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
@@ -360,7 +364,7 @@ void full_mode()
             stop_motors();
     }
 
-    X32_LEDS = ALL_OFF;
+    TURNOFF_LED(LED5);
 }
 
 void stop_motors()
@@ -432,6 +436,13 @@ void clear_drone()
     qr.sq = 0;
     qr.sr = 0;
 
+    qr.fax = 0;
+    qr.fay = 0;
+    qr.faz = 0;
+    qr.fp = 0;
+    qr.fq = 0;
+    qr.fr = 0;
+
     qr.off_ax = 0;
     qr.off_ay = 0;
     qr.off_az = 0;
@@ -448,4 +459,5 @@ void clear_drone()
     qr.log_full = 0;
 
     initfilter();
+    X32_LEDS = ALL_OFF;
 }
