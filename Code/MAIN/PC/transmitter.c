@@ -214,12 +214,9 @@ int main()
     int js_exit = 0;
 
     /******************* Open Status Terminal **********************************/
-    //pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
+    pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
 
     sleep(1);
-    pthread_cancel(status_terminal);
-    pthread_exit(NULL);
-    return 0;
 
     /************* Open Joystick ********************************/
 //    joystick = open(JS_DEV0, O_RDONLY);
@@ -262,7 +259,7 @@ int main()
     if( status )
     {
         printf("pc> Error while creating polling thread. Session Aborted.\n");
-	PC_log_errors("pc> Error while creating polling thread. Session Aborted.\n");
+        PC_log_errors("pc> Error while creating polling thread. Session Aborted.\n");
         ctty = ESC;
     }
 
@@ -328,7 +325,7 @@ int main()
                 {
                     case ACK_NEGATIVE:
                         printf("NACK received, trying again...\n"), counter++;
-			PC_log_errors("NACK received, trying again...\n");
+                        PC_log_errors("NACK received, trying again...\n");
 
                         pthread_mutex_lock( &lock_board );
 
@@ -340,7 +337,7 @@ int main()
 
                     case ACK_HAMMING:
                         printf("Checksum is wrong, rejected\n");
-			PC_log_errors("Checksum is wrong, rejected\n");
+                        PC_log_errors("Checksum is wrong, rejected\n");
 
                         pthread_mutex_lock( &lock_board );
 
@@ -352,13 +349,13 @@ int main()
 
                     case ACK_INVALID:
                         printf("Invalid command, rejected.\n");
-			PC_log_errors("Invalid command, rejected.\n");
+                        PC_log_errors("Invalid command, rejected.\n");
 
                         break;
 
                     case ACK_POSITIVE:
                         printf("Command executed correctly.\n");
-			PC_log_errors("Command executed correctly.\n");
+                        PC_log_errors("Command executed correctly.\n");
 
                         if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
                         {
@@ -371,7 +368,7 @@ int main()
 
                     case EMPTY:
                         printf("No answer received, trying again...\n"), counter++;
-			PC_log_errors("No answer received, trying again...\n");
+                        PC_log_errors("No answer received, trying again...\n");
 
                         while( getchar_board(board) ) mon_delay_ms(1);
 
