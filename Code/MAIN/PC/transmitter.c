@@ -175,7 +175,6 @@ void logging(int board, packet_t p)
     pthread_mutex_unlock( &lock_board );//****************************** BOARD IS UNLOCKED **************************
 
     printf("\npc>Log retrival is over. Press any key to continue.\n\n");
-
     getchar();
 }
 
@@ -205,9 +204,7 @@ int main()
     int js_exit = 0;
 
     /******************* Open Status Terminal **********************************/
-    pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
-
-    printf("into main!\n");
+    //pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
 
     sleep(1);
 

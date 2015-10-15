@@ -49,6 +49,8 @@ int main()
     X32_DISPLAY = 0xC1A0;
     #endif
 
+    X32_LEDS = ALL_OFF;
+
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
     return 0;

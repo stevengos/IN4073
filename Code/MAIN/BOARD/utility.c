@@ -5,6 +5,18 @@
 #include "utility.h"
 #include "../interface/packet.h"
 
+
+void panic_blink(int sec)
+{
+    char save_status = X32_LEDS;
+    int i;
+
+    for(i=0; i < sec; i++, catnap(500))
+            X32_LEDS = ALL_ON, catnap(500), X32_LEDS = ALL_OFF;
+
+    X32_LEDS = save_status;
+}
+
 void flush_buffer()
 {
     while(X32_RS232_READ){ char c = X32_RS232_DATA; }

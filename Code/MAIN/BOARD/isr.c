@@ -22,6 +22,8 @@ void isr_buttons(void)
 
 void isr_sensors(void)
 {
+    TURNON_LED(LED3);
+
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
     qr.sax = X32_QR_S1 - qr.off_ax;
@@ -35,6 +37,8 @@ void isr_sensors(void)
     //butter_second();
 
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
+
+    TURNOFF_LED(LED3);
 }
 
 /**
@@ -46,7 +50,7 @@ void isr_rs232_rx(void)
     char counter = 0;
 
     qr.link_down = 0;
-    X32_LEDS |= LED2;
+    TURNON_LED(LED2);
 
     if( !X32_RS232_READ )
         return;
@@ -106,9 +110,6 @@ void isr_timer(void)
         qr.exit = 1;
         qr.flag_mode = 1;
 
-        for(i=0; i < 5; i++, catnap(500))
-            X32_LEDS = ALL_ON, catnap(500), X32_LEDS = ALL_OFF;
-
         #ifdef PERIPHERAL_DISPLAY
             X32_DISPLAY = 0xf1fa;
         #endif
@@ -117,4 +118,5 @@ void isr_timer(void)
     }
 
     qr.link_down = 1;
+    TURNOFF_LED(LED2);
 }
