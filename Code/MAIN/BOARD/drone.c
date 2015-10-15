@@ -436,6 +436,13 @@ void clear_drone()
     qr.sq = 0;
     qr.sr = 0;
 
+    qr.fax = 0;
+    qr.fay = 0;
+    qr.faz = 0;
+    qr.fp = 0;
+    qr.fq = 0;
+    qr.fr = 0;
+
     qr.off_ax = 0;
     qr.off_ay = 0;
     qr.off_az = 0;
