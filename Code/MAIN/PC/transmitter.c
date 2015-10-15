@@ -29,7 +29,7 @@ char* get_current_time_string(){
 	time_t current_time;
 	struct tm * time_info;
 	char* timeString;  // space for "%Y_%m_%d_%H_%M_%S\0"
-	timeString = malloc(sizeof(char) * 21);
+	timeString = malloc(sizeof(char) * 21);git pull
 
 	time(&current_time);
 	time_info = localtime(&current_time);
