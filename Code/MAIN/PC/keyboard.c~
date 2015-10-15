@@ -11,14 +11,15 @@
 #include "keyboard.h"
 #include "../interface/hamming.h"
 
+/* from http://stackoverflow.com/questions/448944/c-non-blocking-keyboard-input
+ * check if keyboard was hit
+ */
 int kbhit()
 {
     struct timeval tv = { 0L, 0L };
-
     fd_set fds;
     FD_ZERO(&fds);
     FD_SET(0, &fds);
-
     return select(1, &fds, NULL, NULL, &tv);
 }
 
@@ -32,7 +33,11 @@ void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTermi
 
     tcsetattr(0, TCSANOW, newTerminalSettings);
 
-    git setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
+<<<<<<< HEAD
+    //system ("/bin/stty raw");
+=======
+>>>>>>> 2015-09-28-sina-Butterworth_2order_fixed_20
+    setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
 void close_keyboard(struct termios* oldTerminalSettings)
@@ -42,8 +47,18 @@ void close_keyboard(struct termios* oldTerminalSettings)
 
 char getchar_keyboard()
 {
+<<<<<<< HEAD
+	char ch = 0;
+	int c;
+
+    //char ch = getchar();
+    if(kbhit()){
+	ch = getchar();
+    }
+=======
     char ch;
     int c;
+>>>>>>> 2015-09-28-sina-Butterworth_2order_fixed_20
 
     if(kbhit())
     {
@@ -141,13 +156,14 @@ packet_t encapsulate(char command)
 
         /* MANUAL CONTROL */
         case A:
-            outgoing.header     = D_LIFT;
+	    outgoing.header     = D_LIFT;
             outgoing.command    = INCREASE;
             break;
         case Z:
             outgoing.header     = D_LIFT;
             outgoing.command    = DECREASE;
             break;
+        
         case Q:
             outgoing.header     = D_YAWRATE;
             outgoing.command    = DECREASE;

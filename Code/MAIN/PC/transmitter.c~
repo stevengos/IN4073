@@ -194,10 +194,11 @@ int main()
     pthread_t polling, status_terminal;
 
     int status, i = 0;
-    int fd, js_exit = 0;
+    int js_exit = 0;
     pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
 
 //---- open joystick
+	int 		fd, js_exit = 0;
 
 	if ((fd = open(JS_DEV, O_RDONLY)) < 0) {
 		perror("jstest");
