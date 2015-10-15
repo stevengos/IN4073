@@ -301,7 +301,7 @@ void d_pitch(char command)
 {
     qr.off_pitch = command == INCREASE ? qr.off_pitch + STEP_PITCH : qr.off_pitch - STEP_PITCH;
 
-    qr.pitch_momentum = qr.off_pitch;
+    qr.pitch_momentum = qr.off_pitch > MAX_PITCH ? MAX_PITCH : qr.off_pitch < MIN_PITCH ? MIN_PITCH : qr.off_pitch;
 
     acknowledge(ACK_POSITIVE);
 }
@@ -310,7 +310,7 @@ void d_roll(char command)
 {
     qr.off_roll = command == INCREASE ? qr.off_roll + STEP_ROLL : qr.off_roll - STEP_ROLL;
 
-    qr.roll_momentum = qr.off_roll;
+    qr.roll_momentum = qr.off_roll > MAX_ROLL ? MAX_ROLL : qr.off_roll < MIN_ROLL ? MIN_ROLL : qr.off_roll;
 
     acknowledge(ACK_POSITIVE);
 }
@@ -319,7 +319,7 @@ void d_yawrate(char command)
 {
     qr.off_yawrate = command == INCREASE ? qr.off_yawrate + STEP_YAW : qr.off_yawrate - STEP_YAW;
 
-    qr.yaw_momentum = qr.off_yawrate;
+    qr.yaw_momentum = qr.off_yawrate > MAX_YAWRATE ? MAX_YAWRATE : qr.off_yawrate < MIN_YAWRATE ? MIN_YAWRATE : qr.off_yawrate;
 
     acknowledge(ACK_POSITIVE);
 }
@@ -328,7 +328,7 @@ void d_lift(char command)
 {
     qr.off_lift = command == INCREASE ? qr.off_lift + STEP_LIFT : qr.off_lift - STEP_LIFT;
 
-    qr.lift_force = qr.off_lift;
+    qr.lift_force = qr.off_lift > MAX_LIFT ? MAX_LIFT : qr.off_lift < MIN_LIFT ? MIN_LIFT : qr.off_lift;
 
     acknowledge(ACK_POSITIVE);
 }

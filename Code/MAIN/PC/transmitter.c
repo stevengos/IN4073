@@ -17,8 +17,8 @@
 
 #define REFRESH_TIME    50 //ms
 
-pthread_mutex_t lock_board;
-int end_communication = 0;
+pthread_mutex_t lock_board; //semaphore which allows atomic access to the communication
+int end_communication = 0;  //flag which controls the exit from the main loop
 
 packet_t packet_buffer[10];
 int packet_counter = 0;
@@ -71,6 +71,9 @@ void empty_packet_t()
 	packet_counter = 0;
 }
 
+/**
+    Pooling method which sends "keep-alive" messages in order to keep the board awake.
+*/
 void *is_alive(void* board)
 {
     int idboard = *( (int*)(board) );
@@ -93,6 +96,10 @@ void *is_alive(void* board)
     }
 }
 
+/**
+    Log retrival session: it allows to download log data into a file on the PC.
+    Standard communication protocol is interrupted, PC reads log data from the board in a continous stream.
+*/
 void logging(int board, packet_t p)
 {
     printf("pc> Retrieving Log Data...\n");
@@ -109,7 +116,7 @@ void logging(int board, packet_t p)
     int status = 1;
     int debug = 0;
 
-    pthread_mutex_lock( &lock_board ); //*******************************************************************
+    pthread_mutex_lock( &lock_board ); //****************************** BOARD IS LOCKED **********************
 
     /********* receive number of logs ******/
     status = getint_board(board, &incoming_int);
@@ -162,10 +169,10 @@ void logging(int board, packet_t p)
         safe_measurement_to_file(file_name, "\n");
     }
 
-    mon_delay_ms(500);
-    while( getchar_board(board) );
+    mon_delay_ms(1000);
+    while( getchar_board(board) ); //flush spurious data
 
-    pthread_mutex_unlock( &lock_board );//*****************************************************************************
+    pthread_mutex_unlock( &lock_board );//****************************** BOARD IS UNLOCKED **************************
 
     printf("\npc>Log retrival is over. Press any key to continue.\n\n");
 
@@ -197,15 +204,12 @@ int main()
 
     int js_exit = 0;
 
+    /******************* Open Status Terminal **********************************/
     pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
 
     printf("into main!\n");
 
     sleep(1);
-
-    pthread_cancel(status_terminal);
-    pthread_exit(NULL);
-    return 0;
 
     /************* Open Joystick ********************************/
 //    joystick = open(JS_DEV0, O_RDONLY);
@@ -316,7 +320,7 @@ int main()
 
                         pthread_mutex_lock( &lock_board );
 
-                        while( getchar_board(board) );
+                        while( getchar_board(board) ) mon_delay_ms(1);
 
                         pthread_mutex_unlock( &lock_board );
 
@@ -327,7 +331,7 @@ int main()
 
                         pthread_mutex_lock( &lock_board );
 
-                        while( getchar_board(board) );
+                        while( getchar_board(board) ) mon_delay_ms(1);
 
                         pthread_mutex_unlock( &lock_board );
 
@@ -353,7 +357,7 @@ int main()
                     case EMPTY:
                         printf("No answer received, trying again...\n"), counter++;
 
-                        while( getchar_board(board) );
+                        while( getchar_board(board) ) mon_delay_ms(1);
 
                         break;
                 };
@@ -373,12 +377,12 @@ int main()
 
     end_communication = 1;
     mon_delay_ms(500);
+
     pthread_cancel(polling);
     pthread_cancel(status_terminal);
 
     close_keyboard(&oldKeyboardSettings);
     close_board(board, &oldBoardSettings);
-    //does the joystick need closing?
 
     return 0;
 }

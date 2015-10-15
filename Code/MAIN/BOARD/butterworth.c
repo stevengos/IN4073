@@ -5,22 +5,19 @@
 
 #include "butterworth.h"
 
+extern struct drone qr;
+
 void butter_second()
 {
-  if (Sample ==99)
-  {
-    reset_sample();
-  }
+
   int i, j;
   int x0_1, x0_2, x0_3;
   int x1_1, x1_2, x1_3;
-  int x2_1, x2_2, x2_3; 
-  int y1_1, y1_2, y1_3; 
+  int x2_1, x2_2, x2_3;
+  int y1_1, y1_2, y1_3;
   int y2_1, y2_2, y2_3;
- 
-  struct butter_s new_data;
 
- 
+  struct butter_s new_data;
 
  /**update the history**/
 
@@ -34,7 +31,7 @@ void butter_second()
   x[0][0] = qr.sp;
   x[0][1] = qr.sq;
   x[0][2] = qr.sr;
-  
+
  /*readin the variables ***/
   x0_1 = x[0][0];
   x0_2 = x[0][1];
@@ -61,8 +58,8 @@ void butter_second()
  /********Write the results to structure ******/
  new_data.sp = y[0][0];
  new_data.sq = y[0][1];
- new_data.sr = y[0][2]; 
- 
+ new_data.sr = y[0][2];
+
  /***Write data back to QR **********/
  qr.fp = new_data.sp;
  qr.fq = new_data.sq;

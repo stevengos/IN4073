@@ -20,7 +20,6 @@ void isr_buttons(void);
 void isr_rs232_rx(void);
 void isr_timer(void);
 void isr_sensors(void);
-void isr_leds(void);
 
 
 #endif // ISR_H

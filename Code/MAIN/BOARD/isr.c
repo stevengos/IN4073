@@ -4,10 +4,8 @@
 
 #include "isr.h"
 #include "mafilter.h"
-#include "butterworth.h"
 
 extern struct drone qr;
-char toggle = 0;
 
 void isr_buttons(void)
 {
@@ -48,6 +46,7 @@ void isr_rs232_rx(void)
     char counter = 0;
 
     qr.link_down = 0;
+    X32_LEDS |= LED2;
 
     if( !X32_RS232_READ )
         return;
@@ -98,6 +97,8 @@ void isr_timer(void)
     {
         unsigned char i;
 
+        TURNOFF_LED(LED2);
+
         panic_mode();
 
         qr.current_mode = SAFE_MODE;
@@ -116,11 +117,4 @@ void isr_timer(void)
     }
 
     qr.link_down = 1;
-}
-
-void isr_leds(void)
-{
-    X32_LEDS |= toggle ? LED1 : ALL_OFF;
-
-    toggle = !toggle;
 }

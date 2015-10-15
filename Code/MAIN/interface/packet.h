@@ -67,7 +67,7 @@
 #define LOG_NEWLINE 0xeff
 #define LOG_END     0xfff
 
-/* Eligible values field when the header is "SET_LED" (use bitwise to operate on more than one led at once */
+/* Eligible values field when the header is "SET_LED" (use bitwise to operate on more than one led at once) */
 #define ALL_OFF 0x00
 #define ALL_ON  0xFF
 #define LED1 0x01 //0b00000001

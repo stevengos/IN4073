@@ -7,6 +7,9 @@
 
 extern struct drone qr;
 
+/**
+    State Machine for the Quad-Rotor
+*/
 void run_drone()
 {
     clear_drone();
@@ -47,11 +50,11 @@ void run_drone()
 void safe_mode()
 {
     short debug = 0;
-    X32_LEDS = LED1;
 
     stop_motors();
 
-    while(!qr.flag_mode);
+    while(!qr.flag_mode)
+        BLINK_LED(LED1);
 
     X32_LEDS = ALL_OFF;
 }
@@ -74,7 +77,7 @@ void panic_mode()
     X32_QR_A2 = qr.ae2;
     X32_QR_A3 = qr.ae3;
     X32_QR_A4 = qr.ae4;
-    #endif // PERIPHERAL_XUFO_A0
+    #endif
 
     qr.lift_force       =  qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
     qr.pitch_momentum   =  0;
@@ -96,14 +99,11 @@ void manual_mode()
     int ae2 = 0;
     int ae3 = 0;
     int ae4 = 0;
-    short debug = 0;
 
     X32_LEDS = LED3;
 
     while(!qr.flag_mode)
     {
-        X32_DISPLAY = qr.lift_force;
-
         if( qr.lift_force )
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
@@ -213,9 +213,11 @@ void calibration_mode()
 
 void yaw_mode()
 {
-    short e;
-    int ae1, ae2, ae3, ae4;
-    short debug = 0;
+    short e = 0;
+    int ae1 = 0;
+    int ae2 = 0;
+    int ae3 = 0;
+    int ae4 = 0;
 
     X32_LEDS = LED5;
 
@@ -275,13 +277,17 @@ void yaw_mode()
 */
 void full_mode()
 {
-    short e_ax;
-    short e_ay;
+    short e_ax = 0;
+    short e_ay = 0;
 
-    short e_p;
-    short e_q;
-    short e_r;
-    int ae1, ae2, ae3, ae4;
+    short e_p = 0;
+    short e_q = 0;
+    short e_r = 0;
+
+    int ae1 = 0;
+    int ae2 = 0;
+    int ae3 = 0;
+    int ae4 = 0;
 
     X32_LEDS = LED6;
 
@@ -302,7 +308,7 @@ void full_mode()
             e_ay = qr.roll_ref - qr.fay;
             e_q = qr.controller_roll*e_ay - qr.fq;
             qr.roll_momentum = qr.controller_roll * e_q;
-*/
+/* END CASCADE CONTROLLER */
 
 /* RATE CONTROL */
             e_p = qr.pitch_ref - qr.fp;
@@ -355,6 +361,37 @@ void full_mode()
     }
 
     X32_LEDS = ALL_OFF;
+}
+
+void stop_motors()
+{
+    while(qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4)
+    {
+        qr.ae1 = qr.ae1 - STEP_RPM < 0 ? 0 : qr.ae1 - STEP_RPM;
+        qr.ae2 = qr.ae2 - STEP_RPM < 0 ? 0 : qr.ae2 - STEP_RPM;
+        qr.ae3 = qr.ae3 - STEP_RPM < 0 ? 0 : qr.ae3 - STEP_RPM;
+        qr.ae4 = qr.ae4 - STEP_RPM < 0 ? 0 : qr.ae4 - STEP_RPM;
+
+        #ifdef PERIPHERAL_XUFO_A0
+
+        X32_QR_A1 = qr.ae1;
+        X32_QR_A2 = qr.ae2;
+        X32_QR_A3 = qr.ae3;
+        X32_QR_A4 = qr.ae4;
+
+        #endif // PERIPHERAL_XUFO_A0
+
+        ucatnap(500);
+    }
+
+    qr.lift_force = 0;
+    qr.pitch_momentum = 0;
+    qr.roll_momentum = 0;
+    qr.yaw_momentum = 0;
+
+    qr.pitch_ref = 0;
+    qr.roll_ref = 0;
+    qr.yawrate_ref = 0;
 }
 
 void clear_drone()
@@ -412,35 +449,3 @@ void clear_drone()
 
     initfilter();
 }
-
-void stop_motors()
-{
-    while(qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4)
-    {
-        qr.ae1 = qr.ae1 - STEP_RPM < 0 ? 0 : qr.ae1 - STEP_RPM;
-        qr.ae2 = qr.ae2 - STEP_RPM < 0 ? 0 : qr.ae2 - STEP_RPM;
-        qr.ae3 = qr.ae3 - STEP_RPM < 0 ? 0 : qr.ae3 - STEP_RPM;
-        qr.ae4 = qr.ae4 - STEP_RPM < 0 ? 0 : qr.ae4 - STEP_RPM;
-
-        #ifdef PERIPHERAL_XUFO_A0
-
-        X32_QR_A1 = qr.ae1;
-        X32_QR_A2 = qr.ae2;
-        X32_QR_A3 = qr.ae3;
-        X32_QR_A4 = qr.ae4;
-
-        #endif // PERIPHERAL_XUFO_A0
-
-        ucatnap(500);
-    }
-
-    qr.lift_force = 0;
-    qr.pitch_momentum = 0;
-    qr.roll_momentum = 0;
-    qr.yaw_momentum = 0;
-
-    qr.pitch_ref = 0;
-    qr.roll_ref = 0;
-    qr.yawrate_ref = 0;
-}
-
