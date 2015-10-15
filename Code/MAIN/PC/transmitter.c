@@ -15,7 +15,7 @@
 #include "keyboard.h"
 #include "joystick.h"
 
-#define REFRESH_TIME    50
+#define REFRESH_TIME    50 //ms
 
 pthread_mutex_t lock_board;
 int end_communication = 0;
@@ -266,7 +266,7 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-//        js_exit = set_js_command(joystick); //read the joystick configuration
+        //js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 

@@ -23,6 +23,7 @@
 #define X32_QR_S4 		peripherals[PERIPHERAL_XUFO_S3]
 #define X32_QR_S5 		peripherals[PERIPHERAL_XUFO_S4]
 #define X32_QR_S6 		peripherals[PERIPHERAL_XUFO_S5]
+#define X32_QR_BATTERY  peripherals[PERIPHERAL_XUFO_S6]
 #define X32_QR_TIME 	peripherals[PERIPHERAL_XUFO_TIMESTAMP]
 
 #define X32_RS232_DATA	    peripherals[PERIPHERAL_PRIMARY_DATA]
@@ -34,6 +35,6 @@
 #define SLEEP_BUFFER_TX     200  //usec
 
 #define TIMEOUT_BUFFER_RX   20  //counter
-#define SLEEP_BUFFER_RX     20  //usec
+#define SLEEP_BUFFER_RX     10  //usec
 
 #endif // STATIC_H

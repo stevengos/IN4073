@@ -174,46 +174,66 @@ packet_t encapsulate(char command)
             break;
 
         /* CONTROLLER SETTINGS */
-        case Y:
-            outgoing.header     = SET_CONTROLLER_PITCH;
-            outgoing.command    = INCREASE;
-            break;
-        case H:
-            outgoing.header     = SET_CONTROLLER_PITCH;
-            outgoing.command    = DECREASE;
+        case SPACE:
+            outgoing.header     = OPEN_LOOP;
+            outgoing.command    = EMPTY;
             break;
         case U:
-            outgoing.header     = SET_CONTROLLER_ROLL;
+            outgoing.header     = SET_CONTROLLER_PITCH;
             outgoing.command    = INCREASE;
             break;
         case J:
-            outgoing.header     = SET_CONTROLLER_ROLL;
+            outgoing.header     = SET_CONTROLLER_PITCH;
             outgoing.command    = DECREASE;
             break;
         case I:
-            outgoing.header     = SET_CONTROLLER_YAW;
+            outgoing.header     = SET_CONTROLLER_ROLL;
             outgoing.command    = INCREASE;
             break;
         case K:
-            outgoing.header     = SET_CONTROLLER_YAW;
+            outgoing.header     = SET_CONTROLLER_ROLL;
             outgoing.command    = DECREASE;
             break;
         case O:
-            outgoing.header     = SET_SCALE_YAW;
+            outgoing.header     = SET_CONTROLLER_YAW;
             outgoing.command    = INCREASE;
             break;
         case L:
-            outgoing.header     = SET_SCALE_YAW;
+            outgoing.header     = SET_CONTROLLER_YAW;
             outgoing.command    = DECREASE;
             break;
 
-        case N:
-            outgoing.header     = SET_CONTROLLER_YAW;
+        /* PARAMETERS */
+        case E:
+            outgoing.header     = SET_SCALE_PITCH;
             outgoing.command    = INCREASE;
             break;
-
-        case M:
-            outgoing.header     = SET_CONTROLLER_YAW;
+        case D:
+            outgoing.header     = SET_SCALE_PITCH;
+            outgoing.command    = DECREASE;
+            break;
+        case R:
+            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.command    = INCREASE;
+            break;
+        case F:
+            outgoing.header     = SET_SCALE_ROLL;
+            outgoing.command    = DECREASE;
+            break;
+        case T:
+            outgoing.header     = SET_SCALE_YAW;
+            outgoing.command    = INCREASE;
+            break;
+        case G:
+            outgoing.header     = SET_SCALE_YAW;
+            outgoing.command    = DECREASE;
+            break;
+        case Y:
+            outgoing.header     = SET_SCALE_LIFT;
+            outgoing.command    = INCREASE;
+            break;
+        case H:
+            outgoing.header     = SET_SCALE_LIFT;
             outgoing.command    = DECREASE;
             break;
 

@@ -7,7 +7,7 @@
 #include "butterworth.h"
 
 extern struct drone qr;
-short debug = 0;
+char toggle = 0;
 
 void isr_buttons(void)
 {
@@ -39,6 +39,9 @@ void isr_sensors(void)
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 }
 
+/**
+@Profiling: 240us to read 3 bytes, 430us for checksum, 50us to perform the command
+*/
 void isr_rs232_rx(void)
 {
     packet_t incoming;
@@ -91,9 +94,11 @@ void isr_rs232_rx(void)
 
 void isr_timer(void)
 {
-    if( qr.link_down )
+    if( qr.link_down || 1000 < BATTERY_LOW )  //X32_QR_BATTERY FIX
     {
         unsigned char i;
+
+        panic_mode();
 
         qr.current_mode = SAFE_MODE;
         stop_motors();
@@ -111,4 +116,11 @@ void isr_timer(void)
     }
 
     qr.link_down = 1;
+}
+
+void isr_leds(void)
+{
+    X32_LEDS |= toggle ? LED1 : ALL_OFF;
+
+    toggle = !toggle;
 }

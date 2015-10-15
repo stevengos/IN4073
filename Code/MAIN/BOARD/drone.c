@@ -3,7 +3,6 @@
 */
 
 #include "drone.h"
-
 #include "mafilter.h"
 
 extern struct drone qr;
@@ -52,7 +51,7 @@ void safe_mode()
 
     stop_motors();
 
-    while(!qr.flag_mode);// X32_DISPLAY = debug++;
+    while(!qr.flag_mode);
 
     X32_LEDS = ALL_OFF;
 }
@@ -65,18 +64,16 @@ void panic_mode()
 
     if( qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4 )
 
-        qr.ae1 = PANIC_RPM,
-        qr.ae2 = PANIC_RPM,
-        qr.ae3 = PANIC_RPM,
-        qr.ae3 = PANIC_RPM;
+        qr.ae1 = qr.ae1 > PANIC_RPM ? PANIC_RPM : qr.ae1,
+        qr.ae2 = qr.ae2 > PANIC_RPM ? PANIC_RPM : qr.ae1,
+        qr.ae3 = qr.ae3 > PANIC_RPM ? PANIC_RPM : qr.ae1,
+        qr.ae3 = qr.ae4 > PANIC_RPM ? PANIC_RPM : qr.ae1;
 
     #ifdef PERIPHERAL_XUFO_A0
-
     X32_QR_A1 = qr.ae1;
     X32_QR_A2 = qr.ae2;
     X32_QR_A3 = qr.ae3;
     X32_QR_A4 = qr.ae4;
-
     #endif // PERIPHERAL_XUFO_A0
 
     qr.lift_force       =  qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
@@ -105,6 +102,8 @@ void manual_mode()
 
     while(!qr.flag_mode)
     {
+        X32_DISPLAY = qr.lift_force;
+
         if( qr.lift_force )
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
@@ -129,8 +128,6 @@ void manual_mode()
             qr.ae3 = ae3 - qr.ae3 > STEP_RPM ? qr.ae3 + STEP_RPM : qr.ae3 - ae3 > STEP_RPM ? qr.ae3 - STEP_RPM : ae3;
             qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
-            ucatnap(MOTOR_REFRESH);
-
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
             #ifdef PERIPHERAL_XUFO_A0
@@ -147,8 +144,6 @@ void manual_mode()
         else
             stop_motors();
     }
-
-    //X32_DISPLAY = debug++;
 
     stop_motors();
 
@@ -220,6 +215,7 @@ void yaw_mode()
 {
     short e;
     int ae1, ae2, ae3, ae4;
+    short debug = 0;
 
     X32_LEDS = LED5;
 
@@ -256,8 +252,6 @@ void yaw_mode()
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
 
-            ucatnap(MOTOR_REFRESH);
-
             #ifdef PERIPHERAL_XUFO_A0
 
             X32_QR_A1 = qr.ae1;
@@ -276,6 +270,9 @@ void yaw_mode()
     X32_LEDS = ALL_OFF;
 }
 
+/**
+@Profiling: 540us for the main loop
+*/
 void full_mode()
 {
     short e_ax;
@@ -294,7 +291,10 @@ void full_mode()
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
-/* CASCADE CONTROLLER */
+/* CASCADE CONTROLLER
+            qr.fax += qr.fp; //estimated angle by integration
+            qr.fay += qr.sq; //estimated angle by integration
+
             e_ax = qr.pitch_ref - qr.fax;
             e_p = qr.controller_pitch*e_ax - qr.fp;
             qr.pitch_momentum = qr.controller_pitch * e_p;
@@ -302,13 +302,15 @@ void full_mode()
             e_ay = qr.roll_ref - qr.fay;
             e_q = qr.controller_roll*e_ay - qr.fq;
             qr.roll_momentum = qr.controller_roll * e_q;
+*/
 
 /* RATE CONTROL */
-//            e_p = qr.pitch_ref - qr.fp;
-//            qr.pitch_momentum = qr.controller_pitch * e_p;
-//
-//            e_q = qr.roll_ref - qr.fq;
-//            qr.roll_momentum = qr.controller_roll * e_q;
+            e_p = qr.pitch_ref - qr.fp;
+            qr.pitch_momentum = qr.controller_pitch * e_p;
+
+            e_q = qr.roll_ref - qr.fq;
+            qr.roll_momentum = qr.controller_roll * e_q;
+/* END RATE CONTROL*/
 
             e_r = qr.yawrate_ref - qr.fr;
             qr.yaw_momentum = qr.controller_yaw * e_r;
@@ -336,8 +338,6 @@ void full_mode()
             qr.ae4 = ae4 - qr.ae4 > STEP_RPM ? qr.ae4 + STEP_RPM : qr.ae4 - ae4 > STEP_RPM ? qr.ae4 - STEP_RPM : ae4;
 
             DISABLE_INTERRUPT(INTERRUPT_PRIMARY_RX);
-
-            ucatnap(MOTOR_REFRESH);
 
             #ifdef PERIPHERAL_XUFO_A0
 
@@ -372,26 +372,21 @@ void clear_drone()
     qr.pitch_ref = 0;
     qr.roll_ref = 0;
     qr.yawrate_ref = 0;
-    qr.lift_ref = 0;
 
-//    qr.scale_pitch = 8240;
-//    qr.scale_roll = 8240;
-//    qr.scale_yaw = 16400;
-//    qr.scale_lift = 16400;
-
-    qr.scale_pitch = 8240/4;
-    qr.scale_roll = 8240/4;
-    qr.scale_yaw = 16400/2;
-    qr.scale_lift = 16400/2;
+    //values before the slash are the ones which allow to have full output power
+    qr.scale_pitch  = 8240/4;
+    qr.scale_roll   = 8240/4;
+    qr.scale_yaw    = 16400/2;
+    qr.scale_lift   = 16400/2;
 
     qr.controller_pitch = 1;
     qr.controller_roll = 1;
     qr.controller_yaw = 3;
 
-    qr.step_pitch = 5;
-    qr.step_roll = 5;
-    qr.step_yawrate = 10;
-    qr.step_lift = 5;
+    qr.off_pitch = 0;
+    qr.off_roll = 0;
+    qr.off_yawrate = 0;
+    qr.off_lift = 0;
 
     qr.sax = 0;
     qr.say = 0;
@@ -444,7 +439,6 @@ void stop_motors()
     qr.roll_momentum = 0;
     qr.yaw_momentum = 0;
 
-    qr.lift_ref = 0;
     qr.pitch_ref = 0;
     qr.roll_ref = 0;
     qr.yawrate_ref = 0;

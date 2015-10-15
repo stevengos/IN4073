@@ -13,6 +13,9 @@ void perform_command(char header, char command)
 
     switch( header )
     {
+        case ALIVE:
+                    return;
+
         case SET_MODE:
                     set_mode(command);
                     break;
@@ -77,15 +80,10 @@ void perform_command(char header, char command)
         case SET_CONTROLLER_YAW:
                     set_controller_yaw(command);
                     break;
-
-        case ALIVE:
-                    return;
-
-        case BLINK_LED:
-                    break;
-
-        case SET_LED:
-                    set_led(command);
+        case OPEN_LOOP:
+                    qr.controller_pitch = 0;
+                    qr.controller_roll = 0;
+                    qr.controller_yaw = 0;
                     break;
 
         case LOG:
@@ -199,6 +197,8 @@ void set_scale_lift(char command)
 }
 //}
 
+/* Set controller parameters */
+//{
 void set_controller_pitch(char command)
 {
     if(command == INCREASE)
@@ -220,6 +220,7 @@ void set_controller_yaw(char command)
     else
         qr.controller_yaw = qr.controller_yaw-1 >= 0 ? qr.controller_yaw-1 : 0;
 }
+//}
 
 void set_log(char command)
 {
@@ -249,162 +250,86 @@ void set_log(char command)
 //{
 void set_pitch(char command)
 {
-    qr.pitch_momentum = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
+    short value = command + qr.off_pitch;
 
     if( qr.current_mode == FULL_MODE )
-        qr.pitch_ref = command > MAX_PITCH ? MAX_PITCH : command < MIN_PITCH ? MIN_PITCH : command;
+        qr.pitch_ref = value > MAX_PITCH ? MAX_PITCH : value < MIN_PITCH ? MIN_PITCH : value;
+    else
+        qr.pitch_momentum = value > MAX_PITCH ? MAX_PITCH : value < MIN_PITCH ? MIN_PITCH : value;
 
     acknowledge(ACK_POSITIVE);
 }
 
 void set_roll(char command)
 {
-    qr.roll_momentum = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
+    short value = command + qr.off_roll;
 
     if( qr.current_mode == FULL_MODE )
-        qr.roll_ref = command > MAX_ROLL ? MAX_ROLL : command < MIN_ROLL ? MIN_ROLL : command;
+        qr.roll_ref = value > MAX_ROLL ? MAX_ROLL : value < MIN_ROLL ? MIN_ROLL : value;
+    else
+        qr.roll_momentum = value > MAX_ROLL ? MAX_ROLL : value < MIN_ROLL ? MIN_ROLL : value;
 
     acknowledge(ACK_POSITIVE);
 }
 
 void set_lift(unsigned char command)
 {
-    qr.lift_force = command > MAX_LIFT ? MAX_LIFT : command < MIN_LIFT ? MIN_LIFT : command;
+    short value = command + qr.off_lift;
 
-    if( qr.current_mode == FULL_MODE )
-        qr.lift_ref = command > MAX_LIFT ? MAX_LIFT : command < MIN_LIFT ? MIN_LIFT : command;
+    qr.lift_force = value > MAX_LIFT ? MAX_LIFT : value < MIN_LIFT ? MIN_LIFT : value;
 
     acknowledge(ACK_POSITIVE);
 }
 
 void set_yawrate(char command)
 {
-    qr.yaw_momentum = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
+    short value = command + qr.off_yawrate;
 
-    if( qr.current_mode == FULL_MODE )
-        qr.yawrate_ref = command > MAX_YAWRATE ? MAX_YAWRATE : command < MIN_YAWRATE ? MIN_YAWRATE : command;
+    if( qr.current_mode == YAW_MODE || qr.current_mode == FULL_MODE)
+        qr.yawrate_ref = value > MAX_YAWRATE ? MAX_YAWRATE : value < MIN_YAWRATE ? MIN_YAWRATE : value;
+    else
+        qr.yaw_momentum = value > MAX_YAWRATE ? MAX_YAWRATE : value < MIN_YAWRATE ? MIN_YAWRATE : value;
 
     acknowledge(ACK_POSITIVE);
 }
 //}
 
-/* KEYBOARD SESSION */
+/* KEYBOARD SECTION */
 //{
 
 void d_pitch(char command)
 {
-    if( qr.current_mode == FULL_MODE )
+    qr.off_pitch = command == INCREASE ? qr.off_pitch + STEP_PITCH : qr.off_pitch - STEP_PITCH;
 
-        if( command == INCREASE )
-            if( qr.pitch_ref + qr.step_pitch > MAX_PITCH )
-                acknowledge(ACK_INVALID);
-            else
-                qr.pitch_ref += qr.step_pitch, acknowledge(ACK_POSITIVE);
-        else
-            if( qr.pitch_ref - qr.step_pitch < MIN_PITCH )
-                acknowledge(ACK_INVALID);
-            else
-                qr.pitch_ref -= qr.step_pitch, acknowledge(ACK_POSITIVE);
-    else
-        if( command == INCREASE )
-            if( qr.pitch_momentum + qr.step_pitch > MAX_PITCH )
-                acknowledge(ACK_INVALID);
-            else
-                qr.pitch_momentum += qr.step_pitch, acknowledge(ACK_POSITIVE);
-        else
-            if( qr.pitch_momentum - qr.step_pitch < MIN_PITCH )
-                acknowledge(ACK_INVALID);
-            else
-                qr.pitch_momentum -= qr.step_pitch, acknowledge(ACK_POSITIVE);
+    qr.pitch_momentum = qr.off_pitch;
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void d_roll(char command)
 {
-    if( qr.current_mode == FULL_MODE )
+    qr.off_roll = command == INCREASE ? qr.off_roll + STEP_ROLL : qr.off_roll - STEP_ROLL;
 
-        if( command == INCREASE )
-            if( qr.roll_ref + qr.step_roll > MAX_ROLL )
-                acknowledge(ACK_INVALID);
-            else
-                qr.roll_ref += qr.step_roll, acknowledge(ACK_POSITIVE);
-        else
-            if( qr.roll_ref - qr.step_roll < MIN_ROLL )
-                acknowledge(ACK_INVALID);
-            else
-                qr.roll_ref -= qr.step_roll, acknowledge(ACK_POSITIVE);
-    else
+    qr.roll_momentum = qr.off_roll;
 
-        if( command == INCREASE )
-            if( qr.roll_momentum + qr.step_roll > MAX_ROLL )
-                acknowledge(ACK_INVALID);
-            else
-                qr.roll_momentum += qr.step_roll, acknowledge(ACK_POSITIVE);
-        else
-            if( qr.roll_momentum - qr.step_roll < MIN_ROLL )
-                acknowledge(ACK_INVALID);
-            else
-                qr.roll_momentum -= qr.step_roll, acknowledge(ACK_POSITIVE);
+    acknowledge(ACK_POSITIVE);
 }
 
 void d_yawrate(char command)
 {
-    if( qr.current_mode == FULL_MODE )
+    qr.off_yawrate = command == INCREASE ? qr.off_yawrate + STEP_YAW : qr.off_yawrate - STEP_YAW;
 
-        if( command == INCREASE )
-            if( qr.yawrate_ref + qr.step_yawrate > MAX_YAWRATE )
-                acknowledge(ACK_INVALID);
-            else
-                qr.yawrate_ref += qr.step_yawrate, acknowledge(ACK_POSITIVE);
-        else
-            if( qr.yawrate_ref - qr.step_yawrate < MIN_YAWRATE )
-                acknowledge(ACK_INVALID);
-            else
-                qr.yawrate_ref -= qr.step_yawrate, acknowledge(ACK_POSITIVE);
-    else
+    qr.yaw_momentum = qr.off_yawrate;
 
-        if( command == INCREASE )
-            if( qr.yaw_momentum + qr.step_yawrate > MAX_YAWRATE )
-                acknowledge(ACK_INVALID);
-            else
-                qr.yaw_momentum += qr.step_yawrate, acknowledge(ACK_POSITIVE);
-        else
-            if( qr.yaw_momentum - qr.step_yawrate < MIN_YAWRATE )
-                acknowledge(ACK_INVALID);
-            else
-                qr.yaw_momentum -= qr.step_yawrate, acknowledge(ACK_POSITIVE);
+    acknowledge(ACK_POSITIVE);
 }
 
 void d_lift(char command)
 {
-    if( qr.current_mode == FULL_MODE )
+    qr.off_lift = command == INCREASE ? qr.off_lift + STEP_LIFT : qr.off_lift - STEP_LIFT;
 
-        if( command == INCREASE )
-            if( qr.lift_ref + qr.step_lift > MAX_LIFT )
-                acknowledge(ACK_INVALID);
-            else
-                qr.lift_ref += qr.step_lift, acknowledge(ACK_POSITIVE);
-        else
-            if( qr.lift_ref - qr.step_lift < MIN_LIFT )
-                qr.lift_ref = MIN_LIFT, acknowledge(ACK_INVALID);
-            else
-                qr.lift_ref -= qr.step_lift, acknowledge(ACK_POSITIVE);
-    else
+    qr.lift_force = qr.off_lift;
 
-        if( command == INCREASE )
-            if( qr.lift_force + qr.step_lift > MAX_LIFT )
-                acknowledge(ACK_INVALID);
-            else
-                qr.lift_force += qr.step_lift, acknowledge(ACK_POSITIVE);
-        else
-            if( qr.lift_force - qr.step_lift < MIN_LIFT )
-                qr.lift_force = MIN_LIFT, acknowledge(ACK_INVALID);
-            else
-                qr.lift_force -= qr.step_lift, acknowledge(ACK_POSITIVE);
-}
-
-void set_led(char command)
-{
-    X32_LEDS = command;
     acknowledge(ACK_POSITIVE);
 }
 
