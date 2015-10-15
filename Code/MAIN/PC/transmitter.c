@@ -29,7 +29,7 @@ char* get_current_time_string(){
 	time_t current_time;
 	struct tm * time_info;
 	char* timeString;  // space for "%Y_%m_%d_%H_%M_%S\0"
-	timeString = malloc(sizeof(char) * 21);git pull
+	timeString = malloc(sizeof(char) * 21);
 
 	time(&current_time);
 	time_info = localtime(&current_time);
@@ -219,10 +219,10 @@ int main()
 
     printf("into main!\n");
 
-    /*sleep(1);
+    sleep(1);
     pthread_cancel(status_terminal);
     pthread_exit(NULL);
-    return 0;*/
+    return 0;
 
     /************* Open Joystick ********************************/
 //    joystick = open(JS_DEV0, O_RDONLY);
