@@ -40,6 +40,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="log.h" />
+		<Unit filename="mafilter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mafilter.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
