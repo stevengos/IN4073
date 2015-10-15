@@ -5,7 +5,7 @@
 
 #include "butterworth.h"
 
-extern struct drone qr;
+
 
 void butter_second()
 {
