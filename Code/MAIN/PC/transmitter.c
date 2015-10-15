@@ -211,11 +211,11 @@ int main()
 
     printf("into main!\n");
 
-    sleep(1);
+    /*sleep(1);
 
     pthread_cancel(status_terminal);
     pthread_exit(NULL);
-    return 0;
+    return 0;*/
 
     /************* Open Joystick ********************************/
 //    joystick = open(JS_DEV0, O_RDONLY);
