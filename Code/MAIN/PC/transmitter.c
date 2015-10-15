@@ -47,6 +47,13 @@ void safe_measurement_to_file(char* filename, char* t_string){
 	fclose(fp);
 }
 
+void close_PC_log_errors(){
+	FILE *fp;
+	fp = fopen("last_errors.txt", "w");
+	fprintf(fp, "%s", "-x\n");
+	fclose(fp);
+}
+
 void PC_log_errors(char* t_string){
 	 safe_measurement_to_file("last_errors.txt", t_string);
 }
@@ -190,7 +197,7 @@ void logging(int board, packet_t p)
 }
 
 void* open_status_terminal(){
-     system("gnome-terminal -x sh -c \"./status_terminal; bash\"");
+     
 }
 
 int main()
@@ -209,20 +216,19 @@ int main()
     char ack_received = 0;
     char counter = 0;
 
-    pthread_t polling, status_terminal;
+    pthread_t polling;
     int status, i = 0;
 
     int js_exit = 0;
 
     /******************* Open Status Terminal **********************************/
-    pthread_create(&status_terminal, NULL, open_status_terminal, NULL);
+    system("gnome-terminal -x sh -c \"./status_terminal;\"");
+    //clearup the old file
+    unlink("last_errors.txt");
 
     printf("into main!\n");
 
-    sleep(1);
-    pthread_cancel(status_terminal);
-    pthread_exit(NULL);
-    return 0;
+    sleep(3);
 
     /************* Open Joystick ********************************/
 //    joystick = open(JS_DEV0, O_RDONLY);
@@ -394,11 +400,11 @@ int main()
 
     printf("End of communication.\n");
 
+    close_PC_log_errors();
     end_communication = 1;
     mon_delay_ms(500);
 
     pthread_cancel(polling);
-    pthread_cancel(status_terminal);
 
     close_keyboard(&oldKeyboardSettings);
     close_board(board, &oldBoardSettings);
