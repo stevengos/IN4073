@@ -255,7 +255,10 @@ int main()
     if( board < 0 )
     {
 	close_keyboard(&oldKeyboardSettings);
+	
         printf("Error: connection to board failed.\n");
+	close_PC_log_errors();
+
         return 1;
     }
 
@@ -366,7 +369,7 @@ int main()
 
                     case ACK_POSITIVE:
                         printf("Command executed correctly.\n");
-                        PC_log_errors("Command executed correctly.\n");
+                        //PC_log_errors("Command executed correctly.\n");
 
                         if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
                         {
