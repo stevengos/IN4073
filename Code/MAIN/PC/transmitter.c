@@ -220,11 +220,10 @@ int main()
     int js_exit = 0;
 
     /******************* Open Status Terminal **********************************/
+    //clearup the old file
+    unlink("last_errors.txt");
+    PC_log_errors("startup\n");
     system("gnome-terminal -x sh -c \"./status_terminal;\"");
-
-    unlink("last_errors.txt");//clearup the old file
-
-    sleep(1);
 
     /************* Open Joystick ********************************/
     joystick = open(JS_DEV0, O_RDONLY);
@@ -244,7 +243,7 @@ int main()
 
     printf("TERMINAL\n\n");
 
-    printf("Trying to connect to the board...");
+    printf("Trying to connect to the board...\n");
 
     /************* Open Board ***********************************/
 
@@ -252,7 +251,7 @@ int main()
 
     if( board < 0 )
     {
-        printf("Error: connection to board failed.");
+        printf("Error: connection to board failed.\n");
         close_keyboard(&oldKeyboardSettings);
         return 1;
     }
