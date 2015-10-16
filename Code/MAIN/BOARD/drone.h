@@ -32,8 +32,8 @@
 
 #define STEP_SCALE_PARAMETER 1000
 
-#define PANIC_RPM   200
-#define PANIC_TIME  3000
+#define PANIC_RPM   300
+#define PANIC_TIME  5000
 
 struct drone
 {

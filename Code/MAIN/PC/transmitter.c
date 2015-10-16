@@ -142,7 +142,7 @@ void logging(int board, packet_t p)
         {
             while( getchar_board(board) );
             printf("\npc>Flushing the shit out of the buffer.\n");
-	    PC_log_errors("\npc>Flushing the shit out of the buffer.\n");
+            PC_log_errors("\npc>Flushing the shit out of the buffer.\n");
             break;
         }
 
@@ -157,7 +157,7 @@ void logging(int board, packet_t p)
             if( !status )
             {
                 printf("pc> Error while reading integer.\n");
-		PC_log_errors("pc> Error while reading integer.\n");
+                PC_log_errors("pc> Error while reading integer.\n");
                 break;
             }
 
@@ -167,20 +167,23 @@ void logging(int board, packet_t p)
                 break;
             }
 
-            if( incoming_short == ACK_NEGATIVE ){
+            if( incoming_short == ACK_NEGATIVE )
+            {
                 printf("\n\npc> Error while reading logs from the board. Abort!\n");
-		PC_log_errors("\n\npc> Error while reading logs from the board. Abort!\n");
-		exit(0);
-	    }
+                PC_log_errors("\n\npc> Error while reading logs from the board. Abort!\n");
+                exit(0);
+            }
+
             printf("%d ", incoming_short);
             safe_int_measurement_to_file(file_name, incoming_short);
 
             debug++;
 
-            if( debug == 50 ){
+            if( debug == 50 )
+            {
                 printf("\n\npc> Got in a loop whilst reading logging!\n");
-		PC_log_errors("\n\npc> Got in a loop whilst reading logging!\n");
-	    }
+                PC_log_errors("\n\npc> Got in a loop whilst reading logging!\n");
+            }
         }
 
         safe_measurement_to_file(file_name, "\n");
@@ -193,10 +196,6 @@ void logging(int board, packet_t p)
 
     printf("\npc>Log retrival is over. Press any key to continue.\n\n");
     getchar();
-}
-
-void* open_status_terminal(){
-     
 }
 
 int main()
@@ -222,23 +221,23 @@ int main()
 
     /******************* Open Status Terminal **********************************/
     system("gnome-terminal -x sh -c \"./status_terminal;\"");
-    //clearup the old file
-    unlink("last_errors.txt");
+
+    unlink("last_errors.txt");//clearup the old file
 
     sleep(1);
 
     /************* Open Joystick ********************************/
-//    joystick = open(JS_DEV0, O_RDONLY);
-//
-//	if ( joystick < 0)
-//	{
-//        joystick = open(JS_DEV1, O_RDONLY);
-//
-//        if( joystick < 0 )
-//            perror("jstest"), exit(1);
-//	}
-//
-//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+    joystick = open(JS_DEV0, O_RDONLY);
+
+	if ( joystick < 0)
+	{
+        joystick = open(JS_DEV1, O_RDONLY);
+
+        if( joystick < 0 )
+            perror("jstest"), exit(1);
+	}
+
+	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
     /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
@@ -254,6 +253,7 @@ int main()
     if( board < 0 )
     {
         printf("Error: connection to board failed.");
+        close_keyboard(&oldKeyboardSettings);
         return 1;
     }
 
@@ -276,22 +276,11 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-        //js_exit = set_js_command(joystick); //read the joystick configuration
+        js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 
 		packet_buffer[packet_counter] = encapsulate( ctty ); //decode the character from keyboard
-
-//        if( packet_buffer[packet_counter].header == LOG && packet_buffer[packet_counter].command == LOG_GET)
-//        {
-//            close_keyboard(&oldKeyboardSettings);
-//
-//            logging(board, packet_buffer[packet_counter]);
-//
-//            open_keyboard(&oldKeyboardSettings, &keyboardSettings);
-//
-//            continue;
-//        }
 
 		if( packet_buffer[packet_counter].header != EMPTY )  //if keyboard command is a valid one then push it, else ignore
             packet_counter++;
