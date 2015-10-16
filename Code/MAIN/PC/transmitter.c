@@ -252,8 +252,10 @@ int main()
 
     if( board < 0 )
     {
+	close_keyboard(&oldKeyboardSettings);
+	
         printf("Error: connection to board failed.\n");
-        close_keyboard(&oldKeyboardSettings);
+	close_PC_log_errors();
         return 1;
     }
 
