@@ -183,6 +183,7 @@ void logging(int board, packet_t p)
             {
                 printf("\n\npc> Got in a loop whilst reading logging!\n");
                 PC_log_errors("\n\npc> Got in a loop whilst reading logging!\n");
+                number_logs = 0;
             }
         }
 
@@ -190,7 +191,7 @@ void logging(int board, packet_t p)
     }
 
     mon_delay_ms(1000);
-    while( getchar_board(board) ); //flush spurious data
+    while( getchar_board(board) ) mon_delay_ms(1); //flush spurious data
 
     pthread_mutex_unlock( &lock_board );//****************************** BOARD IS UNLOCKED **************************
 
@@ -352,7 +353,7 @@ int main()
 
                     case ACK_POSITIVE:
                         printf("Command executed correctly.\n");
-                        PC_log_errors("Command executed correctly.\n");
+                        //PC_log_errors("Command executed correctly.\n");
 
                         if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
                         {

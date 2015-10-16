@@ -44,6 +44,8 @@ void add_log()
     new_log.timestamp = X32_CLOCK_MS;
     #endif
 
+    //new_log.battery = X32_QR_BATTERY;
+
 //    new_log.ae1 = qr.ae1;
 //    new_log.ae2 = qr.ae2;
 //    new_log.ae3 = qr.ae3;

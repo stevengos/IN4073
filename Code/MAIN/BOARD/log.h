@@ -20,6 +20,8 @@ struct log_s
 
     short start;
 
+    //short battery;
+
 //    short ae1;
 //    short ae2;
 //    short ae3;

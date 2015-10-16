@@ -244,6 +244,10 @@ void yaw_mode()
 
     TURNON_LED(LED6);
 
+    qr.controller_pitch = 0;
+    qr.controller_roll = 0;
+    qr.controller_yaw = 3;
+
     while(!qr.flag_mode)
     {
         BLINK_LED(LED1);
@@ -315,6 +319,15 @@ void full_mode()
     int ae4 = 0;
 
     TURNON_LED(LED5);
+
+    qr.controller_pitch = 2;
+    qr.controller_roll = 2;
+    qr.controller_yaw = 2;
+
+    qr.scale_pitch  = 1000;
+    qr.scale_roll   = 1000;
+    qr.scale_yaw    = 2000; //5200
+    qr.scale_lift   = 2000;
 
     while(!qr.flag_mode)
     {
@@ -443,9 +456,9 @@ void clear_drone()
     qr.scale_yaw    = 16400/2;
     qr.scale_lift   = 16400/2;
 
-    qr.controller_pitch = 1;
-    qr.controller_roll = 1;
-    qr.controller_yaw = 3;
+    qr.controller_pitch = 0;
+    qr.controller_roll = 0;
+    qr.controller_yaw = 0;
 
     qr.off_pitch = 0;
     qr.off_roll = 0;

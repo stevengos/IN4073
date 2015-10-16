@@ -30,10 +30,10 @@
 #define STEP_YAW    10
 #define STEP_LIFT   5
 
-#define STEP_SCALE_PARAMETER 1000
+#define STEP_SCALE_PARAMETER 250
 
 #define PANIC_RPM   300
-#define PANIC_TIME  5000
+#define PANIC_TIME  2000
 
 struct drone
 {
