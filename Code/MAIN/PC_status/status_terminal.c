@@ -35,7 +35,7 @@ int print_PC_read_errors(){
 	FILE* file = fopen("last_errors.txt","r");
 	if(file == NULL)
 	{
-		exit(-1);
+		//exit(-1);
      	}
 
 	while(fgets(line, sizeof(line), file) != NULL){
@@ -47,7 +47,7 @@ int print_PC_read_errors(){
 
 		if(sscanf(line, "%s", message) != 1){
 			printf("Wrong line read\n");			
-			exit(-1);	
+			//exit(-1);	
 		}
 
 		//printf("%s",message);

@@ -62,30 +62,55 @@ void safe_mode()
 
 void panic_mode()
 {
+    int time;
+
     DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
-
-    if( qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4 )
-
-        qr.ae1 = qr.ae1 > PANIC_RPM ? PANIC_RPM : qr.ae1,
-        qr.ae2 = qr.ae2 > PANIC_RPM ? PANIC_RPM : qr.ae1,
-        qr.ae3 = qr.ae3 > PANIC_RPM ? PANIC_RPM : qr.ae1,
-        qr.ae3 = qr.ae4 > PANIC_RPM ? PANIC_RPM : qr.ae1;
 
     #ifdef PERIPHERAL_XUFO_A0
     X32_QR_A1 = qr.ae1;
-    X32_QR_A2 = qr.ae2;
-    X32_QR_A3 = qr.ae3;
-    X32_QR_A4 = qr.ae4;
+    X32_QR_A2 = qr.ae1;
+    X32_QR_A3 = qr.ae1;
+    X32_QR_A4 = qr.ae1;
     #endif
+
+    while( qr.ae1 > PANIC_RPM )
+    {
+        qr.ae1 = qr.ae1 - STEP_RPM;
+        qr.ae2 = qr.ae1 - STEP_RPM;
+        qr.ae3 = qr.ae1 - STEP_RPM;
+        qr.ae4 = qr.ae1 - STEP_RPM;
+
+        #ifdef PERIPHERAL_XUFO_A0
+        X32_QR_A1 = qr.ae1;
+        X32_QR_A2 = qr.ae2;
+        X32_QR_A3 = qr.ae3;
+        X32_QR_A4 = qr.ae4;
+        #endif
+
+        ucatnap(500);
+    }
+
+    time = X32_CLOCK_MS + PANIC_TIME;
+
+    while( X32_CLOCK_MS < time )
+    {
+        #ifdef PERIPHERAL_XUFO_A0
+        X32_QR_A1 = qr.ae1;
+        X32_QR_A2 = qr.ae2;
+        X32_QR_A3 = qr.ae3;
+        X32_QR_A4 = qr.ae4;
+        #endif
+
+        catnap(200);
+        BLINK_LED(ALL_ON);
+    }
 
     qr.lift_force       =  qr.scale_lift*( qr.ae1*qr.ae1 + qr.ae2*qr.ae2 + qr.ae3*qr.ae3 + qr.ae4*qr.ae4 );
     qr.pitch_momentum   =  0;
     qr.roll_momentum    =  0;
     qr.yaw_momentum     =  0;
 
-    panic_blink(5);
-
-    catnap(PANIC_TIME);
+    stop_motors();
 
     qr.current_mode = SAFE_MODE;
     qr.flag_mode = 1;
@@ -147,8 +172,6 @@ void manual_mode()
         else
             stop_motors();
     }
-
-    stop_motors();
 
     TURNOFF_LED(LED7);
 }
