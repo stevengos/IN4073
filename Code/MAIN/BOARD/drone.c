@@ -318,6 +318,11 @@ void full_mode()
     int ae3 = 0;
     int ae4 = 0;
 
+//    int prate_deg = 0;
+//    int pitch_deg = 0;
+//    int qrate_deg = 0;
+//    int roll_deg = 0;
+
     TURNON_LED(LED5);
 
     qr.controller_pitch = 2;
@@ -338,8 +343,12 @@ void full_mode()
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
 /* CASCADE CONTROLLER
-            qr.fax += qr.fp; //estimated angle by integration
-            qr.fay += qr.sq; //estimated angle by integration
+
+            sp_deg = qr.fp * 57;
+            pitch_deg = q_multiplication( qr.ax, 95724 );
+
+            qr.fax = kalman(&filter, sp_deg, angle_deg, 3277);
+            qr.fay = kalman(&filter, sp_deg, angle_deg, 3277);
 
             e_ax = qr.pitch_ref - qr.fax;
             e_p = qr.controller_pitch*e_ax - qr.fp;
