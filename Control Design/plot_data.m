@@ -3,7 +3,7 @@ close all, clear all;
 
 %% path
 MEAS_PATH = '../Code/MAIN/measurements/';
-file = 'meas_2015_10_09_11_44_04.txt';
+file = 'meas_2015_10_16_09_01_32.txt';
 
 path = fullfile(MEAS_PATH, file);
 data = load_filters(path);
