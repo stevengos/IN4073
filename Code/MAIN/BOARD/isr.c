@@ -98,7 +98,7 @@ void isr_rs232_rx(void)
 
 void isr_timer(void)
 {
-    if( qr.link_down || X32_QR_BATTERY < BATTERY_LOW )
+    if( qr.link_down )//|| X32_QR_BATTERY < BATTERY_LOW ) **************************
     {
         unsigned char i;
 

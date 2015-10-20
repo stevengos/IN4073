@@ -1,5 +1,5 @@
 /**
-@author Gianluca Savaia
+@author Gianluca Savaia & Steven Gosseling
 */
 
 #include <stdio.h>
@@ -25,6 +25,7 @@ int packet_counter = 0;
 
 //{
 
+/** @author Steven Gosseling */
 char* get_current_time_string(){
 	time_t current_time;
 	struct tm * time_info;
@@ -40,6 +41,7 @@ char* get_current_time_string(){
 	return timeString;
 }
 
+/** @author Steven Gosseling */
 void safe_measurement_to_file(char* filename, char* t_string){
 	FILE *fp;
 	fp = fopen(filename, "aw+");
@@ -47,6 +49,7 @@ void safe_measurement_to_file(char* filename, char* t_string){
 	fclose(fp);
 }
 
+/** @author Steven Gosseling */
 void close_PC_log_errors(){
 	FILE *fp;
 	fp = fopen("last_errors.txt", "w");
@@ -54,10 +57,12 @@ void close_PC_log_errors(){
 	fclose(fp);
 }
 
+/** @author Steven Gosseling */
 void PC_log_errors(char* t_string){
 	 safe_measurement_to_file("last_errors.txt", t_string);
 }
 
+/** @author Steven Gosseling */
 void safe_int_measurement_to_file(char* filename, int t_int){
 	char temp_value[100];
 
@@ -66,6 +71,7 @@ void safe_int_measurement_to_file(char* filename, int t_int){
 	safe_measurement_to_file(filename, temp_value);
 }
 
+/** @author Steven Gosseling */
 void push_packet_t(char header, char command)
 {
 	packet_t p;
@@ -77,12 +83,15 @@ void push_packet_t(char header, char command)
 	packet_buffer[packet_counter++] = p;
 }
 
+/** @author Steven Gosseling */
 void empty_packet_t()
 {
 	packet_counter = 0;
 }
 
 /**
+    @author Gianluca Savaia
+
     Pooling method which sends "keep-alive" messages in order to keep the board awake.
 */
 void *is_alive(void* board)
@@ -108,6 +117,8 @@ void *is_alive(void* board)
 }
 
 /**
+    @author Gianluca Savaia
+
     Log retrival session: it allows to download log data into a file on the PC.
     Standard communication protocol is interrupted, PC reads log data from the board in a continous stream.
 */
@@ -222,22 +233,22 @@ int main()
 
     /******************* Open Status Terminal **********************************/
     //clearup the old file
-    unlink("last_errors.txt");
-    PC_log_errors("startup\n");
-    system("gnome-terminal -x sh -c \"./status_terminal;\"");
+//    unlink("last_errors.txt");
+//    PC_log_errors("startup\n");
+//    system("gnome-terminal -x sh -c \"./status_terminal;\"");
 
     /************* Open Joystick ********************************/
-    joystick = open(JS_DEV0, O_RDONLY);
-
-	if ( joystick < 0)
-	{
-        joystick = open(JS_DEV1, O_RDONLY);
-
-        if( joystick < 0 )
-            perror("jstest"), exit(1);
-	}
-
-	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+//    joystick = open(JS_DEV0, O_RDONLY);
+//
+//	if ( joystick < 0)
+//	{
+//        joystick = open(JS_DEV1, O_RDONLY);
+//
+//        if( joystick < 0 )
+//            perror("jstest"), exit(1);
+//	}
+//
+//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
     /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
@@ -252,10 +263,10 @@ int main()
 
     if( board < 0 )
     {
-	close_keyboard(&oldKeyboardSettings);
-	
+        close_keyboard(&oldKeyboardSettings);
+
         printf("Error: connection to board failed.\n");
-	close_PC_log_errors();
+        close_PC_log_errors();
         return 1;
     }
 
@@ -278,7 +289,7 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-        js_exit = set_js_command(joystick); //read the joystick configuration
+//        js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 

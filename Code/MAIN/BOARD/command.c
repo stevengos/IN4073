@@ -170,6 +170,8 @@ void set_scale_pitch(char command)
         qr.scale_pitch += STEP_SCALE_PARAMETER;
     else
         qr.scale_pitch -= STEP_SCALE_PARAMETER;
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void set_scale_roll(char command)
@@ -178,6 +180,8 @@ void set_scale_roll(char command)
         qr.scale_roll += STEP_SCALE_PARAMETER;
     else
         qr.scale_roll -= STEP_SCALE_PARAMETER;
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void set_scale_yaw(char command)
@@ -186,6 +190,8 @@ void set_scale_yaw(char command)
         qr.scale_yaw += STEP_SCALE_PARAMETER;
     else
         qr.scale_yaw -= STEP_SCALE_PARAMETER;
+
+    acknowledge(ACK_POSITIVE);
 }
 
 void set_scale_lift(char command)
@@ -194,6 +200,8 @@ void set_scale_lift(char command)
         qr.scale_lift += STEP_SCALE_PARAMETER;
     else
         qr.scale_lift -= STEP_SCALE_PARAMETER;
+
+    acknowledge(ACK_POSITIVE);
 }
 //}
 
@@ -205,6 +213,8 @@ void set_controller_pitch(char command)
         qr.controller_pitch += 1;
     else
         qr.controller_pitch = qr.controller_pitch-1 >= 0 ? qr.controller_pitch-1 : 0;
+
+    acknowledge(ACK_POSITIVE);
 }
 void set_controller_roll(char command)
 {
@@ -212,6 +222,8 @@ void set_controller_roll(char command)
         qr.controller_roll += 1;
     else
         qr.controller_roll = qr.controller_roll-1 >= 0 ? qr.controller_roll-1 : 0;
+
+    acknowledge(ACK_POSITIVE);
 }
 void set_controller_yaw(char command)
 {
@@ -219,6 +231,8 @@ void set_controller_yaw(char command)
         qr.controller_yaw += 1;
     else
         qr.controller_yaw = qr.controller_yaw-1 >= 0 ? qr.controller_yaw-1 : 0;
+
+    acknowledge(ACK_POSITIVE);
 }
 //}
 

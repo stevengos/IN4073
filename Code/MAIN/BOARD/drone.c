@@ -244,6 +244,11 @@ void yaw_mode()
 
     TURNON_LED(LED6);
 
+    qr.scale_pitch  = 8240/4;
+    qr.scale_roll   = 8240/4;
+    qr.scale_yaw    = 16400/2;
+    qr.scale_lift   = 16400/2;
+
     qr.controller_pitch = 0;
     qr.controller_roll = 0;
     qr.controller_yaw = 3;
@@ -317,11 +322,6 @@ void full_mode()
     int ae2 = 0;
     int ae3 = 0;
     int ae4 = 0;
-
-//    int prate_deg = 0;
-//    int pitch_deg = 0;
-//    int qrate_deg = 0;
-//    int roll_deg = 0;
 
     TURNON_LED(LED5);
 
