@@ -246,7 +246,7 @@ void yaw_mode()
 
     qr.scale_pitch  = 8240/4;
     qr.scale_roll   = 8240/4;
-    qr.scale_yaw    = 16400/2;
+    qr.scale_yaw    = 16400/2; //2000
     qr.scale_lift   = 16400/2;
 
     qr.controller_pitch = 0;
@@ -325,14 +325,23 @@ void full_mode()
 
     TURNON_LED(LED5);
 
-    qr.controller_pitch = 2;
-    qr.controller_roll = 2;
-    qr.controller_yaw = 2;
+//    qr.controller_pitch = 2;
+//    qr.controller_roll = 2;
+//    qr.controller_yaw = 2;
+//
+//    qr.scale_pitch  = 1000;
+//    qr.scale_roll   = 1000;
+//    qr.scale_yaw    = 2000; //************5200
+//    qr.scale_lift   = 2000;
 
-    qr.scale_pitch  = 1000;
-    qr.scale_roll   = 1000;
-    qr.scale_yaw    = 2000; //5200
-    qr.scale_lift   = 2000;
+    qr.controller_pitch = 5;
+    qr.controller_roll = 5;
+    qr.controller_yaw = 3;
+
+    qr.scale_pitch  = 2000;
+    qr.scale_roll   = 2000;
+    qr.scale_yaw    = 8200;
+    qr.scale_lift   = 8200;
 
     while(!qr.flag_mode)
     {
