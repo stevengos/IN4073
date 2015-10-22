@@ -18,7 +18,7 @@ for K=1:25;
 
 	motor = sqrt(  ( scale_lift*lift_force + 2*scale_pitch*pitch_momentum ) / 4 );
 
-	fprintf(['K=' num2str(K) ';\t pitch=' num2str(motor) ';\t diff=' num2str(motor_rest-motor) ';\t ratio=' num2str((motor_rest-motor)/1023*100)  ' \n'] );
+	fprintf(['K=' num2str(K) ';\t ae1=' num2str(motor) ';\t diff=' num2str(motor_rest-motor) ';\t ratio=' num2str((motor_rest-motor)/1023*100)  ' \n'] );
 end
 
 endfunction
