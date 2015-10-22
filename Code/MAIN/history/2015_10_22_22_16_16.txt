@@ -1,0 +1,20 @@
+[2015_10_22_22_16_19] packet: [0	2	20]	ack: Command executed correctly.
+[2015_10_22_22_16_19] packet: [0	0	0]	ack: Command executed correctly.
+[2015_10_22_22_16_20] packet: [0	3	1]	ack: Command executed correctly.
+[2015_10_22_22_16_24] packet: [0	4	19]	ack: Command executed correctly.
+[2015_10_22_22_16_25] packet: [0	0	0]	ack: Command executed correctly.
+[2015_10_22_22_16_26] packet: [0	5	6]	ack: Command executed correctly.
+[2015_10_22_22_16_28] packet: [0	0	0]	ack: Command executed correctly.
+[2015_10_22_22_16_29] packet: [0	2	20]	ack: Command executed correctly.
+[2015_10_22_22_16_32] packet: [0	0	0]	ack: Command executed correctly.
+[2015_10_22_22_16_33] packet: [0	3	1]	ack: Command executed correctly.
+[2015_10_22_22_16_36] packet: [0	4	19]	ack: Command executed correctly.
+[2015_10_22_22_16_40] packet: [32	1	19]	ack: Command executed correctly.
+[2015_10_22_22_17_00] packet: [0	0	0]	ack: Command executed correctly.
+[2015_10_22_22_17_01] packet: [32	3	7]	ack: Command executed correctly.
+[2015_10_22_22_17_03] packet: [0	0	0]	ack: 
+pc>Log retrival is over. Press any key to continue.
+
+[2015_10_22_22_17_07] packet: [0	2	20]	ack: Command executed correctly.
+[2015_10_22_22_17_07] packet: [0	0	0]	ack: Command executed correctly.
+[2015_10_22_22_17_09] packet: [48	64	15]	ack: Command executed correctly.

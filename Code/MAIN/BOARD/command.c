@@ -84,6 +84,7 @@ void perform_command(char header, char command)
                     qr.controller_pitch = 0;
                     qr.controller_roll = 0;
                     qr.controller_yaw = 0;
+                    acknowledge(ACK_POSITIVE);
                     break;
 
         case LOG:

@@ -19,6 +19,7 @@
 
 pthread_mutex_t lock_board; //semaphore which allows atomic access to the communication
 int end_communication = 0;  //flag which controls the exit from the main loop
+char file_error[50];
 
 packet_t packet_buffer[10];
 int packet_counter = 0;
@@ -51,9 +52,9 @@ void safe_measurement_to_file(char* filename, char* t_string){
 
 /** @author Steven Gosseling */
 void PC_log_errors(char* t_string, packet_t p){
-     FILE *fp = fopen("log_errors.txt", "a");
+     FILE *fp = fopen(file_error, "a");
 
-	 fprintf(fp, "[%s] packet: [%d %d %d] ack: %s", get_current_time_string(), p.header, p.command, p.crc, t_string);
+	 fprintf(fp, "[%s] packet: [%d\t%d\t%d]\tack: %s", get_current_time_string(), p.header, p.command, p.crc, t_string);
 
 	 fclose(fp);
 }
@@ -250,6 +251,12 @@ int main()
     printf("TERMINAL\n\n");
 
     printf("Trying to connect to the board...\n");
+
+    /************* Open Error Log File ***********************************/
+
+    strcat(file_error, "history/");
+    strcat(file_error, get_current_time_string());
+    strcat(file_error, ".txt");
 
     /************* Open Board ***********************************/
 
