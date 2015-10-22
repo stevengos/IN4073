@@ -50,16 +50,12 @@ void safe_measurement_to_file(char* filename, char* t_string){
 }
 
 /** @author Steven Gosseling */
-void close_PC_log_errors(){
-	FILE *fp;
-	fp = fopen("last_errors.txt", "w");
-	fprintf(fp, "%s", "-x\n");
-	fclose(fp);
-}
+void PC_log_errors(char* t_string, packet_t p){
+     FILE *fp = fopen("log_errors.txt", "a");
 
-/** @author Steven Gosseling */
-void PC_log_errors(char* t_string){
-	 safe_measurement_to_file("last_errors.txt", t_string);
+	 fprintf(fp, "[%s] packet: [%d %d %d] ack: %s", get_current_time_string(), p.header, p.command, p.crc, t_string);
+
+	 fclose(fp);
 }
 
 /** @author Steven Gosseling */
@@ -152,8 +148,8 @@ void logging(int board, packet_t p)
         if( !status )
         {
             while( getchar_board(board) );
-            printf("\npc>Flushing the shit out of the buffer.\n");
-            PC_log_errors("\npc>Flushing the shit out of the buffer.\n");
+            printf("\npc>Flushing the buffer.\n");
+            PC_log_errors("\npc>Flushing the buffer.\n",p);
             break;
         }
 
@@ -168,7 +164,7 @@ void logging(int board, packet_t p)
             if( !status )
             {
                 printf("pc> Error while reading integer.\n");
-                PC_log_errors("pc> Error while reading integer.\n");
+                PC_log_errors("pc> Error while reading integer.\n",p);
                 break;
             }
 
@@ -181,7 +177,7 @@ void logging(int board, packet_t p)
             if( incoming_short == ACK_NEGATIVE )
             {
                 printf("\n\npc> Error while reading logs from the board. Abort!\n");
-                PC_log_errors("\n\npc> Error while reading logs from the board. Abort!\n");
+                PC_log_errors("\n\npc> Error while reading logs from the board. Abort!\n",p);
                 exit(0);
             }
 
@@ -193,7 +189,7 @@ void logging(int board, packet_t p)
             if( debug == 50 )
             {
                 printf("\n\npc> Got in a loop whilst reading logging!\n");
-                PC_log_errors("\n\npc> Got in a loop whilst reading logging!\n");
+                PC_log_errors("\n\npc> Got in a loop whilst reading logging!\n",p);
                 number_logs = 0;
             }
         }
@@ -207,9 +203,13 @@ void logging(int board, packet_t p)
     pthread_mutex_unlock( &lock_board );//****************************** BOARD IS UNLOCKED **************************
 
     printf("\npc>Log retrival is over. Press any key to continue.\n\n");
+    PC_log_errors("\npc>Log retrival is over. Press any key to continue.\n\n",p);
     getchar();
 }
 
+/**
+    @author Gianluca Savaia
+*/
 int main()
 {
     struct termios boardSettings;
@@ -230,12 +230,6 @@ int main()
     int status, i = 0;
 
     int js_exit = 0;
-
-    /******************* Open Status Terminal **********************************/
-    //clearup the old file
-//    unlink("last_errors.txt");
-//    PC_log_errors("startup\n");
-//    system("gnome-terminal -x sh -c \"./status_terminal;\"");
 
     /************* Open Joystick ********************************/
 //    joystick = open(JS_DEV0, O_RDONLY);
@@ -266,7 +260,6 @@ int main()
         close_keyboard(&oldKeyboardSettings);
 
         printf("Error: connection to board failed.\n");
-        close_PC_log_errors();
         return 1;
     }
 
@@ -281,7 +274,6 @@ int main()
     if( status )
     {
         printf("pc> Error while creating polling thread. Session Aborted.\n");
-        PC_log_errors("pc> Error while creating polling thread. Session Aborted.\n");
         ctty = ESC;
     }
 
@@ -336,7 +328,7 @@ int main()
                 {
                     case ACK_NEGATIVE:
                         printf("NACK received, trying again...\n"), counter++;
-                        PC_log_errors("NACK received, trying again...\n");
+                        PC_log_errors("NACK received, trying again...\n", p);
 
                         pthread_mutex_lock( &lock_board );
 
@@ -348,7 +340,7 @@ int main()
 
                     case ACK_HAMMING:
                         printf("Checksum is wrong, rejected\n");
-                        PC_log_errors("Checksum is wrong, rejected\n");
+                        PC_log_errors("Checksum is wrong, rejected\n", p);
 
                         pthread_mutex_lock( &lock_board );
 
@@ -360,13 +352,13 @@ int main()
 
                     case ACK_INVALID:
                         printf("Invalid command, rejected.\n");
-                        PC_log_errors("Invalid command, rejected.\n");
+                        PC_log_errors("Invalid command, rejected.\n", p);
 
                         break;
 
                     case ACK_POSITIVE:
                         printf("Command executed correctly.\n");
-                        //PC_log_errors("Command executed correctly.\n");
+                        PC_log_errors("Command executed correctly.\n",p);
 
                         if( packet_buffer[i].header == LOG && packet_buffer[i].command == LOG_GET)
                         {
@@ -379,7 +371,7 @@ int main()
 
                     case EMPTY:
                         printf("No answer received, trying again...\n"), counter++;
-                        PC_log_errors("No answer received, trying again...\n");
+                        PC_log_errors("No answer received, trying again...\n", p);
 
                         while( getchar_board(board) ) mon_delay_ms(1);
 
@@ -399,7 +391,6 @@ int main()
 
     printf("End of communication.\n");
 
-    close_PC_log_errors();
     end_communication = 1;
     mon_delay_ms(500);
 

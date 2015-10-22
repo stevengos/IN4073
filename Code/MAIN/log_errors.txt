@@ -1,0 +1,20 @@
+[2015_10_22_19_49_22] packet: [0 2 0] ack: Command executed correctly.
+[2015_10_22_19_49_23] packet: [0 0 0] ack: Command executed correctly.
+[2015_10_22_19_49_24] packet: [0 3 0] ack: Command executed correctly.
+[2015_10_22_19_49_28] packet: [0 4 0] ack: Command executed correctly.
+[2015_10_22_19_49_29] packet: [0 0 0] ack: Command executed correctly.
+[2015_10_22_19_49_30] packet: [0 5 0] ack: Command executed correctly.
+[2015_10_22_19_49_32] packet: [0 0 0] ack: Command executed correctly.
+[2015_10_22_19_49_34] packet: [32 1 0] ack: Command executed correctly.
+[2015_10_22_19_49_40] packet: [32 2 0] ack: Command executed correctly.
+[2015_10_22_19_49_46] packet: [32 3 0] ack: Command executed correctly.
+[2015_10_22_19_49_47] packet: [0 0 0] ack: 
+pc>Log retrival is over. Press any key to continue.
+
+[2015_10_22_19_49_53] packet: [0 2 0] ack: Command executed correctly.
+[2015_10_22_19_49_53] packet: [0 0 0] ack: Command executed correctly.
+[2015_10_22_19_49_55] packet: [0 1 0] ack: Command executed correctly.
+[2015_10_22_19_50_00] packet: [0 1 0] ack: Checksum is wrong, rejected
+[2015_10_22_19_50_05] packet: [0 2 0] ack: Checksum is wrong, rejected
+[2015_10_22_19_50_07] packet: [0 1 0] ack: Command executed correctly.
+[2015_10_22_19_50_18] packet: [48 64 0] ack: Checksum is wrong, rejected
