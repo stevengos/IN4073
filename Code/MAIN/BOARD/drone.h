@@ -44,10 +44,10 @@ struct drone
     short ae4;
 
     //openloop control input
-    short pitch_momentum;
-    short roll_momentum;
-    short yaw_momentum;
-    short lift_force;
+    int pitch_momentum;
+    int roll_momentum;
+    int yaw_momentum;
+    int lift_force;
 
     //references for control mode
     short pitch_ref;
@@ -66,9 +66,9 @@ struct drone
     short off_lift;
 
     //Parameter Yaw Mode
-    short controller_pitch;
-    short controller_roll;
-    short controller_yaw;
+    int controller_pitch;
+    int controller_roll;
+    int controller_yaw;
 
     //sensed data
     short sax;

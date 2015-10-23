@@ -34,8 +34,8 @@ void isr_sensors(void)
     qr.sq = X32_QR_S5 - qr.off_q;
     qr.sr = X32_QR_S6 - qr.off_r;
 
-    //mafilter();
-    butter_second();
+    mafilter();
+    //butter_second();
 
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
@@ -98,7 +98,7 @@ void isr_rs232_rx(void)
 
 void isr_timer(void)
 {
-    if( qr.link_down )//|| X32_QR_BATTERY < BATTERY_LOW ) **************************
+    if( qr.link_down || X32_QR_BATTERY < BATTERY_LOW )
     {
         unsigned char i;
 

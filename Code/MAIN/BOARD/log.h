@@ -20,12 +20,12 @@ struct log_s
 
     short start;
 
-    //short battery;
+    short battery;
 
-//    short ae1;
-//    short ae2;
-//    short ae3;
-//    short ae4;
+    short ae1;
+    short ae2;
+    short ae3;
+    short ae4;
 
     short sax;
     short say;

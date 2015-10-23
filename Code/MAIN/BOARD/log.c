@@ -44,12 +44,12 @@ void add_log()
     new_log.timestamp = X32_CLOCK_MS;
     #endif
 
-    //new_log.battery = X32_QR_BATTERY;
+    new_log.battery = X32_QR_BATTERY;
 
-//    new_log.ae1 = qr.ae1;
-//    new_log.ae2 = qr.ae2;
-//    new_log.ae3 = qr.ae3;
-//    new_log.ae4 = qr.ae4;
+    new_log.ae1 = qr.ae1;
+    new_log.ae2 = qr.ae2;
+    new_log.ae3 = qr.ae3;
+    new_log.ae4 = qr.ae4;
 
     new_log.sax = qr.sax;
     new_log.say = qr.say;
@@ -66,22 +66,6 @@ void add_log()
     new_log.fp = qr.fp;
     new_log.fq = qr.fq;
     new_log.fr = qr.fr;
-//    new_log.ae1 = 1;
-//    new_log.ae2 = 2;
-//    new_log.ae3 = 3;
-//    new_log.ae4 = 4;
-//
-//    new_log.sax = 5;
-//    new_log.say = 6;
-//    new_log.saz = 7;
-//
-//    new_log.sp = 8;
-//    new_log.sq = 9;
-//    new_log.sr = 10;
-//
-//    new_log.fp = 11;
-//    new_log.fq = 12;
-//    new_log.fr = 13;
 
     log_buffer[log_size] = new_log; // write log into buffer
 

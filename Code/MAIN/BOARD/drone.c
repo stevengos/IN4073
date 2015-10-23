@@ -135,10 +135,10 @@ void manual_mode()
         if( qr.lift_force )
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
-            ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae1 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae2 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae3 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae4 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      - qr.scale_yaw*qr.yaw_momentum ) / 4;
             ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
             ae1 = ae1 <= MIN_RPM ? MIN_RPM : sqrt(ae1);
@@ -246,12 +246,21 @@ void yaw_mode()
 
     qr.scale_pitch  = 8240/4;
     qr.scale_roll   = 8240/4;
-    qr.scale_yaw    = 16400/2; //2000
+    qr.scale_yaw    = 2000;
     qr.scale_lift   = 16400/2;
 
     qr.controller_pitch = 0;
     qr.controller_roll = 0;
-    qr.controller_yaw = 3;
+    qr.controller_yaw = 7;
+
+    qr.scale_pitch  = 8240/4;
+    qr.scale_roll   = 8240/4;
+    qr.scale_yaw    = 2000;
+    qr.scale_lift   = 16400/2;
+
+    qr.controller_pitch = 0;
+    qr.controller_roll = 0;
+    qr.controller_yaw = 7;
 
     while(!qr.flag_mode)
     {
@@ -261,13 +270,13 @@ void yaw_mode()
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
-            e = qr.yawrate_ref - qr.fr;
+            e = qr.yawrate_ref + qr.fr;
             qr.yaw_momentum = qr.controller_yaw * e;
 
-            ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae1 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae2 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae3 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae4 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      - qr.scale_yaw*qr.yaw_momentum ) / 4;
 
             ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
@@ -311,12 +320,9 @@ void yaw_mode()
 */
 void full_mode()
 {
-    short e_ax = 0;
-    short e_ay = 0;
-
-    short e_p = 0;
-    short e_q = 0;
-    short e_r = 0;
+    int e_p = 0;
+    int e_q = 0;
+    int e_r = 0;
 
     int ae1 = 0;
     int ae2 = 0;
@@ -325,23 +331,14 @@ void full_mode()
 
     TURNON_LED(LED5);
 
-//    qr.controller_pitch = 2;
-//    qr.controller_roll = 2;
-//    qr.controller_yaw = 2;
-//
-//    qr.scale_pitch  = 1000;
-//    qr.scale_roll   = 1000;
-//    qr.scale_yaw    = 2000; //************5200
-//    qr.scale_lift   = 2000;
+    qr.controller_pitch = 60*1000;
+    qr.controller_roll = 60*1000;
+    qr.controller_yaw = 240*1000;
 
-    qr.controller_pitch = 5;
-    qr.controller_roll = 5;
-    qr.controller_yaw = 3;
-
-    qr.scale_pitch  = 2000;
-    qr.scale_roll   = 2000;
-    qr.scale_yaw    = 8200;
-    qr.scale_lift   = 8200;
+    qr.scale_pitch  = 1;
+    qr.scale_roll   = 1;
+    qr.scale_yaw    = 1;
+    qr.scale_lift   = 4500;
 
     while(!qr.flag_mode)
     {
@@ -351,38 +348,23 @@ void full_mode()
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
-/* CASCADE CONTROLLER
-
-            sp_deg = qr.fp * 57;
-            pitch_deg = q_multiplication( qr.ax, 95724 );
-
-            qr.fax = kalman(&filter, sp_deg, angle_deg, 3277);
-            qr.fay = kalman(&filter, sp_deg, angle_deg, 3277);
-
-            e_ax = qr.pitch_ref - qr.fax;
-            e_p = qr.controller_pitch*e_ax - qr.fp;
-            qr.pitch_momentum = qr.controller_pitch * e_p;
-
-            e_ay = qr.roll_ref - qr.fay;
-            e_q = qr.controller_roll*e_ay - qr.fq;
-            qr.roll_momentum = qr.controller_roll * e_q;
-/* END CASCADE CONTROLLER */
-
 /* RATE CONTROL */
-            e_p = qr.pitch_ref - qr.fp;
+            e_p = qr.pitch_ref/10 - qr.fq;
+            e_p += (qr.fax/7);
             qr.pitch_momentum = qr.controller_pitch * e_p;
 
-            e_q = qr.roll_ref - qr.fq;
+            e_q = qr.roll_ref/10 - qr.fp;
+            e_q +=  - (qr.fay/8);
             qr.roll_momentum = qr.controller_roll * e_q;
 /* END RATE CONTROL*/
 
             e_r = qr.yawrate_ref - qr.fr;
             qr.yaw_momentum = qr.controller_yaw * e_r;
 
-            ae1 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae2 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae3 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           - qr.scale_yaw*qr.yaw_momentum ) / 4;
-            ae4 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae1 = ( qr.scale_lift*qr.lift_force  - 2*qr.scale_pitch*qr.pitch_momentum                                           + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae2 = ( qr.scale_lift*qr.lift_force                                         + 2*qr.scale_roll*qr.roll_momentum      - qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae3 = ( qr.scale_lift*qr.lift_force  + 2*qr.scale_pitch*qr.pitch_momentum                                           + qr.scale_yaw*qr.yaw_momentum ) / 4;
+            ae4 = ( qr.scale_lift*qr.lift_force                                         - 2*qr.scale_roll*qr.roll_momentum      - qr.scale_yaw*qr.yaw_momentum ) / 4;
 
             ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 

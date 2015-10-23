@@ -1,30 +1,29 @@
-%% YAW CONTROL DESIGN
-close all, clear all;
+function [data] = plot_data(file)
 
 %% path
 MEAS_PATH = '../Code/MAIN/measurements/';
-file = 'meas_2015_10_16_09_01_32.txt';
+%file = 'meas_2015_10_23_10_45_27.txt';
 
 path = fullfile(MEAS_PATH, file);
-data = load_filters(path);
+data = load_measures(path);
 
 time = 0:size(data.time,1)-1;
 
 %% motors
-% figure, plot(time,data.ae1, 'black', time,data.ae2, 'blue', ...
-%      time,data.ae3, 'red',   time,data.ae4, 'green');
-% 
+% figure, plot(time,data.ae1, 'color', 'black', time,data.ae2, 'color', 'blue', ...
+%              time,data.ae3, 'color', 'red',   time,data.ae4, 'color', 'green');
 % legend('ae1','ae2','ae3','ae4');
 
 %% acc
-figure, plot(time,data.sax, 'red'); hold on; plot(time,data.fax, 'blue');
-figure, plot(time,data.say, 'red'); hold on; plot(time,data.fay, 'blue');
-figure, plot(time,data.saz, 'red'); hold on; plot(time,data.faz, 'blue');
-legend('sax','say','saz');
+figure, plot(time,data.sax, 'color', 'red');hold on; plot(time,data.fax, 'color', 'blue'); title('ax');
+figure, plot(time,data.say, 'color', 'red'); hold on; plot(time,data.fay, 'color', 'blue'); title('ay');
+figure, plot(time,data.saz, 'color', 'red'); hold on; plot(time,data.faz, 'color', 'blue'); title('az');
+
 
 %% gyro
-figure, plot(time,data.sp, 'red'); hold on; plot(time,data.fp, 'blue');
-figure, plot(time,data.sq, 'red'); hold on; plot(time,data.fq, 'blue');
-figure, plot(time,data.sr, 'red'); hold on; plot(time,data.fr, 'blue');
-legend('sp','sq','sr');
+figure, plot(time,data.sp, 'color', 'red'); hold on; plot(time,data.fp, 'color', 'blue'); title('sp');
+figure, plot(time,data.sq, 'color', 'red'); hold on; plot(time,data.fq, 'color', 'blue'); title('sq');
+figure, plot(time,data.sr, 'color', 'red'); hold on; plot(time,data.fr, 'color', 'blue'); title('sr');
 
+
+endfunction

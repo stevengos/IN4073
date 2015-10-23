@@ -211,27 +211,27 @@ void set_scale_lift(char command)
 void set_controller_pitch(char command)
 {
     if(command == INCREASE)
-        qr.controller_pitch += 1;
+        qr.controller_pitch += 10;
     else
-        qr.controller_pitch = qr.controller_pitch-1 >= 0 ? qr.controller_pitch-1 : 0;
+        qr.controller_pitch = qr.controller_pitch-10 >= 0 ? qr.controller_pitch-10 : 0;
 
     acknowledge(ACK_POSITIVE);
 }
 void set_controller_roll(char command)
 {
     if(command == INCREASE)
-        qr.controller_roll += 1;
+        qr.controller_roll += 10;
     else
-        qr.controller_roll = qr.controller_roll-1 >= 0 ? qr.controller_roll-1 : 0;
+        qr.controller_roll = qr.controller_roll-10 >= 0 ? qr.controller_roll-10 : 0;
 
     acknowledge(ACK_POSITIVE);
 }
 void set_controller_yaw(char command)
 {
     if(command == INCREASE)
-        qr.controller_yaw += 1;
+        qr.controller_yaw += 10;
     else
-        qr.controller_yaw = qr.controller_yaw-1 >= 0 ? qr.controller_yaw-1 : 0;
+        qr.controller_yaw = qr.controller_yaw-10 >= 0 ? qr.controller_yaw-10 : 0;
 
     acknowledge(ACK_POSITIVE);
 }
@@ -265,7 +265,7 @@ void set_log(char command)
 //{
 void set_pitch(char command)
 {
-    short value = command + qr.off_pitch;
+    short value = -command + qr.off_pitch;
 
     if( qr.current_mode == FULL_MODE )
         qr.pitch_ref = value > MAX_PITCH ? MAX_PITCH : value < MIN_PITCH ? MIN_PITCH : value;
@@ -277,7 +277,7 @@ void set_pitch(char command)
 
 void set_roll(char command)
 {
-    short value = command + qr.off_roll;
+    short value = -command + qr.off_roll;
 
     if( qr.current_mode == FULL_MODE )
         qr.roll_ref = value > MAX_ROLL ? MAX_ROLL : value < MIN_ROLL ? MIN_ROLL : value;
@@ -298,7 +298,7 @@ void set_lift(unsigned char command)
 
 void set_yawrate(char command)
 {
-    short value = command + qr.off_yawrate;
+    short value = -command + qr.off_yawrate;
 
     if( qr.current_mode == YAW_MODE || qr.current_mode == FULL_MODE)
         qr.yawrate_ref = value > MAX_YAWRATE ? MAX_YAWRATE : value < MIN_YAWRATE ? MIN_YAWRATE : value;
