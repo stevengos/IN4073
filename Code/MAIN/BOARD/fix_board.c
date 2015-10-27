@@ -1,29 +1,30 @@
+/**
+  @author SinaValipoor
+*/
 
 #include "fix_board.h"
-
+/***This function converts int value to q14 - board side ***/
 q14 normal2q (int x) {   
  int result;
- /******Second edition-board ******/
  result = x * (1 << Q);
    
  return result;
 }
 
-
+/***this function converts q14 value back to int ***/
  int q2normal(q14 a) {
 	 int result;
-	/******Second edition-board ***/ 
 	 result =  a / (1 << Q);
 	 return result;
 }
 
-/*********this function adds two q14 numbers*********/
+/***this function adds two q14 numbers***/
 
 q14 q_add(q14 a, q14 b){
  q14 result;
  int tmp;
  tmp = (int)a + (int)b;
- //Add saturation
+ /*Add saturation*/
  if (tmp > 0x7FFF){
     tmp = 0x7FFF;
    }
@@ -34,7 +35,7 @@ q14 q_add(q14 a, q14 b){
  return result;
 }
 
-/***********this function subtract two q14 numbers*******/
+/***this function subtracts two q14 numbers***/
 q14 q_subtract(q14 a, q14 b){
   q14 result;
   result = a - b;
@@ -43,25 +44,25 @@ q14 q_subtract(q14 a, q14 b){
  
  
  
- /*********this function multiplies 2 x float numbers**/
+ /***this function multiplies two q14 numbers***/
 
 q14 q_multiplication (q14 a, q14 b){
     q14 result;
     int temp;
     temp = a * b; 
     temp += K;
-    // Correct by dividing by base
+    /* Correct by dividing by base*/
     result = (q14)(temp >> Q);
     return result;
 }
 
- /***********this function performs the division *************/
+ /***this function performs the division between two q14 numbers ***/
 q14 q_division (q14 a, q14 b){
 
 	 q14 result;
 	 int temp;
 	 temp=(int)a << Q;
-	// Rounding: mid values are rounded up.
+	/*Rounding: mid values are rounded up*/
          if ((temp >= 0 && b >= 0) || (temp < 0 && b < 0))
             temp += b / 2;
          else
@@ -70,15 +71,6 @@ q14 q_division (q14 a, q14 b){
 	 return result;
 }
 
-/************************This function calculates Square root ***************/
-q14 q_sqrt (q14 a){
-  q14 result =0;
-  int i;
-  for (i =0; i<15; i++){
-      result=(1/2)*(result+result/(int)a);
-      }
-   return (q14) result;
-}
-          
+        
 
 
