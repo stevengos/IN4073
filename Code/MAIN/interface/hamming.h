@@ -1,6 +1,5 @@
 /**
 @author Gianluca Savaia
-@last update 2015-09-15
 */
 
 #ifndef HAMMING_H

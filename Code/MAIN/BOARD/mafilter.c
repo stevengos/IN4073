@@ -1,5 +1,7 @@
 /**
 @author Gianluca Savaia
+This is the MOVING AVERAGE FILTER designed at first when the more complex
+Butterworth was not ready
 */
 
 #include "mafilter.h"
@@ -17,6 +19,10 @@ int p_buffer[MEMORY];
 int q_buffer[MEMORY];
 int r_buffer[MEMORY];
 
+/**
+@author Gianluca Savaia
+Zeroing the buffers.
+*/
 void initfilter()
 {
     int i=0;
@@ -36,22 +42,27 @@ void initfilter()
         r_buffer[i] = 0;
 }
 
+/**
+@author Gianluca Savaia
+This method is called whenever a new set of data from the sensors is ready.
+This newcome set is processed and filtered.
+*/
 void mafilter()
 {
     int i = 0;
     int sum = 0;
 
-    /********************* GET DATA ********************************/
-//    for(i=0; i<MEMORY-1; i++)
-//        ax_buffer[i+1] = ax_buffer[i];
-//    for(i=0; i<MEMORY-1; i++)
-//        ay_buffer[i+1] = ay_buffer[i];
-//    for(i=0; i<MEMORY-1; i++)
-//        az_buffer[i+1] = az_buffer[i];
-//
-//    ax_buffer[0] = qr.sax;
-//    ay_buffer[0] = qr.say;
-//    az_buffer[0] = qr.saz;
+    /********************* GET NEWCOME DATA ********************************/
+    for(i=0; i<MEMORY-1; i++)
+        ax_buffer[i+1] = ax_buffer[i];
+    for(i=0; i<MEMORY-1; i++)
+        ay_buffer[i+1] = ay_buffer[i];
+    for(i=0; i<MEMORY-1; i++)
+        az_buffer[i+1] = az_buffer[i];
+
+    ax_buffer[0] = qr.sax;
+    ay_buffer[0] = qr.say;
+    az_buffer[0] = qr.saz;
 
 
     for(i=0; i<MEMORY-1; i++)
@@ -65,22 +76,22 @@ void mafilter()
     q_buffer[0] = qr.sq;
     r_buffer[0] = qr.sr;
 
-    /********************* COMPUTE *********************************/
+    /********************* COMPUTE FILTERED DATA *********************************/
 
-//    for(i=0, sum=0; i<MEMORY; i++)
-//        sum += ax_buffer[i];
-//    sum = sum/MEMORY;
-//    qr.fax = (short)sum;
-//
-//    for(i=0, sum=0; i<MEMORY; i++)
-//        sum += ay_buffer[i];
-//    sum = sum/MEMORY;
-//    qr.fay = (short)sum;
-//
-//    for(i=0, sum=0; i<MEMORY; i++)
-//        sum += az_buffer[i];
-//    sum = sum/MEMORY;
-//    qr.faz = (short)sum;
+    for(i=0, sum=0; i<MEMORY; i++)
+        sum += ax_buffer[i];
+    sum = sum/MEMORY;
+    qr.fax = (short)sum;
+
+    for(i=0, sum=0; i<MEMORY; i++)
+        sum += ay_buffer[i];
+    sum = sum/MEMORY;
+    qr.fay = (short)sum;
+
+    for(i=0, sum=0; i<MEMORY; i++)
+        sum += az_buffer[i];
+    sum = sum/MEMORY;
+    qr.faz = (short)sum;
 
 
     for(i=0, sum=0; i<MEMORY; i++)

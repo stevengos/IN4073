@@ -1,11 +1,16 @@
 /**
 @author Gianluca Savaia
+This file contains useful functions which logically does not belong to any module
+but that they mey be often used all over the code.
 */
 
 #include "utility.h"
 #include "../interface/packet.h"
 
-
+/**
+@author Gianluca Savaia
+Leds blinks for 'sec' seconds and restore the leds to their previous status
+*/
 void panic_blink(int sec)
 {
     char save_status = X32_LEDS;
@@ -16,12 +21,19 @@ void panic_blink(int sec)
 
     X32_LEDS = save_status;
 }
-
+/**
+@author Gianluca Savaia
+Flush input buffer
+*/
 void flush_buffer()
 {
     while(X32_RS232_READ){ char c = X32_RS232_DATA; }
 }
 
+/**
+@author Gianluca Savaia
+Resync communication between PC and Board
+*/
 void synchro()
 {
     char c;
@@ -31,6 +43,10 @@ void synchro()
     while( (c = X32_RS232_DATA) != 0x9 );
 }
 
+/**
+@author Gianluca Savaia
+Idle for 'ms' milliseconds. (the built-in function 'sleep' gave us problems)
+*/
 void catnap(int ms)
 {
     int now = X32_CLOCK_MS;
@@ -38,6 +54,10 @@ void catnap(int ms)
     while( X32_CLOCK_MS < now + ms);
 }
 
+/**
+@author Gianluca Savaia
+Idle for 'us' microseconds. (the built-in function 'usleep' gave us problems)
+*/
 void ucatnap(int us)
 {
     int now = X32_CLOCK_US;
@@ -45,6 +65,12 @@ void ucatnap(int us)
     while( X32_CLOCK_US < now + us);
 }
 
+/**
+@author Gianluca Savaia
+Square root algorithm. The Babylonian method is implemented.
+The trick which makes it faster (convergence in 4 iterations on avg) is the starting point
+tuned properly for our range of values.
+*/
 int sqrt(int square)
 {
     int prev = 0;

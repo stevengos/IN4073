@@ -1,11 +1,17 @@
 /**
 @author Gianluca Savaia
+This module decodes the incoming packet from the RS232 and performs the command
+if it a valid one.
 */
 
 #include "command.h"
 
 extern struct drone qr;
 
+/**
+@author Gianluca Savaia
+Decode the command and call the correspondent function
+*/
 void perform_command(char header, char command)
 {
     if( qr.log )
@@ -99,6 +105,10 @@ void perform_command(char header, char command)
     };
 }
 
+/**
+@author Gianluca Savaia
+Stop the execution of the code
+*/
 void stop()
 {
     if( qr.current_mode != SAFE_MODE ) //machine can be stopped only in SAFE_MODE
@@ -113,7 +123,10 @@ void stop()
     acknowledge(ACK_POSITIVE);
 }
 
-//set_mode changes the operating mode of the drone. It performs some checking in order to avoid unsafe behaviour.
+/**
+@author Gianluca Savaia
+It changes the operating mode of the drone. It performs some checking in order to avoid unsafe behaviour.
+*/
 void set_mode(char command)
 {
     ENABLE_INTERRUPT(INTERRUPT_TIMER1);
@@ -163,8 +176,10 @@ void set_mode(char command)
     acknowledge(ACK_POSITIVE);
 }
 
-/* Setting parameters */
-//{
+/**
+@author Gianluca Savaia
+Setting parameters
+*/
 void set_scale_pitch(char command)
 {
     if(command == INCREASE)
@@ -175,6 +190,10 @@ void set_scale_pitch(char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Setting parameters
+*/
 void set_scale_roll(char command)
 {
     if(command == INCREASE)
@@ -185,6 +204,10 @@ void set_scale_roll(char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Setting parameters
+*/
 void set_scale_yaw(char command)
 {
     if(command == INCREASE)
@@ -195,6 +218,10 @@ void set_scale_yaw(char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Setting parameters
+*/
 void set_scale_lift(char command)
 {
     if(command == INCREASE)
@@ -204,10 +231,11 @@ void set_scale_lift(char command)
 
     acknowledge(ACK_POSITIVE);
 }
-//}
 
-/* Set controller parameters */
-//{
+/**
+@author Gianluca Savaia
+Set controller parameters
+*/
 void set_controller_pitch(char command)
 {
     if(command == INCREASE)
@@ -217,6 +245,10 @@ void set_controller_pitch(char command)
 
     acknowledge(ACK_POSITIVE);
 }
+/**
+@author Gianluca Savaia
+Set controller parameters
+*/
 void set_controller_roll(char command)
 {
     if(command == INCREASE)
@@ -226,6 +258,10 @@ void set_controller_roll(char command)
 
     acknowledge(ACK_POSITIVE);
 }
+/**
+@author Gianluca Savaia
+Set controller parameters
+*/
 void set_controller_yaw(char command)
 {
     if(command == INCREASE)
@@ -235,8 +271,11 @@ void set_controller_yaw(char command)
 
     acknowledge(ACK_POSITIVE);
 }
-//}
 
+/**
+@author Gianluca Savaia
+Manage Log commands
+*/
 void set_log(char command)
 {
     switch(command)
@@ -261,8 +300,10 @@ void set_log(char command)
     }
 }
 
-/* JOYSTICK SECTION */
-//{
+/**
+@author Gianluca Savaia
+Manage input from joystick
+*/
 void set_pitch(char command)
 {
     short value = command + qr.off_pitch;
@@ -275,6 +316,10 @@ void set_pitch(char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Manage input from joystick
+*/
 void set_roll(char command)
 {
     short value = command + qr.off_roll;
@@ -287,6 +332,10 @@ void set_roll(char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Manage input from joystick
+*/
 void set_lift(unsigned char command)
 {
     short value = command + qr.off_lift;
@@ -296,6 +345,10 @@ void set_lift(unsigned char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Manage input from joystick
+*/
 void set_yawrate(char command)
 {
     short value = command + qr.off_yawrate;
@@ -307,11 +360,11 @@ void set_yawrate(char command)
 
     acknowledge(ACK_POSITIVE);
 }
-//}
 
-/* KEYBOARD SECTION */
-//{
-
+/**
+@author Gianluca Savaia
+Manage input from keyboard
+*/
 void d_pitch(char command)
 {
     qr.off_pitch = command == INCREASE ? qr.off_pitch + STEP_PITCH : qr.off_pitch - STEP_PITCH;
@@ -321,6 +374,10 @@ void d_pitch(char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Manage input from keyboard
+*/
 void d_roll(char command)
 {
     qr.off_roll = command == INCREASE ? qr.off_roll + STEP_ROLL : qr.off_roll - STEP_ROLL;
@@ -330,6 +387,10 @@ void d_roll(char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Manage input from keyboard
+*/
 void d_yawrate(char command)
 {
     qr.off_yawrate = command == INCREASE ? qr.off_yawrate + STEP_YAW : qr.off_yawrate - STEP_YAW;
@@ -339,6 +400,10 @@ void d_yawrate(char command)
     acknowledge(ACK_POSITIVE);
 }
 
+/**
+@author Gianluca Savaia
+Manage input from keyboard
+*/
 void d_lift(char command)
 {
     qr.off_lift = command == INCREASE ? qr.off_lift + STEP_LIFT : qr.off_lift - STEP_LIFT;
@@ -347,5 +412,3 @@ void d_lift(char command)
 
     acknowledge(ACK_POSITIVE);
 }
-
-//}

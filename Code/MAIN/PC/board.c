@@ -1,9 +1,14 @@
 /**
 @author Gianluca Savaia
+This module manages the operations available for the board
 */
 
 #include "board.h"
 
+/**
+@author Gianluca Savaia
+Open the connection with the board on the QR
+*/
 int open_board(struct termios* oldtty, struct termios* tty)
 {
     //open the board
@@ -40,12 +45,20 @@ int open_board(struct termios* oldtty, struct termios* tty)
     return board;
 }
 
+/**
+@author Gianluca Savaia
+Close the communication with the board
+*/
 int close_board(int board, struct termios* oldtty)
 {
     tcsetattr(board, TCSADRAIN, oldtty);
     return close(board);
 }
 
+/**
+@author Gianluca Savaia
+Read a byte from the Board
+*/
 char getchar_board(int board)
 {
     char stat;
@@ -59,6 +72,10 @@ char getchar_board(int board)
         return c;
 }
 
+/**
+@author Gianluca Savaia
+Read a short from the Board
+*/
 int getshort_board(int board, short* value)
 {
     unsigned char c1, c2;
@@ -74,6 +91,10 @@ int getshort_board(int board, short* value)
     return 1;
 }
 
+/**
+@author Gianluca Savaia
+Read an integer from the Board
+*/
 int getint_board(int board, int* value)
 {
     unsigned char c1, c2, c3, c4;
@@ -95,6 +116,10 @@ int getint_board(int board, int* value)
     return 1;
 }
 
+/**
+@author Gianluca Savaia
+Send a package to the board
+*/
 int send_packet(int board, packet_t p)
 {
     int done = 0;

@@ -24,8 +24,6 @@ char file_error[50];
 packet_t packet_buffer[10];
 int packet_counter = 0;
 
-//{
-
 /** @author Steven Gosseling */
 char* get_current_time_string(){
 	time_t current_time;
@@ -88,7 +86,6 @@ void empty_packet_t()
 
 /**
     @author Gianluca Savaia
-
     Pooling method which sends "keep-alive" messages in order to keep the board awake.
 */
 void *is_alive(void* board)
@@ -115,7 +112,6 @@ void *is_alive(void* board)
 
 /**
     @author Gianluca Savaia
-
     Log retrival session: it allows to download log data into a file on the PC.
     Standard communication protocol is interrupted, PC reads log data from the board in a continous stream.
 */
@@ -210,6 +206,7 @@ void logging(int board, packet_t p)
 
 /**
     @author Gianluca Savaia
+    Main program which runs on PC side.
 */
 int main()
 {
@@ -233,17 +230,17 @@ int main()
     int js_exit = 0;
 
     /************* Open Joystick ********************************/
-//    joystick = open(JS_DEV0, O_RDONLY);
-//
-//	if ( joystick < 0)
-//	{
-//        joystick = open(JS_DEV1, O_RDONLY);
-//
-//        if( joystick < 0 )
-//            perror("jstest"), exit(1);
-//	}
-//
-//	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
+    joystick = open(JS_DEV0, O_RDONLY);
+
+	if ( joystick < 0)
+	{
+        joystick = open(JS_DEV1, O_RDONLY);
+
+        if( joystick < 0 )
+            perror("jstest"), exit(1);
+	}
+
+	fcntl(joystick, F_SETFL, O_NONBLOCK); // non-blocking mode
 
     /************* Open Keyboard ********************************/
     open_keyboard(&oldKeyboardSettings, &keyboardSettings);
@@ -288,7 +285,7 @@ int main()
 
     while(js_exit != 1 && ctty != ESC)
     {
-//        js_exit = set_js_command(joystick); //read the joystick configuration
+        js_exit = set_js_command(joystick); //read the joystick configuration
 
 		ctty = getchar_keyboard();          //read the keyboard
 

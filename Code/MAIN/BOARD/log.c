@@ -1,5 +1,6 @@
 /**
 @author Gianluca Savaia
+This module gathers all functions involved in the data logging.
 */
 
 #include "log.h"
@@ -11,6 +12,10 @@ int log_buffer_size;
 malloc_memory_size = LOG_BUFFER_SIZE_KB;
 malloc_memory[LOG_BUFFER_SIZE_KB];
 
+/**
+@author Gianluca Savaia
+Add a new log to the buffer.
+*/
 void add_log()
 {
     struct log_s new_log;
@@ -44,12 +49,12 @@ void add_log()
     new_log.timestamp = X32_CLOCK_MS;
     #endif
 
-    //new_log.battery = X32_QR_BATTERY;
+    new_log.battery = X32_QR_BATTERY;
 
-//    new_log.ae1 = qr.ae1;
-//    new_log.ae2 = qr.ae2;
-//    new_log.ae3 = qr.ae3;
-//    new_log.ae4 = qr.ae4;
+    new_log.ae1 = qr.ae1;
+    new_log.ae2 = qr.ae2;
+    new_log.ae3 = qr.ae3;
+    new_log.ae4 = qr.ae4;
 
     new_log.sax = qr.sax;
     new_log.say = qr.say;
@@ -66,22 +71,6 @@ void add_log()
     new_log.fp = qr.fp;
     new_log.fq = qr.fq;
     new_log.fr = qr.fr;
-//    new_log.ae1 = 1;
-//    new_log.ae2 = 2;
-//    new_log.ae3 = 3;
-//    new_log.ae4 = 4;
-//
-//    new_log.sax = 5;
-//    new_log.say = 6;
-//    new_log.saz = 7;
-//
-//    new_log.sp = 8;
-//    new_log.sq = 9;
-//    new_log.sr = 10;
-//
-//    new_log.fp = 11;
-//    new_log.fq = 12;
-//    new_log.fr = 13;
 
     log_buffer[log_size] = new_log; // write log into buffer
 
@@ -99,19 +88,23 @@ void add_log()
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL); //END LOG
 }
 
-
+/**
+@author Gianluca Savaia
+Send all logs to the PC terminal.
+I implemented a way of unrolling the log which is independent of the log size which makes use of pointers.
+*/
 void upload_log()
 {
     int counter_timeout = 0;
     int i = 0;
 
-    if( qr.current_mode != SAFE_MODE )
+    if( qr.current_mode != SAFE_MODE ) //upload is possible only in SAFE MODE
     {
         acknowledge(ACK_INVALID);
         return;
     }
 
-    if( !qr.log_full )
+    if( !qr.log_full ) //if buffer is empty do not go on
     {
         acknowledge(ACK_INVALID);
         return;
@@ -208,6 +201,10 @@ void upload_log()
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 }
 
+/**
+@author Gianluca Savaia
+Init log and allocate buffer in RAM.
+*/
 char init_log(void)
 {
     int decrease_kb;
@@ -233,6 +230,10 @@ char init_log(void)
     return log_buffer ? 1 : 0;
 }
 
+/**
+@author Gianluca Savaia
+Check if the log has been saved correctly into RAM
+*/
 char check_sanity(struct log_s* log1, struct log_s* log2)
 {
     short* ptr_1   = &(log1->start);

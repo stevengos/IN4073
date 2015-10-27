@@ -1,5 +1,6 @@
 /**
 @author Gianluca Savaia
+This header file contains all the messages allowed in the Communication Protocol
 */
 
 /* In the following we list the admissable values for the fields of the struct packet_s */
@@ -56,9 +57,9 @@
 
 /* Eligible values files when the header is "ACK" */
 #define ACK_POSITIVE 0x0
-#define ACK_NEGATIVE 0x5F
-#define ACK_INVALID  0x6F
-#define ACK_HAMMING  0x7F
+#define ACK_NEGATIVE 0x5F //Negative if the packet needs to be resent
+#define ACK_INVALID  0x6F //Invalid if the command received is not applicable in the present status
+#define ACK_HAMMING  0x7F //Checksum did not match
 
 /* Eligible values files when the header is "LOG" */
 #define LOG_START   0x1

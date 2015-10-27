@@ -1,5 +1,8 @@
 /**
 @author Gianluca Savaia
+
+This is the main program which is launched at startup.
+The board is initialized (interrupts, buffers, leds, ...) and the main loop is called.
 */
 
 #include "x32.h"
@@ -8,7 +11,7 @@
 #include "drone.h"
 #include "isr.h"
 
-struct drone qr; // OUR DRONE
+struct drone qr; /* This struct contains all the information regarding the status of the QR */
 
 int main()
 {
@@ -38,12 +41,11 @@ int main()
     X32_DISPLAY = 0xAAAA;
     #endif
 
-    //reset drone properties
-    clear_drone();
+    clear_drone(); //reset drone properties
 
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
-    run_drone();
+    run_drone(); /* Launching main loop (state machine) */
 
     #ifdef PERIPHERAL_DISPLAY
     X32_DISPLAY = 0xC1A0;

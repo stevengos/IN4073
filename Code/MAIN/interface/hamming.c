@@ -4,7 +4,12 @@
 
 #include "hamming.h"
 
-/* Computes the hamming code for struct packet_s with 16bits data and 5bits parity (encapsulated in one byte) */
+/**
+@author Gianluca Savaia
+Computes the hamming code for struct packet_s with 16bits data and 5bits parity (encapsulated in one byte).
+The implementation is optimized so to be as fast as possible.
+As a further work it can be implemented the error correction (allowed by the hamming code).
+*/
 void compute_hamming(packet_t* packet)
 {
     char code = 0;
@@ -90,7 +95,10 @@ void compute_hamming(packet_t* packet)
     packet->crc = code;
 }
 
-/* Return zero if packet contains errors */
+/**
+@author Gianluca Savaia
+Return zero if packet contains errors
+*/
 char check_hamming(packet_t tobe_checked)
 {
     packet_t temp = tobe_checked;

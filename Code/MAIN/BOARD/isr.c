@@ -1,5 +1,6 @@
 /**
 @author Gianluca Savaia
+This module contains all the interrupt service routines.
 */
 
 #include "isr.h"
@@ -8,6 +9,11 @@
 
 extern struct drone qr;
 
+/**
+@author Gianluca Savaia
+In case of stall it is possible to push a button to exit the program on-board
+and avoiding to make use of hard reset.
+*/
 void isr_buttons(void)
 {
     char i;
@@ -21,6 +27,10 @@ void isr_buttons(void)
     stop();
 }
 
+/**
+@author Gianluca Savaia
+Read sensors data into the main struct and calls the filtering function
+*/
 void isr_sensors(void)
 {
     TURNON_LED(LED3);
@@ -42,7 +52,10 @@ void isr_sensors(void)
     TURNOFF_LED(LED3);
 }
 
+
 /**
+@author Gianluca Savaia
+Receive messages from the PC Link and checks for CRC errors.
 @Profiling: 240us to read 3 bytes, 430us for checksum, 50us to perform the command
 */
 void isr_rs232_rx(void)
@@ -95,10 +108,14 @@ void isr_rs232_rx(void)
     }
 }
 
-
+/**
+@author Gianluca Savaia
+Timeout which allows to notice if the PC link is down.
+This is done by checking if we have received a message whithin a certain time window.
+*/
 void isr_timer(void)
 {
-    if( qr.link_down )//|| X32_QR_BATTERY < BATTERY_LOW ) **************************
+    if( qr.link_down || X32_QR_BATTERY < BATTERY_LOW ) // if the link is down or battery drained, then panic and exit
     {
         unsigned char i;
 
@@ -118,6 +135,6 @@ void isr_timer(void)
         DISABLE_INTERRUPT(INTERRUPT_TIMER1);
     }
 
-    qr.link_down = 1;
+    qr.link_down = 1; // this variable is set to zero whenever I receive a new packet
     TURNOFF_LED(LED2);
 }

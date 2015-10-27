@@ -1,5 +1,6 @@
 /**
 @author Gianluca Savaia
+This module manages the input coming from the keyboard.
 */
 
 #include <stdlib.h>
@@ -22,24 +23,36 @@ int kbhit()
     return select(1, &fds, NULL, NULL, &tv);
 }
 
+/**
+@author Gianluca Savaia
+Settings for the keyboard.
+*/
 void open_keyboard(struct termios* oldTerminalSettings, struct termios* newTerminalSettings)
 {
     tcgetattr(0, oldTerminalSettings);
 
     *newTerminalSettings = *oldTerminalSettings;
 
-    newTerminalSettings->c_lflag &= (~ICANON & ~ECHO); //dont wait for enter, dont print to terminal
+    newTerminalSettings->c_lflag &= (~ICANON & ~ECHO); //dont wait for 'enter' key, dont print to terminal
 
     tcsetattr(0, TCSANOW, newTerminalSettings);
 
     setvbuf(stdin, NULL, _IONBF, 8); //turn off buffering
 }
 
+/**
+@author Gianluca Savaia
+Restore keyboard settings
+*/
 void close_keyboard(struct termios* oldTerminalSettings)
 {
     tcsetattr(0, TCSANOW, oldTerminalSettings);
 }
 
+/**
+@author Gianluca Savaia
+Read a byte from the Keyboard
+*/
 char getchar_keyboard()
 {
     char ch;
@@ -90,6 +103,10 @@ char getchar_keyboard()
     return ch;
 }
 
+/**
+@author Gianluca Savaia
+Encode the command into a packet
+*/
 packet_t encapsulate(char command)
 {
     packet_t outgoing;

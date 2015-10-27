@@ -1,5 +1,6 @@
 /**
 @author Gianluca Savaia
+This is the module which implements the state machine and the control modes for the QR
 */
 
 #include "drone.h"
@@ -8,7 +9,8 @@
 extern struct drone qr;
 
 /**
-    State Machine for the Quad-Rotor
+@author Gianluca Savaia
+State Machine for the Quad-Rotor
 */
 void run_drone()
 {
@@ -47,6 +49,9 @@ void run_drone()
     }
 }
 
+/**
+@author Gianluca Savaia
+*/
 void safe_mode()
 {
     short debug = 0;
@@ -60,6 +65,9 @@ void safe_mode()
     TURNOFF_LED(LED8);
 }
 
+/**
+@author Gianluca Savaia
+*/
 void panic_mode()
 {
     int time;
@@ -119,6 +127,9 @@ void panic_mode()
     ENABLE_INTERRUPT(INTERRUPT_GLOBAL);
 }
 
+/**
+@author Gianluca Savaia
+*/
 void manual_mode()
 {
     int ae1 = 0;
@@ -176,6 +187,9 @@ void manual_mode()
     TURNOFF_LED(LED7);
 }
 
+/**
+@author Gianluca Savaia
+*/
 void calibration_mode()
 {
     int samples = 100;
@@ -234,6 +248,9 @@ void calibration_mode()
     qr.flag_mode = 1;
 }
 
+/**
+@author Gianluca Savaia
+*/
 void yaw_mode()
 {
     short e = 0;
@@ -251,7 +268,7 @@ void yaw_mode()
 
     qr.controller_pitch = 0;
     qr.controller_roll = 0;
-    qr.controller_yaw = 3;
+    qr.controller_yaw = 7;
 
     while(!qr.flag_mode)
     {
@@ -307,6 +324,7 @@ void yaw_mode()
 }
 
 /**
+@author Gianluca Savaia
 @Profiling: 540us for the main loop
 */
 void full_mode()
@@ -325,22 +343,14 @@ void full_mode()
 
     TURNON_LED(LED5);
 
-//    qr.controller_pitch = 2;
-//    qr.controller_roll = 2;
-//    qr.controller_yaw = 2;
-//
-//    qr.scale_pitch  = 1000;
-//    qr.scale_roll   = 1000;
-//    qr.scale_yaw    = 2000; //************5200
-//    qr.scale_lift   = 2000;
 
-    qr.controller_pitch = 5;
-    qr.controller_roll = 5;
-    qr.controller_yaw = 3;
+    qr.controller_pitch = 60;
+    qr.controller_roll = 60;
+    qr.controller_yaw = 60;
 
-    qr.scale_pitch  = 2000;
-    qr.scale_roll   = 2000;
-    qr.scale_yaw    = 8200;
+    qr.scale_pitch  = 1000;
+    qr.scale_roll   = 1000;
+    qr.scale_yaw    = 4500;
     qr.scale_lift   = 8200;
 
     while(!qr.flag_mode)
@@ -351,28 +361,21 @@ void full_mode()
         {
             DISABLE_INTERRUPT(INTERRUPT_GLOBAL);
 
-/* CASCADE CONTROLLER
-
-            sp_deg = qr.fp * 57;
-            pitch_deg = q_multiplication( qr.ax, 95724 );
-
-            qr.fax = kalman(&filter, sp_deg, angle_deg, 3277);
-            qr.fay = kalman(&filter, sp_deg, angle_deg, 3277);
-
-            e_ax = qr.pitch_ref - qr.fax;
-            e_p = qr.controller_pitch*e_ax - qr.fp;
+/* ANGLE CONTROL (implemented in the extralab time)
+            e_p = qr.pitch_ref - qr.fq;
+            e_p += (qr.fax/7);
             qr.pitch_momentum = qr.controller_pitch * e_p;
 
-            e_ay = qr.roll_ref - qr.fay;
-            e_q = qr.controller_roll*e_ay - qr.fq;
+            e_q = qr.roll_ref - qr.fp;
+            e_q +=  - (qr.fay/8);
             qr.roll_momentum = qr.controller_roll * e_q;
-/* END CASCADE CONTROLLER */
+*/
 
-/* RATE CONTROL */
-            e_p = qr.pitch_ref - qr.fp;
+/* RATE CONTROL (shown during the demo) */
+            e_p = qr.pitch_ref - qr.fq;
             qr.pitch_momentum = qr.controller_pitch * e_p;
 
-            e_q = qr.roll_ref - qr.fq;
+            e_q = qr.roll_ref - qr.fp;
             qr.roll_momentum = qr.controller_roll * e_q;
 /* END RATE CONTROL*/
 
@@ -421,6 +424,10 @@ void full_mode()
     TURNOFF_LED(LED5);
 }
 
+/**
+@author Gianluca Savaia
+Stops the motors avoiding stalling
+*/
 void stop_motors()
 {
     while(qr.ae1 || qr.ae2 || qr.ae3 || qr.ae4)
@@ -452,6 +459,9 @@ void stop_motors()
     qr.yawrate_ref = 0;
 }
 
+/**
+@author Gianluca Savaia
+*/
 void clear_drone()
 {
     qr.ae1 = 0;
