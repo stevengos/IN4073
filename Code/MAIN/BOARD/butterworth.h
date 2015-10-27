@@ -10,8 +10,8 @@
 #include <stdlib.h>
 
 
-
-#define a0 3384 //Second-Order Butterworth constants in q14 Sampleing Frequentie = 500Hz, Cutoff @100Hz
+/* Second-Order Butterworth coefficient in Q14 Sampleing Frequentie = 500Hz, Cutoff @100Hz*/
+#define a0 3384 
 #define a1 6769
 #define a2 3384
 #define b1 -6054
@@ -21,7 +21,8 @@ extern struct drone qr;
 
 int Sample=0;
 
-struct butter_s  //Structure that will contain the buffered data
+/*Structure that will contain the buffered data*/
+struct butter_s  
 {
   
    short int sp;
@@ -33,5 +34,5 @@ short int x[3][3];
 short int y[3][3];
 
 void butter_second(void);
-#endif//BUTTERWORTH_H
+#endif
 
