@@ -253,15 +253,6 @@ void yaw_mode()
     qr.controller_roll = 0;
     qr.controller_yaw = 7;
 
-    qr.scale_pitch  = 8240/4;
-    qr.scale_roll   = 8240/4;
-    qr.scale_yaw    = 2000;
-    qr.scale_lift   = 16400/2;
-
-    qr.controller_pitch = 0;
-    qr.controller_roll = 0;
-    qr.controller_yaw = 7;
-
     while(!qr.flag_mode)
     {
         BLINK_LED(LED1);
