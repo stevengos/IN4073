@@ -2,7 +2,7 @@
 @author Gianluca Savaia
 */
 
-/* In the following we list the admissable values for the fields of the struct packet_s */
+/* In the following we list the admissible values for the fields of the struct packet_s */
 
 #ifndef PACKET_H
 #define PACKET_H

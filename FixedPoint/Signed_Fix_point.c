@@ -57,7 +57,7 @@ return 1;
 
 
 
-/***** this function recieves a float and 
+/***** this function receives a float and 
  turn it to q14 value*********/
 
 q14 normal2q (float x) {   
@@ -82,7 +82,7 @@ q14 normal2q (float x) {
  return result;
 }
 
-/******this function recieves a q14 value
+/******this function receives a q14 value
  and turn it into floating point real value************/
 
  float q2normal(q14 a) {
