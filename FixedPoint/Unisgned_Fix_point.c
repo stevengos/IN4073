@@ -30,7 +30,7 @@ return 1;
 
 
 
-/***** this function recieves a float and 
+/***** this function receives a float and 
  turn it to q88 value*********/
 
 unsigned short int normal2q (float x) {   
@@ -49,7 +49,7 @@ unsigned short int normal2q (float x) {
  return result;
 }
 
-/******this function recieves a q88 value
+/******this function receives a q88 value
  and turn it into floating point real value************/
 
 float q2normal(q88 a) {
